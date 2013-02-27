@@ -1,0 +1,154 @@
+html, table {
+	color: #656565;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
+}
+
+.menu li{
+	display: inline;
+	list-style-type: none;
+	margin-left: 20px;
+}
+.menu ul{
+	margin: 0px;
+	padding: 0px;
+}
+.menu a{
+	padding-right:0px;
+	font-weight: bold;
+}
+
+div#menu_pad{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: normal;
+	padding-bottom: 25px;
+	padding-top: 50px;
+	padding-left: 0px;
+}
+div#menu_pad a {
+	color: #656565;
+	text-decoration: none;
+}
+div#menu_pad a:hover {
+	color: lightgrey;
+}
+div#menu_pad table {
+    width:90%; margin-left:5%; margin-right:5%;
+}
+div#menu_pad table tr td {
+    vertical-align: middle;
+}
+#header-inside {
+	position: relative;
+	padding: 0 15px;
+	height: 140px;
+}
+
+.right {
+    text-align:right;
+}
+
+#logo {
+	position: absolute;
+	top: 20px;
+	left: 15px;
+	width: 132px;
+	height: 108px;
+	display: block;
+	text-indent: -1999px;
+	border: solid 0px #e0e0e0;
+	background: url(logo.jpg) no-repeat top left;
+	
+}
+
+#title {
+    color: #EDC31C;
+    font-size: 45px;
+    font-style: italic;
+    margin-left: 30px;
+}
+
+#intro {
+    color: #C49D00;
+    font-size: 25px;
+    font-style: italic;
+    margin-left: 70px;
+}
+
+table.banner {
+    width:90%; margin-left:5%; margin-right:5%;
+}
+
+table.banner, table.banner tr, table.banner td {
+    border: solid 0px #e0e0e0;
+}
+
+table.syntax {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+table.syntax tr td {
+    border: solid 1px #e0e0e0;
+}
+
+table.syntax th {
+    border: solid 1px #e0e0e0;
+    background-color: #f5f5f5;
+    color: #656565;
+}
+
+table.syntax tr.last {
+    background-color: #f5f5f5;
+}
+
+table.syntax a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #656565;
+}
+
+table.syntax a:hover {
+    text-decoration: none;
+    color: lightgrey;
+}
+
+.lg {
+    color: lightgrey;
+}
+ 
+p, ul {
+	margin-left: 50px;
+	margin-right: 50px;
+}		
+	
+p.code {
+	font-family: monospace;
+	display: block;
+	border: 1px solid #005;
+	border-top: solid 1px #e0e0e0;
+	border-bottom: solid 1px #e0e0e0;
+	background-color: #f5f5f5;
+	min-height: 32px;
+	white-space: pre /*For IE7: the "display: block" perturp it :-) */;
+	overflow: auto;
+}
+
+.information {
+    float: right;
+    margin-right: 10px;
+    color: #bfbfbf;
+}
+
+h2 {
+    padding:.4em 30px .4em 0;
+    margin:0 0 1em 0;
+    border-bottom: 1px solid #edc31c;
+    color: #C49D00;
+    background: url(small_logo.jpg) no-repeat right center;
+}
+
+h3 {
+    border-bottom: 1px dashed #C49D00;
+}

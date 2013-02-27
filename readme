@@ -1,0 +1,48 @@
+* 1.5.2 (2012-02-02)
+- change format signature 
+
+* 1.5.1 (2011-12-08)
+- modify dateutils 
+
+* 1.5.0 (2011-12-08) 
+- modify api for string helper
+- add dateutils 
+
+* 1.4.1 (2011-12-08)
+- modify api for string helper
+
+* 1.4.0 (2011-12-08)
+- add a string helper
+
+* 1.3.4 (2011-11-17)
+- possibility to get pathes from TemplateRecorder
+
+* 1.3.3 (2011-08-19)
+- best exception message
+
+* 1.3.2 (2011-08-18)
+- add set tag
+
+* 1.3.1 (2011-08-18)
+- add some filters
+
+* 1.3.0 (2011-08-03)
+- modify api for ConditionalFunction and ConditionalConvertFunction
+
+* 1.2.8 (2011-07-12)
+- fix: ResourceBundle.containsKey not available for jdk 1.5
+
+* 1.2.5 (2011-07-07)
+- fix: set locale
+
+* 1.2.2 (2011-07-06)
+- add Template.getMessages()
+
+* 1.2.1 (2011-06-30)
+- add TemplateRecorder.clear()
+
+* 1.2.0 (2011-06-29) 
+- add TemplateUtils.readProperties()
+- modification of the constructors (create Template with ResourceBundle, Properties or a String containing classpath: or file:) 
+. classpath:org.package.foo reads the org/package/foo<locale>.properties file in the classpath
+. file:org/package/foo.properties reads the org/package/foo<locale>.properties file in the given directory

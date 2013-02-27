@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<project name="temmental" default="jar" basedir=".">
+	<property file="build.properties" />
+
+	<property name="build.dir" value="${basedir}/target" />
+	<property name="classes.main.dir" value="${build.dir}/classes" />
+	<property name="src.main.dir" value="${basedir}/src" />
+	<property name="jar.file" value="${build.dir}/temmental.jar" />
+    <property name="api.dir" value="${basedir}/html/api/"/>
+
+	<target name="svn-st" description="Check that all files are commited." >
+		<exec executable="svn" failonerror="true" outputproperty="svn.output">
+			<arg value="st" />
+		</exec>
+		<fail message="Local modification. Please commit all files.">
+			<condition>
+				<not>
+					<equals arg1="${svn.output}" arg2="" />
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<target name="version" description="Adds a major and minor version to the build.">
+		<echo message="Current version is: ${version}"/>
+		<input message="Please enter next version number: " addproperty="wanted.version" />
+		<echo message="Wanted version is: ${wanted.version}"/>
+		<propertyfile file="build.properties">
+			<entry key="version" type="string" operation="=" value="${wanted.version} "/>
+		</propertyfile>
+	</target>
+
+	<target name="release" description="Build a versioned library jar file. Check that you do not have unchecked local modifications before proceeding." depends="svn-st,compile,version">
+		<antcall target="jar">
+			<param name="jar.file" value="${build.dir}/temmental-${wanted.version}.jar" />
+		</antcall>
+	</target>
+
+	<target name="jar" depends="compile" description="Build unversioned library jar file. You may prefer release for a versioned jar.">
+		<jar destfile="${jar.file}" basedir="${classes.main.dir}" />
+	</target>
+
+    <target name="doc" depends="clean,compile" description="generate javadoc">
+	    <delete dir="${api.dir}"/>
+	    <javadoc sourcepath="${src.main.dir}"
+	             destdir="${api.dir}" />
+	</target>
+	
+	<target name="clean" description="clean project (remove target directory).">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="compile" depends="prepare">
+		<javac srcdir="${src.main.dir}" destdir="${classes.main.dir}" fork="true" source="1.5" target="1.5" />
+	</target>
+
+	<target name="prepare">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${classes.main.dir}" />
+	</target>
+	
+	<target name="copy-www" description="Copy site">
+	   <exec executable="scp" failonerror="false" outputproperty="svn.output">
+            <arg value="html/api.jpg" />
+            <arg value="html/download.jpg" />
+            <arg value="html/index.html" />
+            <arg value="html/logo.jpg" />
+            <arg value="html/small_logo.jpg" />
+            <arg value="html/style.css" />
+            <arg value="html/svn.jpg" />
+            <arg value="web.sourceforge.net:/home/project-web/temmental/htdocs/" />
+       </exec>
+	</target>
+
+    <target name="copy-api" depends="doc" description="Copy site">
+       <exec executable="scp" failonerror="false" outputproperty="svn.output">
+            <arg value="-r" />
+            <arg value="html/api/" />
+            <arg value="web.sourceforge.net:/home/project-web/temmental/htdocs/" />
+       </exec>
+    </target>
+
+
+</project>
+
