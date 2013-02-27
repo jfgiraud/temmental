@@ -611,6 +611,16 @@ public class Node {
 			return applyMessage(model, template, out, false);
 		} else if (type == Type.QuoteMessage) { 
 			return applyMessage(model, template, out, true);
+		} else if (type == Type.Array) {
+			List<Object> parameters = new ArrayList<Object>();
+			for (Node child : children) {
+				Object o = child.value(out, model, template);
+				if (o == null) {
+					return null;
+				}
+				parameters.add(o);
+			}
+			return parameters.toArray(new Object[1]);
 		} else {
 			throw new TemplateException("Unsupported node type=" + type);
 		}

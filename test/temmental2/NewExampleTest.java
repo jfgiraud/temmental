@@ -394,11 +394,47 @@ public class NewExampleTest extends TestCase {
 	}
 	
 	public void testArray() throws IOException, TemplateException {
-		//TODO
         Node node = template.parse("aaa~($a?,$b:'f2):'f3~bbb");
         assertEquals("text=aaa|array,parameters=[variable=a,norenderifnotpresent,,variable=b#transform,quote=f2]#transform,quote=f3|text=bbb", template.representation(node));
-        node = template.parse("~'myvar[($a?:'f1,$b:'f2):'f3]:'f3~");
-        assertEquals("text=|message,quote=myvar,parameters=[array,parameters=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3]#transform,quote=f3|text=", template.representation(node));
+        template.addTransform("f2", upper);
+        template.addTransform("f3", new Transform<String[], String>() {
+			@Override
+			public String apply(String[] value) {
+				String s = "";
+				for (int i=0; i<value.length; i++) {
+					s += value[value.length-1-i];
+				}
+				return s;
+			}
+		});
+        assertEquals("aaaDOEJohnbbb", getContent("a", "John", "b", "Doe"));
+        assertEquals("aaabbb", getContent("b", "Doe"));
+        
+        node = template.parse("~'myvar[$disk,($a?:'f1,$b:'f2):'f3]:'f4~");
+        Transform toInt = new Transform<String, Integer>() {
+			@Override
+			public Integer apply(String value) {
+				return Integer.valueOf(value);
+			}
+		};
+		template.addTransform("f1", toInt);
+        template.addTransform("f2", toInt);
+        Transform multiplicate = new Transform<Integer[], Integer>() {
+			@Override
+			public Integer apply(Integer[] value) {
+				int r = 1;
+				for (int i : value) {
+					r *= i;
+				}
+				return r;
+			}
+		};
+		template.addTransform("f3", multiplicate);
+		template.addTransform("f4", upper);
+		setMessages("myvar", "The disk {0} contains {1,choice,0#no file|1#one file|1<{1,number,integer} files}.");
+        assertEquals("text=|message,quote=myvar,parameters=[variable=disk,,array,parameters=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3]#transform,quote=f4|text=", template.representation(node));
+        assertEquals("THE DISK C: CONTAINS 10 FILES.", getContent("a", "5", "b", "2", "disk", "C:"));
+        //TODO
 	}
 
 	public void testMultipleFilters() throws IOException, TemplateException {
