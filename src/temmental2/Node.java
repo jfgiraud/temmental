@@ -621,6 +621,25 @@ public class Node {
 				parameters.add(o);
 			}
 			return parameters.toArray(new Object[1]);
+		} else if (type == Type.Command) {
+			String command = buffer.toString();
+			if ("if".equals(command)) {
+				Node test = children.get(0);
+				Boolean result = (Boolean) test.value(out, model, template);
+				if (result) {
+					for (int i=1; i<children.size(); i++) {
+						Object o = children.get(i).value(out, model, template);
+						if (o != null) {
+							out.write(String.valueOf(o));
+						}
+					}
+				} 
+				return null;
+			} else {
+				throw new TemplateException("Unsupported command " + command);
+			}
+		} else if (type == Type.CommandClose) {
+			return null;
 		} else {
 			throw new TemplateException("Unsupported node type=" + type);
 		}

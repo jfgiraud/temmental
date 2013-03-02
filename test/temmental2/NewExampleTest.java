@@ -29,7 +29,7 @@ public class NewExampleTest extends TestCase {
     
     */
 	private NewTemplate template;
-	private Transform<String, ? extends Object> upper, firstLower, length, color;
+	private Transform<String, ? extends Object> upper, firstLower, length, color, bool;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -48,6 +48,12 @@ public class NewExampleTest extends TestCase {
 		length = new Transform<String, Integer>() {
 			public Integer apply(String value) {
 				return value.length();
+			}
+		};
+		bool = new Transform<String, Boolean>() {
+			@Override
+			public Boolean apply(String value) {
+				return Boolean.valueOf(value);
 			}
 		};
 		color = new Transform<String, String>() {
@@ -434,17 +440,24 @@ public class NewExampleTest extends TestCase {
 		setMessages("myvar", "The disk {0} contains {1,choice,0#no file|1#one file|1<{1,number,integer} files}.");
         assertEquals("text=|message,quote=myvar,parameters=[variable=disk,,array,parameters=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3]#transform,quote=f4|text=", template.representation(node));
         assertEquals("THE DISK C: CONTAINS 10 FILES.", getContent("a", "5", "b", "2", "disk", "C:"));
-        //TODO
 	}
 
 	public void testMultipleFilters() throws IOException, TemplateException {
 	    Node node = template.parse("aaa~$a:'f2:'f3~bbb");
+	    template.addTransform("f2", upper);
+        template.addTransform("f3", firstLower);
 	    assertEquals("text=aaa|variable=a#transform,quote=f2#transform,quote=f3|text=bbb", template.representation(node));
+	    assertEquals("aaadOEbbb", getContent("a", "Doe"));
 	}
 
 	public void testCommandIf() throws IOException, TemplateException {
+		//TODO
 	    Node node = template.parse("aaa~#if $a:'f~before ~$b~ after~#/if~bbb");
-	    assertEquals("text=aaa|command[open]=if,variable=a#transform,quote=f,childs=[text=before ,,variable=b,,text= after,,command[close]=if]|text=bbb", template.representation(node));
+	    template.addTransform("f", bool);
+	    System.out.println(node.representation());
+        assertEquals("text=aaa|command[open]=if,variable=a#transform,quote=f,childs=[text=before ,,variable=b,,text= after,,command[close]=if]|text=bbb", template.representation(node));
+        assertEquals("aaabbb", getContent("a", "false"));
+        assertEquals("aaabefore Doe afterbbb", getContent("a", "true", "b", "Doe"));
 	}
 	
 	public void testCommandIfNot() throws IOException, TemplateException {
