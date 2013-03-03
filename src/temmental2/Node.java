@@ -8,11 +8,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import temmental.ObjectFilter;
 
 
 public class Node {
@@ -213,7 +210,7 @@ public class Node {
 		} else if (type == Type.Array) {
 		    return "array" + parameters_representation();
 		} else if (type == Type.Command) {
-		    return "command[open]=" + buffer.toString() + "," + children.get(0).representation() + childs_representation(1);
+		    return "command[open]=" + buffer.toString() + (children.size() > 0 ? "," + children.get(0).representation() + childs_representation(1) : "");
 		} else if (type == Type.CommandClose) {
             return "command[close]=" + buffer.toString();
         } /*else if (type == Type.CommandSection) {
@@ -272,7 +269,7 @@ public class Node {
 	private void validateName(int line, int column, int c) throws TemplateException {
 		String name = buffer.toString();
 		
-		List<String> availableCommands = Arrays.asList("if", "if_not", "iter");
+		List<String> availableCommands = Arrays.asList("if", "iter");
 		if (type == Type.CommandClose || type == Type.Command) {
             if (! availableCommands.contains(name)) {
                 throw new TemplateException("Invalid syntax at position '%s' - invalid command name '%s'!", positionInformation(fileInformation, line, column), name);
@@ -282,7 +279,6 @@ public class Node {
                 String parentName = parent.buffer.toString();
                 if (! name.equals(parentName)) {
                     throw new TemplateException("Invalid syntax at position '%s' - bad close tag (expected='%s', actual='%s')", positionInformation(fileInformation, line, column), parentName, name);
-
                 }
             }
 		} else if (type != Type.Text && type != Type.Array) {

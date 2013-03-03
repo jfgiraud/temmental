@@ -451,21 +451,15 @@ public class NewExampleTest extends TestCase {
 	}
 
 	public void testCommandIf() throws IOException, TemplateException {
-		//TODO
 	    Node node = template.parse("aaa~#if $a:'f~before ~$b~ after~#/if~bbb");
 	    template.addTransform("f", bool);
-	    System.out.println(node.representation());
         assertEquals("text=aaa|command[open]=if,variable=a#transform,quote=f,childs=[text=before ,,variable=b,,text= after,,command[close]=if]|text=bbb", template.representation(node));
         assertEquals("aaabbb", getContent("a", "false"));
         assertEquals("aaabefore Doe afterbbb", getContent("a", "true", "b", "Doe"));
 	}
 	
-	public void testCommandIfNot() throws IOException, TemplateException {
-        Node node = template.parse("aaa~#if_not $a:'f~before ~$b~ after~#/if_not~bbb");
-        assertEquals("text=aaa|command[open]=if_not,variable=a#transform,quote=f,childs=[text=before ,,variable=b,,text= after,,command[close]=if_not]|text=bbb", template.representation(node));
-    }
-	
 	public void testCommandNotReferenced() throws IOException, TemplateException {
+		//TODO
         try {
             template.parse("aaa~#command_not_referenced $a:'f~before ~$b~ after~#/command_not_referenced~bbb");
             fail("An exception must be thrown.");
@@ -476,10 +470,10 @@ public class NewExampleTest extends TestCase {
 	
 	public void testCommandOpenCloseMismatch() throws IOException, TemplateException {
 	    try {
-	        template.parse("aaa~#if $a:'f~before ~$b~ after~#/if_not~bbb");
+	        template.parse("aaa~#if $a:'f~before ~$b~ after~#/iter~bbb");
 	        fail("An exception must be thrown.");
         } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c41' - bad close tag (expected='if', actual='if_not')", e.getMessage());
+            assertEquals("Invalid syntax at position '-:l1:c39' - bad close tag (expected='if', actual='iter')", e.getMessage());
         }
         try {
             template.parse("aaabefore ~$b~ after~#/if~bbb");
