@@ -597,6 +597,8 @@ public class Node {
 			return null;
 		} else if (type == Type.Text) {
 			return buffer.toString();
+		} else if (type == Type.Sentence) {
+			return buffer.toString();
 		} else if (type == Type.Variable) {
 		 	return getInModel(model);
 		} else if (type == Type.VariableFilter) {

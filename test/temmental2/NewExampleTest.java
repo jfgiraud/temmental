@@ -459,55 +459,22 @@ public class NewExampleTest extends TestCase {
 	}
 	
 	public void testCommandNotReferenced() throws IOException, TemplateException {
-		//TODO
-        try {
-            template.parse("aaa~#command_not_referenced $a:'f~before ~$b~ after~#/command_not_referenced~bbb");
-            fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c77' - invalid command name 'command_not_referenced'!", e.getMessage());
-        }
+		assertParseException("aaa~#command_not_referenced $a:'f~before ~$b~ after~#/command_not_referenced~bbb",
+				"Invalid syntax at position '-:l1:c77' - invalid command name 'command_not_referenced'!");
     }
 	
 	public void testCommandOpenCloseMismatch() throws IOException, TemplateException {
-	    try {
-	        template.parse("aaa~#if $a:'f~before ~$b~ after~#/iter~bbb");
-	        fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c39' - bad close tag (expected='if', actual='iter')", e.getMessage());
-        }
-        try {
-            template.parse("aaabefore ~$b~ after~#/if~bbb");
-            fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c23' - reach close tag without opened tag!", e.getMessage());
-        }
+		assertParseException("aaa~#if $a:'f~before ~$b~ after~#/iter~bbb",
+				"Invalid syntax at position '-:l1:c39' - bad close tag (expected='if', actual='iter')");
+		assertParseException("aaabefore ~$b~ after~#/if~bbb", 
+				"Invalid syntax at position '-:l1:c23' - reach close tag without opened tag!");
     }
 
 	public void testErrorWithStrangeCharacterInCommandNames() throws IOException, TemplateException {
-	    try {
-	        template.parse("~#i$f $b~text~~#/if~");
-	        fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c4' - reach character '$'", e.getMessage());
-        }
-	    try {
-	        template.parse("~#i?f $b~text~~#/if~");
-	        fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c4' - reach character '?'", e.getMessage());
-        }
-	    try {
-	        template.parse("~#i'f $b~text~~#/if~");
-	        fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c4' - reach character '\''", e.getMessage());
-        }
-	    try {
-	        template.parse("~#i!f $b~text~~#/if~");
-	        fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c4' - reach character '!'", e.getMessage());
-        }
+		assertParseException("~#i$f $b~text~~#/if~", "Invalid syntax at position '-:l1:c4' - reach character '$'");
+		assertParseException("~#i?f $b~text~~#/if~", "Invalid syntax at position '-:l1:c4' - reach character '?'");
+        assertParseException("~#i'f $b~text~~#/if~", "Invalid syntax at position '-:l1:c4' - reach character '\''");
+        assertParseException("~#i!f $b~text~~#/if~", "Invalid syntax at position '-:l1:c4' - reach character '!'");
 	}
 	
 	public void testInvalidSyntaxAboutArrays() throws IOException, TemplateException {
@@ -588,8 +555,11 @@ public class NewExampleTest extends TestCase {
 	public void testTilde() throws IOException, TemplateException {
 		Node node = template.parse("Some text~~Another text");
 		assertEquals("text=Some text~Another text", template.representation(node));
+		assertEquals("Some text~Another text", getContent());
+		
 		node = template.parse("Some text~~~~Another text");
 		assertEquals("text=Some text~~Another text", template.representation(node));
+		assertEquals("Some text~~Another text", getContent());
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------
@@ -599,11 +569,22 @@ public class NewExampleTest extends TestCase {
 	public void testParseString() throws IOException, TemplateException {
 		Node node = template.parse("Some text~\"Another text\"~And the end");
 		assertEquals("text=Some text|string=Another text|text=And the end", template.representation(node));
+		assertEquals("Some textAnother textAnd the end", getContent());
+		
 		node = template.parse("Some text~$msg[\"Another text\"]~And the end");
+		setMessages("text", "the text is ''{0}''");
         assertEquals("text=Some text|message,variable=msg,parameters=[string=Another text]|text=And the end", template.representation(node));
+        assertEquals("Some textthe text is 'Another text'And the end", getContent("msg", "text"));
+        
         node = template.parse("Some text~$msg[\"Another text\":'g,$b:'f]~And the end");
         assertEquals("text=Some text|message,variable=msg,parameters=[string=Another text#transform,quote=g,,variable=b#transform,quote=f]|text=And the end", template.representation(node));
+        template.addTransform("g", upper);
+        template.addTransform("f", firstLower);
+        setMessages("text", "the text is ''{0}''+{1}");
+        assertEquals("Some textthe text is 'ANOTHER TEXT'+bYEAnd the end", getContent("msg", "text", "b", "BYE"));
+        
         assertParseException("Some text~\"Another text~And the end", "Invalid syntax at position '-:l1:c24' - reach character '~', string not closed!");
+        
         node = template.parse("Some text~$msg[\"Another text\":'g,$b:'f,\"\"]~And the end");
         assertEquals("text=Some text|message,variable=msg,parameters=[string=Another text#transform,quote=g,,variable=b#transform,quote=f,,string=]|text=And the end", template.representation(node));
         assertParseException("~$\"Another text\"~", "Invalid syntax at position '-:l1:c3' - reach character '\"'");
