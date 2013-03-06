@@ -142,6 +142,10 @@ public class NewTemplate {
                     currentNode = currentNode.openBracket(BracketType.Round, file, line, column, currentChar);
                 } else if (currentChar == ')') {
                     currentNode = currentNode.closeBracket(BracketType.Round, file, line, column, currentChar);
+                } else if (currentChar == '<') {
+                    currentNode = currentNode.openBracket(BracketType.Angle, file, line, column, currentChar);
+                } else if (currentChar == '>') {
+                    currentNode = currentNode.closeBracket(BracketType.Angle, file, line, column, currentChar);
                 } else if (currentChar == ',') {
                     currentNode = currentNode.newSibling(file, line, column, currentChar);
                 } else if (currentChar == '#') {

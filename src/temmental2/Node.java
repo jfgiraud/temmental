@@ -648,24 +648,39 @@ public class Node {
 		if (propertyKey == null) {
 			return null;
 		}
-		if (! template.messages.containsKey(propertyKey)) {
-			if (messageOptional == RenderType.OptionalMessage) {
-				return null;
-			} else if (messageOptional == RenderType.ReplacedByPropertyNameIfNotPresent) {
-				return propertyKey;
+		if (bracketType == BracketType.Angle) {
+			Transform function = template.getTransform(propertyKey); 
+			if (function == null) {
+				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
 			}
-			throw new TemplateException("No property key '%s' to render '%s' at position '%s'."+messageOptional, propertyKey, renderBufferError(), posinf());
-		}
-		List<Object> parameters = new ArrayList<Object>();
-		for (Node child : children) {
-			Object o = child.value(out, model, template);
-			if (o == null) {
-				return null;
+			List<Object> parameters = new ArrayList<Object>();
+			for (Node child : children) {
+				Object o = child.value(out, model, template);
+				if (o == null) {
+					return null;
+				}
+				parameters.add(o);
 			}
-			parameters.add(o);
+			return function;
+		} else {
+			if (! template.messages.containsKey(propertyKey)) {
+				if (messageOptional == RenderType.OptionalMessage) {
+					return null;
+				} else if (messageOptional == RenderType.ReplacedByPropertyNameIfNotPresent) {
+					return propertyKey;
+				}
+				throw new TemplateException("No property key '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
+			}
+			List<Object> parameters = new ArrayList<Object>();
+			for (Node child : children) {
+				Object o = child.value(out, model, template);
+				if (o == null) {
+					return null;
+				}
+				parameters.add(o);
+			}
+			return template.messages.format(propertyKey, parameters);
 		}
-		String result = template.messages.format(propertyKey, parameters);
-		return result;
 	}
 
 	

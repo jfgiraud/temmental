@@ -264,6 +264,20 @@ public class NewExampleTest extends TestCase {
 		assertEquals("beforeHello Misterafter", getContent("myvar", "hello"));
 	}
 	
+	public void testTransform() throws IOException, TemplateException {
+		Node node = template.parse("before~'myvar<$temp1,$temp2>~after");
+		template.addTransform("myvar", new Transform<String[], Object>() {
+			@Override
+			public Object apply(String[] value) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		});
+		
+		assertEquals("text=before|message,quote=myvar,parameters=[variable=temp1,,variable=temp2]|text=after", template.representation(node));
+		assertEquals("beforeHello Misterafter", getContent("temp1", "hello", "temp2", "or goodbye"));
+	}
+	
 	public void testQuoteMessageAcceptsFilters() throws IOException, TemplateException {
 		Node node = template.parse("~'myvar[]:$filter?:'filter2:$filter3~hello");
 		assertEquals("text=|message,quote=myvar,noparam#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=hello", template.representation(node));
