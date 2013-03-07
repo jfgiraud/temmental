@@ -48,26 +48,16 @@ public class NewTemplate {
 		boolean outsideAnExpression = true;
 		functions = new HashMap<String, Transform>();
 		
-		
 		int currentChar = sr.read(); 
 		int previousChar = -1;
-		int delta = 0;
-		boolean inString = false;
 		while (currentChar != -1) {
 			column++;
-			delta++;
-			
 			if (outsideAnExpression) {
-//                System.out.println(String.format("**%c", currentChar));
-//                System.out.println(root.representationTree(0));
-//                System.out.println(currentNode);
-                
 				if (currentChar != '~') {
 				    currentNode = currentNode.write(file, line, column, currentChar);
 					if (currentChar == '\n') {
 						line++;
 						column = 0;
-						delta = 0;
 					} 
 				} else {
 					int nextChar = sr.read();
@@ -92,8 +82,6 @@ public class NewTemplate {
 
 				}
 			} else {
-//			    System.out.println(String.format("=> %c (E) currentNode=%s\n%s", currentChar, currentNode, root.representationTree(0)));
-                
 			    boolean nextLoop = false;
 			    if (currentNode.getType() == Type.Unknown && currentChar == '"') {
 			        currentNode = currentNode.startSentence(file, line, column, currentChar);
@@ -110,19 +98,6 @@ public class NewTemplate {
 			        currentChar = sr.read();
 			        continue;
 			    }
-			    
-//				if (currentChar == '"') {
-//					currentNode = currentNode.startSentence(file, line, column, currentChar);
-//				} 
-//				else if (currentNode.getType() == Type.Sentence && currentNode.isClosed() == false) {
-//                    if (currentChar == '"') {
-//                        currentNode = currentNode.stopSentence(file, line, column, currentChar);
-//                    } else { 
-//                        currentNode = currentNode.write(file, line, column, currentChar);
-//                    } 
-//                } 
-				
-				
 				if (currentChar == '~') {
 					currentNode.validateAll(line, column, currentChar, true);
 					outsideAnExpression = true;
@@ -157,8 +132,6 @@ public class NewTemplate {
 				} else {
 					throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", currentNode.positionInformation(file, line, column), currentChar);
 				}
-				
-//                System.out.println(String.format("<= %c (E) currentNode=%s\n%s", currentChar, currentNode, root.representationTree(0)));
 			}
 			previousChar = currentChar;
 			currentChar = sr.read();
@@ -166,14 +139,6 @@ public class NewTemplate {
 		return currentNode;
 	}
 
-	private boolean inAcceptedChars(int c, int ... acceptedChars) {
-        for (int a : acceptedChars) {
-            if (c == a)
-                return true;
-        }
-        return false;
-	}
-	
 	private Node createNodeDown(Type type, String file, int line, int column, Node parent) {
         Node newNode = new Node(type, file, line, column, false);
         newNode.setParent(parent);

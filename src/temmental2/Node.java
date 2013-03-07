@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class Node {
 	
-	enum Type { Section, Sentence, Text, Unknown, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/ };
+	enum Type { Section, Sentence, Text, Unknown, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion };
 
 	private Type type; 
 	
@@ -86,7 +86,9 @@ public class Node {
 	        return this;
 	    }
 		if (type == Type.Unknown) {
-			if (c == '$') {
+			if (c == '@') {
+				type = Type.ArrayExpansion;
+			} else if (c == '$') {
 				type = startTransform ? Type.VariableFilter : Type.Variable;
 			} else if (c == '\'') {
 				type = startTransform ? Type.QuoteFilter : Type.Quote;
@@ -209,6 +211,8 @@ public class Node {
 			return children.get(0).representation() + "#transform,quote=" + buffer.toString() + optional;
 		} else if (type == Type.Array) {
 		    return "array" + parameters_representation();
+		} else if (type == Type.ArrayExpansion) {
+		    return "expansion,variable=" + buffer.toString() + optional;
 		} else if (type == Type.Command) {
 		    return "command[open]=" + buffer.toString() + (children.size() > 0 ? "," + children.get(0).representation() + childs_representation(1) : "");
 		} else if (type == Type.CommandClose) {
@@ -463,6 +467,7 @@ public class Node {
 				|| currentChar == '_'
 				|| currentChar == '.'
 				|| currentChar == '$'
+				|| currentChar == '@'
 				|| currentChar == '\''
 				|| currentChar == '?'
 				|| currentChar == '!'
@@ -610,15 +615,11 @@ public class Node {
 		} else if (type == Type.QuoteMessage) { 
 			return applyMessage(model, template, out, true);
 		} else if (type == Type.Array) {
-			List<Object> parameters = new ArrayList<Object>();
-			for (Node child : children) {
-				Object o = child.value(out, model, template);
-				if (o == null) {
-					return null;
-				}
-				parameters.add(o);
-			}
-			return parameters.toArray(new Object[1]);
+			List<Object> parameters = createParameterList(model, template, out);
+			if (parameters == null)
+				return null;
+			else
+				return parameters.toArray(new Object[1]);
 		} else if (type == Type.Command) {
 			String command = buffer.toString();
 			if ("if".equals(command)) {
@@ -653,14 +654,7 @@ public class Node {
 			if (function == null) {
 				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
 			}
-			List<Object> parameters = new ArrayList<Object>();
-			for (Node child : children) {
-				Object o = child.value(out, model, template);
-				if (o == null) {
-					return null;
-				}
-				parameters.add(o);
-			}
+			List<Object> parameters = createParameterList(model, template, out);
 			try {
 				return function.apply(parameters);
 			} catch (ClassCastException e) {
@@ -675,18 +669,25 @@ public class Node {
 				}
 				throw new TemplateException("No property key '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
 			}
-			List<Object> parameters = new ArrayList<Object>();
-			for (Node child : children) {
-				Object o = child.value(out, model, template);
-				if (o == null) {
-					return null;
-				}
-				parameters.add(o);
-			}
-			return template.messages.format(propertyKey, parameters);
+			List<Object> parameters = createParameterList(model, template, out);
+			if (parameters == null)
+				return null;
+			else
+				return template.messages.format(propertyKey, parameters);
 		}
 	}
 
+	private List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out) throws TemplateException, IOException {
+		List<Object> parameters = new ArrayList<Object>();
+		for (Node child : children) {
+			Object o = child.value(out, model, template);
+			if (o == null) {
+				return null;
+			}
+			parameters.add(o);
+		}
+		return parameters;
+	}
 	
 	private Object applyTransformOnNode(String varname, Node node, Map<String, ? extends Object> model, NewTemplate template, Writer out, boolean quote) throws TemplateException, IOException {
 		Transform transform = ! quote ? (Transform) getInModel(model) : template.getTransform(varname);

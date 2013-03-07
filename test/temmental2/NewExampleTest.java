@@ -288,8 +288,11 @@ public class NewExampleTest extends TestCase {
 		assertFormatException("Unable to apply parametrized function 'add' to render ''add' at position '-:l1:c32'.", "p1", 3, "p2", "7");
 		
 		node = template.parse("The result of the addition is: ~'add<@items>~");
+		
+		node = template.parse("The result of the addition is: ~'add<@items>~");
 		template.addTransform("add", add);
 		
+		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[expansion,variable=items]|text=", template.representation(node));
 		assertEquals("The result of the addition is: 8", getContent("items", Arrays.asList(2, 5, 6)));
 	}
 	
