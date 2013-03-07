@@ -661,7 +661,11 @@ public class Node {
 				}
 				parameters.add(o);
 			}
-			return function;
+			try {
+				return function.apply(parameters);
+			} catch (ClassCastException e) {
+				throw new TemplateException(e, "Unable to apply parametrized function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
+			}
 		} else {
 			if (! template.messages.containsKey(propertyKey)) {
 				if (messageOptional == RenderType.OptionalMessage) {

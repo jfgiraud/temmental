@@ -4,7 +4,9 @@ import static temmental2.TemplateUtils.createModel;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -262,20 +264,33 @@ public class NewExampleTest extends TestCase {
 		
 		assertEquals("text=before|message,quote=myvar,noparam|text=after", template.representation(node));
 		assertEquals("beforeHello Misterafter", getContent("myvar", "hello"));
-	}
+	} 
 	
 	public void testTransform() throws IOException, TemplateException {
-		Node node = template.parse("before~'myvar<$temp1,$temp2>~after");
-		template.addTransform("myvar", new Transform<String[], Object>() {
+		Node node = template.parse("The result of the addition is: ~'add<$p1,$p2>~");
+		Transform<Iterable<Integer>, Integer> add = new Transform<Iterable<Integer>, Integer>() {
 			@Override
-			public Object apply(String[] value) {
-				// TODO Auto-generated method stub
-				return null;
+			public Integer apply(Iterable<Integer> values) {
+				Integer sum = 0;
+				for (Integer value : values) {
+					sum = sum + value;
+				}
+				return sum;
 			}
-		});
+		};
+		template.addTransform("add", add);
 		
-		assertEquals("text=before|message,quote=myvar,parameters=[variable=temp1,,variable=temp2]|text=after", template.representation(node));
-		assertEquals("beforeHello Misterafter", getContent("temp1", "hello", "temp2", "or goodbye"));
+		
+		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[variable=p1,,variable=p2]|text=", template.representation(node));
+		
+		
+		assertEquals("The result of the addition is: 8", getContent("p1", 3, "p2", 5));
+		assertFormatException("Unable to apply parametrized function 'add' to render ''add' at position '-:l1:c32'.", "p1", 3, "p2", "7");
+		
+		node = template.parse("The result of the addition is: ~'add<@items>~");
+		template.addTransform("add", add);
+		
+		assertEquals("The result of the addition is: 8", getContent("items", Arrays.asList(2, 5, 6)));
 	}
 	
 	public void testQuoteMessageAcceptsFilters() throws IOException, TemplateException {
