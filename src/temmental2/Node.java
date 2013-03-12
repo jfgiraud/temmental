@@ -531,10 +531,10 @@ public class Node {
         return s;
     }*/
     
-    private Object applyFilter(Transform filter, Object s) throws TemplateException {
+    private Object applyFilter(String filterName, Transform filter, Object s) throws TemplateException {
         Class typeIn = Object.class; 
         boolean isArray = false;
-        String filterName="?????";
+//        String filterName="?????";
         try {
             Method firstMethod = getApply(filter);
             typeIn = firstMethod.getParameterTypes()[0]; 
@@ -614,7 +614,7 @@ public class Node {
 			return applyMessage(model, template, out, false);
 		} else if (type == Type.QuoteMessage) { 
 			return applyMessage(model, template, out, true);
-		} else if (type == Type.Array) {
+		} else if (type == Type.Array/* || type == Type.ArrayExpansion*/) {
 			List<Object> parameters = createParameterList(model, template, out);
 			if (parameters == null)
 				return null;
@@ -680,11 +680,24 @@ public class Node {
 	private List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out) throws TemplateException, IOException {
 		List<Object> parameters = new ArrayList<Object>();
 		for (Node child : children) {
-			Object o = child.value(out, model, template);
-			if (o == null) {
-				return null;
+			if (child.type != Type.ArrayExpansion) {
+				Object o = child.value(out, model, template);
+				if (o == null) {
+					return null;
+				}
+				parameters.add(o);
+			} else {
+				Object o = child.getInModel(model);
+				if (o.getClass().isArray()) {
+					for (Object p : (Object[]) o) {
+						parameters.add(p);
+					}
+				} else {
+					for (Object p : (Iterable) o) {
+						parameters.add(p);
+					}
+            	}
 			}
-			parameters.add(o);
 		}
 		return parameters;
 	}
@@ -694,7 +707,7 @@ public class Node {
 		if (transform != null) {
 			Object o = node.value(out, model, template);
 			if (o != null) {
-				return applyFilter(transform, o);
+				return applyFilter(varname, transform, o);
 			} else {
 				return null;
 			}
