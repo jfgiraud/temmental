@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class Node {
 	
-	enum Type { Section, Sentence, Text, Unknown, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion };
+	enum Type { Section, Sentence, Text, Unknown, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion, QuoteFilterDyn, VariableFilterDyn };
 
 	private Type type; 
 	
@@ -135,6 +135,10 @@ public class Node {
 		return this;
 	}
 
+	private String cons_representation(int from) {
+	    return xxx_representation("constructor", "noparam", from);
+	}
+	
 	private String parameters_representation() {
 	    return xxx_representation("parameters", "noparam", 0);
 	}
@@ -209,6 +213,10 @@ public class Node {
 			return children.get(0).representation() + "#transform,variable=" + buffer.toString() + optional;
 		} else if (type == Type.QuoteFilter) {
 			return children.get(0).representation() + "#transform,quote=" + buffer.toString() + optional;
+		} else if (type == Type.VariableFilterDyn) {
+			return children.get(0).representation() + "#transform,variable=" + buffer.toString() + optional + cons_representation(1);
+		} else if (type == Type.QuoteFilterDyn) {
+			return children.get(0).representation() + "#transform,quote=" + buffer.toString() + optional + cons_representation(1);
 		} else if (type == Type.Array) {
 		    return "array" + parameters_representation();
 		} else if (type == Type.ArrayExpansion) {
@@ -335,10 +343,26 @@ public class Node {
 		this.bracketType = bracketType;
 		opened = true;
 		
-		if (type == Type.Quote) {
-			type = Type.QuoteMessage;
+		if (type == Type.QuoteFilter) {
+			if (bracketType == BracketType.Angle)
+				type = Type.QuoteFilterDyn;
+			else
+				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
+		} else if (type == Type.VariableFilter) {
+			if (bracketType == BracketType.Angle)
+				type = Type.VariableFilterDyn;
+			else
+				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
+		} else if (type == Type.Quote) {
+			if (bracketType == BracketType.Square)
+				type = Type.QuoteMessage;
+			else
+				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
 		} else if (type == Type.Variable) {
-			type = Type.VariableMessage;
+			if (bracketType == BracketType.Square)
+				type = Type.VariableMessage;
+			else
+				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
 		} else if (! startTransform && type == Type.Unknown && bracketType == BracketType.Round) {
 		    type = Type.Array;
 		} else {
@@ -606,6 +630,28 @@ public class Node {
 			return buffer.toString();
 		} else if (type == Type.Variable) {
 		 	return getInModel(model);
+		} else if (type == Type.VariableFilterDyn) {
+			//FIXME
+			throw new TemplateException("Unsupported node type=" + type);
+		} else if (type == Type.QuoteFilterDyn) {
+			//FIXME
+			Transform transform = (Transform) applyMessage(model, template, out, true); 
+			
+			
+			if (transform != null) {
+				Object o = children.get(0).value(out, model, template);
+				if (o != null) {
+					//FIXME varname
+						return applyFilter("arname", transform, o);
+				} else {
+					return null;
+				}
+			} else {
+				//FIXME varname
+				throw new TemplateException("No transform function named '%s' is associated with the template to render '%s' at position '%s'.", "varname", renderBufferError(), posinf());
+			}
+			
+			
 		} else if (type == Type.VariableFilter) {
 			return applyTransformOnNode(buffer.toString(), children.get(0), model, template, out, false);
 		} else if (type == Type.QuoteFilter) {
@@ -701,6 +747,8 @@ public class Node {
 		}
 		return parameters;
 	}
+	
+
 	
 	private Object applyTransformOnNode(String varname, Node node, Map<String, ? extends Object> model, NewTemplate template, Writer out, boolean quote) throws TemplateException, IOException {
 		Transform transform = ! quote ? (Transform) getInModel(model) : template.getTransform(varname);

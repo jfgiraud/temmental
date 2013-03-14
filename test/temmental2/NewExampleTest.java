@@ -4,9 +4,11 @@ import static temmental2.TemplateUtils.createModel;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -267,30 +269,57 @@ public class NewExampleTest extends TestCase {
 	} 
 	
 	public void testTransform() throws IOException, TemplateException {
-		Transform<Iterable<Integer>, Integer> add = new Transform<Iterable<Integer>, Integer>() {
+		assertParseException("The concatenation of the strings gives: ~'concat<$s>~", "Invalid syntax at position '-:l1:c49' - reach character '<'");
+		assertParseException("The concatenation of the strings gives: ~'concat<@items,$p1>~", "Invalid syntax at position '-:l1:c49' - reach character '<'");
+		
+		Node node = template.parse("~($p1,$p2):'concat<\"+\">");
+		template.addTransform("concat", new Transform<List<Object>, Transform>() {
 			@Override
-			public Integer apply(Iterable<Integer> values) {
-				Integer sum = 0;
-				for (Integer value : values) {
-					sum = sum + value;
-				}
-				return sum;
+			public Transform apply(final List<Object> sep) {
+				return new Transform<Object[], String>() {
+					@Override
+					public String apply(Object[] values) {
+						String s = "";
+						for (Object v : values) {
+							if (!"".equals(s))
+								s+= sep.get(1);
+							s += v;
+						}
+						return s;
+					}
+				};
 			}
-		};
-		Node node = template.parse("The result of the addition is: ~'add<$p1,$p2>~");
-		template.addTransform("add", add);
+		});
 		
-		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[variable=p1,,variable=p2]|text=", template.representation(node));
+//		Node node = template.parse("~($p1,$p2):'concat<\"+\">");
+//		template.addTransform("concat", new Transform<ArrayList<Object>, Transform>() {
+//			@Override
+//			public Transform apply(final ArrayList<Object> sep) {
+//				return new Transform<Object[], String>() {
+//					@Override
+//					public String apply(Object[] values) {
+//						String s = "";
+//						for (Object v : values) {
+//							if (!"".equals(s))
+//								s+=sep.get(0);
+//							s += v;
+//						}
+//						return s;
+//					}
+//				};
+//			}
+//		});
 		
 		
-		assertEquals("The result of the addition is: 8", getContent("p1", 3, "p2", 5));
-		assertFormatException("Unable to apply parametrized function 'add' to render ''add' at position '-:l1:c32'.", "p1", 3, "p2", "7");
+		assertEquals("text=|array,parameters=[variable=p1,,variable=p2]#transform,quote=concat,constructor=[string=+]", template.representation(node));
+		assertEquals("3+5", getContent("p1", 3, "p2", 5));
+
 		
-		node = template.parse("The result of the addition is: ~'add<@items,$p1>~");
-		template.addTransform("add", add);
-		
-		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[expansion,variable=items,,variable=p1]|text=", template.representation(node));
-		assertEquals("The result of the addition is: 14", getContent("items", Arrays.asList(2, 5, 6), "p1", 1));
+//		node = template.parse("The result of the addition is: ~'add<@items,$p1>~");
+//		template.addTransform("add", add);
+//		
+//		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[expansion,variable=items,,variable=p1]|text=", template.representation(node));
+//		assertEquals("The result of the addition is: 14", getContent("items", Arrays.asList(2, 5, 6), "p1", 1));
 		
 //		node = template.parse("The result of the addition is: ~(@items,$p1):'add~");
 //		template.addTransform("add", add);
