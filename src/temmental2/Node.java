@@ -560,7 +560,7 @@ public class Node {
         return s;
     }*/
     
-    private Object applyFilter(String filterName, Transform filter, Object s) throws TemplateException {
+    private Object applyFilter(String filterName, Transform filter, Object s, boolean dyn) throws TemplateException {
         Class typeIn = Object.class; 
         boolean isArray = false;
 //        String filterName="?????";
@@ -574,16 +574,24 @@ public class Node {
             boolean convertToString = typeIn == String.class;
             
             if (! isArray) {
-                if (convertToString) {
-                    if (s.getClass().isArray()) {
-                        throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", 
-                                s.getClass().getCanonicalName(), renderBufferError(), posinf());
-                    } else {
-                        s = filter.apply(s.toString());
-                    }
-                } else {
-                    s = filter.apply(s);
-                }
+            	if (! dyn) {
+            		if (convertToString) {
+            			if (s.getClass().isArray()) {
+            				throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", 
+            						s.getClass().getCanonicalName(), renderBufferError(), posinf());
+            			} else {
+            				s = filter.apply(s.toString());
+            			}
+            		} else {
+                		s = filter.apply(s);
+                	}
+            	} else {
+            		if (s.getClass().isArray() && ((Object[]) s).length == 1) {
+            			s = filter.apply(((Object[]) s)[0]);
+            		} else {
+            			s = filter.apply(s);
+            		}
+            	}
             } else {
                 //http://www.java2s.com/Tutorial/Java/0125__Reflection/CreatearraywithArraynewInstance.htm
                 Object[] objs = (Object[]) s;
@@ -602,7 +610,7 @@ public class Node {
             }
             return s;
         } catch (ClassCastException e) {
-        	e.printStackTrace(System.out);
+        	e.printStackTrace();
             throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", s.getClass().getCanonicalName(), renderBufferError(), posinf());
         } catch (TemplateException e) {
             throw e; 
@@ -648,12 +656,12 @@ public class Node {
 			
 			List<Object> parameters = createParameterList(model, template, out, children.subList(1, children.size()));
 
-			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]));
-
+			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]), true);
+			
 			if (function != null) {
 				Object o = children.get(0).value(out, model, template);
 				if (o != null) {
-					return applyFilter(propertyKey, function, o);
+					return applyFilter(propertyKey, function, o, false);
 				} else {
 					return null;
 				}
@@ -675,13 +683,12 @@ public class Node {
 			}
 			
 			List<Object> parameters = createParameterList(model, template, out, children.subList(1, children.size()));
-
-			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]));
-
+			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]), true);
+			
 			if (function != null) {
 				Object o = children.get(0).value(out, model, template);
 				if (o != null) {
-					return applyFilter(propertyKey, function, o);
+					return applyFilter(propertyKey, function, o, false);
 				} else {
 					return null;
 				}
@@ -780,7 +787,7 @@ public class Node {
 		if (transform != null) {
 			Object o = node.value(out, model, template);
 			if (o != null) {
-				return applyFilter(varname, transform, o);
+				return applyFilter(varname, transform, o, false);
 			} else {
 				return null;
 			}

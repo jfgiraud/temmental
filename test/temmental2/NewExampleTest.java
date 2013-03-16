@@ -283,7 +283,7 @@ public class NewExampleTest extends TestCase {
 		assertParseException("The concatenation of the strings gives: ~'concat<$s>~", "Invalid syntax at position '-:l1:c49' - reach character '<'");
 		assertParseException("The concatenation of the strings gives: ~'concat<@items,$p1>~", "Invalid syntax at position '-:l1:c49' - reach character '<'");
 	
-		Node node = template.parse("~($p1,$p2):'concat<\"+\">");
+		Node node = template.parse("~($p1,$p2):'concat<\"+\",\"+\">");
 		template.addTransform("concat", new Transform<String[], Transform>() {
 			@Override
 			public Transform apply(final String sep[]) {
@@ -302,9 +302,7 @@ public class NewExampleTest extends TestCase {
 			}
 		});
 		
-		
-		
-		assertEquals("text=|array,children=[variable=p1,,variable=p2]#transform,quote=concat,constructor=[string=+]", template.representation(node));
+		assertEquals("text=|array,children=[variable=p1,,variable=p2]#transform,quote=concat,constructor=[string=+,,string=+]", template.representation(node));
 		assertEquals("3+5", getContent("p1", 3, "p2", 5));
 		
 		assertParseException("The result of the addition is: ~'add<@items,$p1>~", "Invalid syntax at position '-:l1:c37' - reach character '<'");
@@ -357,13 +355,13 @@ public class NewExampleTest extends TestCase {
 		};
 		template.addTransform("add", add);
 		
-		Transform greaterthan = new Transform<Integer[], Transform>() {
+		Transform greaterthan = new Transform<Integer, Transform>() {
 			@Override
-			public Transform apply(final Integer limit[]) {
+			public Transform apply(final Integer limit) {
 				return new Transform<Integer, Boolean>() {
 					@Override
 					public Boolean apply(Integer value) {
-						return value.compareTo(limit[0]) > 0;
+						return value.compareTo(limit) > 0;
 					}
 					
 				};
