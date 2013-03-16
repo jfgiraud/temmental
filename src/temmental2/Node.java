@@ -48,7 +48,7 @@ public class Node {
 	private boolean closed;
 	private boolean startTransform;
 	private BracketType bracketType;
-	
+
 	// round () // square [] // curly {} // angle <>
 	enum BracketType { Round, Square, Curly, Angle };
 	
@@ -79,7 +79,7 @@ public class Node {
 		return file + ":l" + line + ":c" + column;
 	}
 	
-	Node write(String file, int line, int column, int c) throws TemplateException {
+	Node write(String file, int line, int column, int c, NewTemplate template) throws TemplateException {
 		bufferError.write(c);
 	    if (type == Type.Text || type == Type.Sentence) {
 	        buffer.write(c);
@@ -114,7 +114,7 @@ public class Node {
                     this.messageOptional = RenderType.ReplacedByPropertyNameIfNotPresent;
                 }
 		    } else if (type == Type.Variable || type == Type.VariableFilter) {
-				validateName(line, column, c);
+				validateName(line, column, c, template);
 				if (c == '?') {
 				    this.optional = RenderType.Optional;
 				} else {
@@ -136,28 +136,28 @@ public class Node {
 	}
 
 	private String cons_representation(int from) {
-	    return xxx_representation("constructor", "noparam", from);
+	    return xxx_representation("constructor", "noparam", from, children);
 	}
 	
-	private String parameters_representation() {
-	    return xxx_representation("parameters", "noparam", 0);
-	}
+//	private String children_representation() {
+//	    return xxx_representation("parameters", "noparam", 0, children);
+//	}
 	
-	private String childs_representation(int from) {
-        return xxx_representation("childs", "nochild", from);
+	private String children_representation(int from) {
+        return xxx_representation("children", "nochild", from, children);
     }
 	
-	private String xxx_representation(String with, String without, int from) {
-		if (children.size() - from == 0) {
+	private String xxx_representation(String with, String without, int from, List<Node> items) {
+		if (items.size() - from == 0) {
 			return "," + without;
 		} else {
 			String s = "," + with + "=[";
-			for (int i=from; i<children.size(); i++) {
-				Node parameter = children.get(i);
+			for (int i=from; i<items.size(); i++) {
+				Node node = items.get(i);
 				if (i != from) {
 					s += ",,";
 				}
-				s += parameter.representation();
+				s += node.representation();
 			}
 			s += "]";
 			return s;
@@ -204,9 +204,9 @@ public class Node {
 		} else if (type == Type.Quote) {
 			return "quote=" + buffer.toString();
 		} else if (type == Type.QuoteMessage) {
-			return "message,quote=" + buffer.toString() + optional + messageOptional + parameters_representation();
+			return "message,quote=" + buffer.toString() + optional + messageOptional + children_representation(0);
 		} else if (type == Type.VariableMessage) {
-			return "message,variable=" + buffer.toString() + optional + messageOptional + parameters_representation();
+			return "message,variable=" + buffer.toString() + optional + messageOptional + children_representation(0);
 		} else if (type == Type.Variable) {
 			return "variable=" + buffer.toString() + optional;
 		} else if (type == Type.VariableFilter) {
@@ -218,17 +218,17 @@ public class Node {
 		} else if (type == Type.QuoteFilterDyn) {
 			return children.get(0).representation() + "#transform,quote=" + buffer.toString() + optional + cons_representation(1);
 		} else if (type == Type.Array) {
-		    return "array" + parameters_representation();
+		    return "array" + children_representation(0);
 		} else if (type == Type.ArrayExpansion) {
 		    return "expansion,variable=" + buffer.toString() + optional;
 		} else if (type == Type.Command) {
-		    return "command[open]=" + buffer.toString() + (children.size() > 0 ? "," + children.get(0).representation() + childs_representation(1) : "");
+		    return "command[open]=" + buffer.toString() + "," + children.get(0).representation() + children_representation(1);
 		} else if (type == Type.CommandClose) {
             return "command[close]=" + buffer.toString();
         } /*else if (type == Type.CommandSection) {
             return "xxxxxxx";
         }*/ else if (type == Type.Unknown) {
-			return "??? " + parameters_representation();
+			return "??? " + children_representation(0);
 		} else {
 			throw new RuntimeException("Unsupported node type '" + type + "'.");
 		}
@@ -238,15 +238,15 @@ public class Node {
 		this.parent = parent;
 	}
 
-	void addChild(Node node) {
+	void add(Node node) {
 		children.add(node);
 	}
-
-	void removeChild(Node node) {
+	
+	void remove(Node node) {
 		children.remove(node);
 	}
 
-	void validateAll(int line, int column, int c, boolean checkAncestors) throws TemplateException {
+	void validateAll(int line, int column, int c, boolean checkAncestors, NewTemplate template) throws TemplateException {
 	    if (type == Type.Sentence) { 
 	        if (! closed) {
 	            throw new TemplateException("Invalid syntax at position '%s' - reach character '%c', string not closed!", positionInformation(fileInformation, line, column), c);
@@ -263,7 +263,7 @@ public class Node {
 		        tmp = tmp.parent;
 		    }
 		}
-		validateName(line, column, c);
+		validateName(line, column, c, template);
 	}
 	
 	private void checkNotUnknown(int line, int column, int c) throws TemplateException {
@@ -278,7 +278,7 @@ public class Node {
 		}
 	}
 
-	private void validateName(int line, int column, int c) throws TemplateException {
+	private void validateName(int line, int column, int c, NewTemplate template) throws TemplateException {
 		String name = buffer.toString();
 		
 		List<String> availableCommands = Arrays.asList("if", "iter");
@@ -293,14 +293,19 @@ public class Node {
                     throw new TemplateException("Invalid syntax at position '%s' - bad close tag (expected='%s', actual='%s')", positionInformation(fileInformation, line, column), parentName, name);
                 }
             }
+		} else if (type == Type.QuoteFilter) {
+			if (template.getTransform(name) == null) {
+				throw new TemplateException("Unknown filter name '%s' at position '%s'!", name, positionInformation(fileInformation, line, column));
+			}
 		} else if (type != Type.Text && type != Type.Array) {
+				
 			if (name.equals("")) {
 				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c', empty name!", positionInformation(fileInformation, line, column), c);
 			}
 			if (! name.matches("^\\w[\\w\\.]*$")) {
 				throw new TemplateException("Invalid syntax at position '%s' - invalid name '%s'", positionInformation(fileInformation, lineInformation, columnInformation + 2), name);
 			}
-		}
+		} 
 	}
 	
 	private void validateSyntax(int line, int column, int c) throws TemplateException {
@@ -323,25 +328,19 @@ public class Node {
 		return parent;
 	}
 
-	Node startTransform(String file, int line, int column, int currentChar) throws TemplateException {
-		validateAll(line, column, currentChar, false);
+	Node startTransform(String file, int line, int column, int currentChar, NewTemplate template) throws TemplateException {
+		validateAll(line, column, currentChar, false, template);
 		Node newFilter = new Node(Type.Unknown, file, line, column, true);
 		Node _parent = parentNode();
 		newFilter.setParent(_parent);
-		_parent.removeChild(this);
-		_parent.addChild(newFilter);
+		_parent.remove(this);
+		_parent.add(newFilter);
 		setParent(newFilter);
-		newFilter.addChild(this);
+		newFilter.add(this);
 		return newFilter;
 	}
 
 	Node openBracket(BracketType bracketType, String file, int line, int column, int currentChar) throws TemplateException {
-		
-		Node newParameter = new Node(Type.Unknown, file, line, column, false);
-		newParameter.setParent(this);
-		addChild(newParameter);
-		this.bracketType = bracketType;
-		opened = true;
 		
 		if (type == Type.QuoteFilter) {
 			if (bracketType == BracketType.Angle)
@@ -368,6 +367,12 @@ public class Node {
 		} else {
 			throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
 		}
+		
+		Node newParameter = new Node(Type.Unknown, file, line, column, false);
+		newParameter.setParent(this);
+		add(newParameter);
+		this.bracketType = bracketType;
+		opened = true;
 		return newParameter;
 	}
 	
@@ -395,7 +400,7 @@ public class Node {
 		
 		if (type == Type.Unknown) {
 		    if (parent.children.size() == 1)
-		        parent.removeChild(this);
+		        parent.remove(this);
 		    else 
 		        throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
 		} else {
@@ -406,14 +411,14 @@ public class Node {
 		return _parent;
 	}
 
-    Node newSibling(String file, int line, int column, int currentChar) throws TemplateException {
-        validateAll(line, column, currentChar, false);
-        if (parent.type != Type.QuoteMessage && parent.type != Type.VariableMessage && parent.type != Type.Array) {
+    Node newSibling(String file, int line, int column, int currentChar, NewTemplate template) throws TemplateException {
+        validateAll(line, column, currentChar, false, template);
+        if (parent.type != Type.QuoteMessage && parent.type != Type.VariableMessage && parent.type != Type.Array && parent.type != Type.QuoteFilterDyn && parent.type != Type.VariableFilterDyn) {
             throw new TemplateException("Invalid syntax at position '%s' - reach character '%c', this character is not allowed here!", positionInformation(file, line, column), currentChar);
         }
         Node newParameter = new Node(Type.Unknown, file, line, column, false);
         newParameter.setParent(parent);
-        parent.addChild(newParameter);
+        parent.add(newParameter);
         return newParameter;
     }
 
@@ -439,8 +444,8 @@ public class Node {
             throw new TemplateException("Invalid syntax at position '%s' - reach close tag without opened tag!", positionInformation(fileInformation, line, column));
         }
         
-        parent.removeChild(this);
-        p.addChild(this);
+        parent.remove(this);
+        p.add(this);
         setParent(p);
         
         return this;
@@ -460,7 +465,7 @@ public class Node {
         }
         Node newParameter = new Node(Type.Unknown, file, line, column, false);
         newParameter.setParent(this);
-        addChild(newParameter);
+        add(newParameter);
         return newParameter;
     }
 
@@ -597,6 +602,7 @@ public class Node {
             }
             return s;
         } catch (ClassCastException e) {
+        	e.printStackTrace(System.out);
             throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", s.getClass().getCanonicalName(), renderBufferError(), posinf());
         } catch (TemplateException e) {
             throw e; 
@@ -635,20 +641,30 @@ public class Node {
 			throw new TemplateException("Unsupported node type=" + type);
 		} else if (type == Type.QuoteFilterDyn) {
 			//FIXME
-			Transform transform = (Transform) applyMessage(model, template, out, true); 
 			
+			String propertyKey = buffer.toString();
+			if (propertyKey == null) {
+				return null;
+			}
 			
-			if (transform != null) {
+			Transform function = template.getTransform(propertyKey); 
+			if (function == null) {
+				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
+			}
+			
+			List<Object> parameters = createParameterList(model, template, out, children.subList(1, children.size()));
+
+			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]));
+
+			if (function != null) {
 				Object o = children.get(0).value(out, model, template);
 				if (o != null) {
-					//FIXME varname
-						return applyFilter("arname", transform, o);
+					return applyFilter(propertyKey, function, o);
 				} else {
 					return null;
 				}
 			} else {
-				//FIXME varname
-				throw new TemplateException("No transform function named '%s' is associated with the template to render '%s' at position '%s'.", "varname", renderBufferError(), posinf());
+				throw new TemplateException("No transform function named '%s' is associated with the template to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
 			}
 			
 			
@@ -661,7 +677,7 @@ public class Node {
 		} else if (type == Type.QuoteMessage) { 
 			return applyMessage(model, template, out, true);
 		} else if (type == Type.Array/* || type == Type.ArrayExpansion*/) {
-			List<Object> parameters = createParameterList(model, template, out);
+			List<Object> parameters = createParameterList(model, template, out, children);
 			if (parameters == null)
 				return null;
 			else
@@ -695,37 +711,24 @@ public class Node {
 		if (propertyKey == null) {
 			return null;
 		}
-		if (bracketType == BracketType.Angle) {
-			Transform function = template.getTransform(propertyKey); 
-			if (function == null) {
-				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
-			}
-			List<Object> parameters = createParameterList(model, template, out);
-			try {
-				return function.apply(parameters);
-			} catch (ClassCastException e) {
-				throw new TemplateException(e, "Unable to apply parametrized function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
-			}
-		} else {
-			if (! template.messages.containsKey(propertyKey)) {
-				if (messageOptional == RenderType.OptionalMessage) {
-					return null;
-				} else if (messageOptional == RenderType.ReplacedByPropertyNameIfNotPresent) {
-					return propertyKey;
-				}
-				throw new TemplateException("No property key '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
-			}
-			List<Object> parameters = createParameterList(model, template, out);
-			if (parameters == null)
+		if (! template.messages.containsKey(propertyKey)) {
+			if (messageOptional == RenderType.OptionalMessage) {
 				return null;
-			else
-				return template.messages.format(propertyKey, parameters);
+			} else if (messageOptional == RenderType.ReplacedByPropertyNameIfNotPresent) {
+				return propertyKey;
+			}
+			throw new TemplateException("No property key '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
 		}
+		List<Object> parameters = createParameterList(model, template, out, children);
+		if (parameters == null)
+			return null;
+		else
+			return template.messages.format(propertyKey, parameters);
 	}
 
-	private List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out) throws TemplateException, IOException {
+	private static List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out, List<Node> items) throws TemplateException, IOException {
 		List<Object> parameters = new ArrayList<Object>();
-		for (Node child : children) {
+		for (Node child : items) {
 			if (child.type != Type.ArrayExpansion) {
 				Object o = child.value(out, model, template);
 				if (o == null) {
@@ -799,7 +802,5 @@ public class Node {
 //		}
 		return b;
 	}
-	
 
-	
 }

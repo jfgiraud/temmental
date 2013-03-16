@@ -34,6 +34,7 @@ public class NewExampleTest extends TestCase {
     */
 	private NewTemplate template;
 	private Transform<String, ? extends Object> upper, firstLower, length, color, bool;
+	private Transform<Object, Object> dummy;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -58,6 +59,12 @@ public class NewExampleTest extends TestCase {
 			@Override
 			public Boolean apply(String value) {
 				return Boolean.valueOf(value);
+			}
+		};
+		dummy = new Transform<Object, Object>() {
+			@Override
+			public Object apply(Object value) {
+				return value;
 			}
 		};
 		color = new Transform<String, String>() {
@@ -161,14 +168,19 @@ public class NewExampleTest extends TestCase {
 	}
 
 	public void testParseVariableWithStaticFilter() throws IOException, TemplateException {
+		template.addTransform("filter", upper);
         Node node = template.parse("~$myvar:'filter~");
-        template.addTransform("filter", upper);
         
         assertEquals("text=|variable=myvar#transform,quote=filter|text=", template.representation(node));
         assertEquals("THE TEXT", getContent("myvar", "The text"));
 	}
 	
+	public void testParseVariableWithStaticFilterNotPresent() throws IOException, TemplateException {
+        assertParseException("~$myvar:'filter~", "Unknown filter name 'filter' at position '-:l1:c16'!");
+	}
+	
 	public void testParseVariableWithTwoDifferentFilters() throws IOException, TemplateException {
+		template.addTransform("filter2", color);
         Node node = template.parse("~$myvar:$filter?:'filter2~");
         
         assertEquals("text=|variable=myvar#transform,variable=filter,norenderifnotpresent#transform,quote=filter2|text=", template.representation(node));
@@ -177,15 +189,14 @@ public class NewExampleTest extends TestCase {
 				return value + 1;
 			}
 		};
-		template.addTransform("filter2", color);
         assertEquals("", getContent("myvar", "The text"));
         assertEquals("<font color=\"red\">9</font>", getContent("myvar", 8, "filter", addOne));
     }
 	
 	public void testParseVariableWithThreeDifferentFilters() throws IOException, TemplateException {
+		template.addTransform("filter2", firstLower);
 		Node node = template.parse("~$myvar:$filter?:'filter2:$filter3~");
 		assertEquals("text=|variable=myvar#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=", template.representation(node));
-		template.addTransform("filter2", firstLower);
         		
 //		"Key '%s' is not present or has null value in the model map to render '%s' at position '%s'."
 		assertFormatException("Key 'filter3' is not present or has null value in the model map (needed for '$filter3' at position '-:l1:c26').", "myvar", "The text");
@@ -214,15 +225,15 @@ public class NewExampleTest extends TestCase {
 		assertEquals("", getContent("myvar", "The text"));
 		assertEquals("", getContent("filter", upper));
 		
-		node = template.parse("~$myvar?:$filter?:'filter2~");
 		template.addTransform("filter2", firstLower);
+		node = template.parse("~$myvar?:$filter?:'filter2~");
 		assertEquals("text=|variable=myvar,norenderifnotpresent#transform,variable=filter,norenderifnotpresent#transform,quote=filter2|text=", template.representation(node));
 		assertEquals("tHE TEXT", getContent("myvar", "The text", "filter", upper));
 		assertEquals("", getContent("myvar", "The text"));
 		assertEquals("", getContent("filter", upper));
 		
-		node = template.parse("~$myvar?:$filter?:'filter2:$filter3~");
 		template.addTransform("filter2", firstLower);
+		node = template.parse("~$myvar?:$filter?:'filter2:$filter3~");
 		assertEquals("text=|variable=myvar,norenderifnotpresent#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=", template.representation(node));
 		assertEquals("<font color=\"red\">tHE TEXT</font>", getContent("myvar", "The text", "filter", upper, "filter3", color));
 		assertEquals("", getContent("myvar", "The text", "filter3", upper));
@@ -232,7 +243,7 @@ public class NewExampleTest extends TestCase {
 	public void testVariableMessageWithOptionalKey() throws IOException, TemplateException {
 		Node node = template.parse("before~$myvar?[]~after");
 		setMessages("hello", "Hello Mister");
-		assertEquals("text=before|message,variable=myvar,norenderifnotpresent,noparam|text=after", template.representation(node));
+		assertEquals("text=before|message,variable=myvar,norenderifnotpresent,nochild|text=after", template.representation(node));
 		assertEquals("beforeHello Misterafter", getContent("myvar", "hello"));
 		assertEquals("beforeafter", getContent());
 	}
@@ -251,11 +262,11 @@ public class NewExampleTest extends TestCase {
 	
 	
 	public void testMessageWithOptionalKeyAcceptsFilters() throws IOException, TemplateException {
+		template.addTransform("filter2", firstLower);
 		Node node = template.parse("before~$myvar?[]:$filter?:'filter2:$filter3~after");
-		assertEquals("text=before|message,variable=myvar,norenderifnotpresent,noparam#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=after", template.representation(node));
+		assertEquals("text=before|message,variable=myvar,norenderifnotpresent,nochild#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=after", template.representation(node));
 
 		setMessages("hello", "Hello Mister");
-		template.addTransform("filter2", firstLower);
 		assertEquals("before<font color=\"red\">hELLO MISTER</font>after", getContent("myvar", "hello", "filter", upper, "filter3", color));
 		
 	}
@@ -264,25 +275,25 @@ public class NewExampleTest extends TestCase {
 		Node node = template.parse("before~'myvar[]~after");
 		setMessages("myvar", "Hello Mister");
 		
-		assertEquals("text=before|message,quote=myvar,noparam|text=after", template.representation(node));
+		assertEquals("text=before|message,quote=myvar,nochild|text=after", template.representation(node));
 		assertEquals("beforeHello Misterafter", getContent("myvar", "hello"));
 	} 
 	
-	public void testTransform() throws IOException, TemplateException {
+	public void testQuoteTransformDyn() throws IOException, TemplateException {
 		assertParseException("The concatenation of the strings gives: ~'concat<$s>~", "Invalid syntax at position '-:l1:c49' - reach character '<'");
 		assertParseException("The concatenation of the strings gives: ~'concat<@items,$p1>~", "Invalid syntax at position '-:l1:c49' - reach character '<'");
-		
+	
 		Node node = template.parse("~($p1,$p2):'concat<\"+\">");
-		template.addTransform("concat", new Transform<List<Object>, Transform>() {
+		template.addTransform("concat", new Transform<String[], Transform>() {
 			@Override
-			public Transform apply(final List<Object> sep) {
+			public Transform apply(final String sep[]) {
 				return new Transform<Object[], String>() {
 					@Override
 					public String apply(Object[] values) {
 						String s = "";
 						for (Object v : values) {
 							if (!"".equals(s))
-								s+= sep.get(1);
+								s+= sep[0];
 							s += v;
 						}
 						return s;
@@ -291,50 +302,45 @@ public class NewExampleTest extends TestCase {
 			}
 		});
 		
-//		Node node = template.parse("~($p1,$p2):'concat<\"+\">");
-//		template.addTransform("concat", new Transform<ArrayList<Object>, Transform>() {
-//			@Override
-//			public Transform apply(final ArrayList<Object> sep) {
-//				return new Transform<Object[], String>() {
-//					@Override
-//					public String apply(Object[] values) {
-//						String s = "";
-//						for (Object v : values) {
-//							if (!"".equals(s))
-//								s+=sep.get(0);
-//							s += v;
-//						}
-//						return s;
-//					}
-//				};
-//			}
-//		});
 		
 		
-		assertEquals("text=|array,parameters=[variable=p1,,variable=p2]#transform,quote=concat,constructor=[string=+]", template.representation(node));
+		assertEquals("text=|array,children=[variable=p1,,variable=p2]#transform,quote=concat,constructor=[string=+]", template.representation(node));
 		assertEquals("3+5", getContent("p1", 3, "p2", 5));
-
 		
-//		node = template.parse("The result of the addition is: ~'add<@items,$p1>~");
-//		template.addTransform("add", add);
+		assertParseException("The result of the addition is: ~'add<@items,$p1>~", "Invalid syntax at position '-:l1:c37' - reach character '<'");
 //		
 //		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[expansion,variable=items,,variable=p1]|text=", template.representation(node));
 //		assertEquals("The result of the addition is: 14", getContent("items", Arrays.asList(2, 5, 6), "p1", 1));
+//	
+		Transform multiplicate = new Transform<Integer[], Integer>() {
+			@Override
+			public Integer apply(Integer[] value) {
+				int r = 1;
+				for (int i : value) {
+					r *= i;
+				}
+				return r;
+			}
+		};
+		template.addTransform("multiplicate", multiplicate);
 		
-//		node = template.parse("The result of the addition is: ~(@items,$p1):'add~");
-//		template.addTransform("add", add);
-//		
-//		assertEquals("text=The result of the addition is: |array,parameters=[expansion,variable=items,,variable=p1]#transform,quote=add|text=", template.representation(node));
-//		assertEquals("The result of the addition is: 14", getContent("items", Arrays.asList(2, 5, 6), "p1", 1));
+		node = template.parse("The result is: ~(@items,$p1):'multiplicate~");
+		assertEquals("text=The result is: |array,children=[expansion,variable=items,,variable=p1]#transform,quote=multiplicate|text=", template.representation(node));
+		
+		assertEquals("The result is: 120", getContent("items", Arrays.asList(2, 5, 6), "p1", 2));
 		
 	}
 	
+	public void testVariableTransformDyn() throws IOException, TemplateException {
+		fail();
+	}
+	
 	public void testQuoteMessageAcceptsFilters() throws IOException, TemplateException {
+		template.addTransform("filter2", firstLower);
 		Node node = template.parse("~'myvar[]:$filter?:'filter2:$filter3~hello");
-		assertEquals("text=|message,quote=myvar,noparam#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=hello", template.representation(node));
+		assertEquals("text=|message,quote=myvar,nochild#transform,variable=filter,norenderifnotpresent#transform,quote=filter2#transform,variable=filter3|text=hello", template.representation(node));
 
 		setMessages("myvar", "Hello Mister");
-		template.addTransform("filter2", firstLower);
 		assertEquals("<font color=\"red\">hELLO MISTER</font>hello", getContent("filter", upper, "filter3", color));
 	}
 	
@@ -362,13 +368,13 @@ public class NewExampleTest extends TestCase {
 
 	public void testVariableMessageParameterOrFilterFlag() throws IOException, TemplateException {
 		Node node = template.parse("before~'myvar[$name?]~after");
-		assertEquals("text=before|message,quote=myvar,parameters=[variable=name,norenderifnotpresent]|text=after", template.representation(node));
+
 		setMessages("myvar", "Hello {0}");
 		assertEquals("beforeHello Jeffafter", getContent("name", "Jeff"));
 		assertEquals("beforeafter", getContent());
 
 		node = template.parse("before~'myvar[$name?:$filter?]~after");
-		assertEquals("text=before|message,quote=myvar,parameters=[variable=name,norenderifnotpresent#transform,variable=filter,norenderifnotpresent]|text=after", template.representation(node));
+		assertEquals("text=before|message,quote=myvar,children=[variable=name,norenderifnotpresent#transform,variable=filter,norenderifnotpresent]|text=after", template.representation(node));
 		assertEquals("beforeHello JEFFafter", getContent("name", "Jeff", "filter", upper));
 		assertEquals("beforeafter", getContent("name", "Jeff"));
 		assertEquals("beforeafter", getContent("filter", upper));
@@ -376,7 +382,7 @@ public class NewExampleTest extends TestCase {
 	
     public void testParseVariableMessagePropertyRequired() throws IOException, TemplateException {
         Node node = template.parse("~$myvar[]~");
-        assertEquals("text=|message,variable=myvar,noparam|text=", template.representation(node));
+        assertEquals("text=|message,variable=myvar,nochild|text=", template.representation(node));
         assertFormatException("Key 'myvar' is not present or has null value in the model map (needed for '$myvar' at position '-:l1:c1').");
         
         setMessages("hello", "Hello Mister");
@@ -387,7 +393,7 @@ public class NewExampleTest extends TestCase {
     public void testParseVariableMessagePropertyOptional() throws IOException, TemplateException {
         Node node = template.parse("~$myvar[]?~");
         setMessages();
-        assertEquals("text=|message,variable=myvar,norenderifpropertynamenotpresent,noparam|text=", template.representation(node));
+        assertEquals("text=|message,variable=myvar,norenderifpropertynamenotpresent,nochild|text=", template.representation(node));
         assertEquals("", getContent("myvar", "hello"));
         setMessages("hello", "Hello Mister");
         assertEquals("Hello Mister", getContent("myvar", "hello"));
@@ -410,7 +416,7 @@ public class NewExampleTest extends TestCase {
 
     public void testParseVariableMessagePropertyOptionalButKeyDisplayed() throws IOException, TemplateException {
         Node node = template.parse("~$myvar[]!~");
-        assertEquals("text=|message,variable=myvar,renderpropertynameifnotpresent,noparam|text=", template.representation(node));
+        assertEquals("text=|message,variable=myvar,renderpropertynameifnotpresent,nochild|text=", template.representation(node));
         setMessages();
         assertEquals("hello", getContent("myvar", "hello"));
     }
@@ -431,7 +437,7 @@ public class NewExampleTest extends TestCase {
 	public void testOnePropertyIncludedInAProperty() throws IOException, TemplateException {
 		Node node = template.parse("~'hello['mister[$lastname]]~");
 		setMessages("hello", "Bonjour {0}", "mister", "Monsieur {0}!");
-		assertEquals("text=|message,quote=hello,parameters=[message,quote=mister,parameters=[variable=lastname]]|text=", template.representation(node));
+		assertEquals("text=|message,quote=hello,children=[message,quote=mister,children=[variable=lastname]]|text=", template.representation(node));
 		assertEquals("Bonjour Monsieur Jeff!", getContent("lastname", "Jeff"));
 	}
 	
@@ -440,35 +446,38 @@ public class NewExampleTest extends TestCase {
     }
 	
 	public void testVariableMessageWithDifferentTypeOfParametersAndFilters() throws IOException, TemplateException {
-        Node node = template.parse("before~'myvar[$a?:'f1,$b:'f2]:'f3~after");
-        assertEquals("text=before|message,quote=myvar,parameters=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3|text=after", template.representation(node));
-        template.addTransform("f1", firstLower);
-        template.addTransform("f2", upper);
-        template.addTransform("f3", color);
+		template.addTransform("f1", firstLower);
+		template.addTransform("f2", upper);
+		template.addTransform("f3", color);
+		template.addTransform("f5", firstLower);
+
+		Node node = template.parse("before~'myvar[$a?:'f1,$b:'f2]:'f3~after");
+        assertEquals("text=before|message,quote=myvar,children=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3|text=after", template.representation(node));
         setMessages("myvar", "Hello {0} and {1}");
         
         assertEquals("before<font color=\"red\">Hello jeff and PEG</font>after", getContent("a", "Jeff", "b", "Peg"));
         
         node = template.parse("~'myvar[$a?:$f1,$b.c:'f2,'msg[]:'f5]:'f3~hello");
-        assertEquals("text=|message,quote=myvar,parameters=[variable=a,norenderifnotpresent#transform,variable=f1,,variable=b.c#transform,quote=f2,,message,quote=msg,noparam#transform,quote=f5]#transform,quote=f3|text=hello", template.representation(node));
+        assertEquals("text=|message,quote=myvar,children=[variable=a,norenderifnotpresent#transform,variable=f1,,variable=b.c#transform,quote=f2,,message,quote=msg,nochild#transform,quote=f5]#transform,quote=f3|text=hello", template.representation(node));
         
         node = template.parse("~'myvar[$a?:$f1,$b.c:'f2,'msg[$cc:$f6]:'f5]:'f3~hello");
-        assertEquals("text=|message,quote=myvar,parameters=[variable=a,norenderifnotpresent#transform,variable=f1,,variable=b.c#transform,quote=f2,,message,quote=msg,parameters=[variable=cc#transform,variable=f6]#transform,quote=f5]#transform,quote=f3|text=hello", template.representation(node));
+        assertEquals("text=|message,quote=myvar,children=[variable=a,norenderifnotpresent#transform,variable=f1,,variable=b.c#transform,quote=f2,,message,quote=msg,children=[variable=cc#transform,variable=f6]#transform,quote=f5]#transform,quote=f3|text=hello", template.representation(node));
         
         setMessages("myvar", "Hello {0}, {1} and {2}", "msg", "Mister {0}");
         
-        template.addTransform("f2", upper);
-        template.addTransform("f3", color);
-        template.addTransform("f5", firstLower);
         assertEquals("<font color=\"red\">Hello JEFF, PEG and mister MIKE</font>hello", getContent("a", "Jeff", "b.c", "Peg", "cc", "Mike", "f1", upper, "f6", upper));
         
 	}
 	
 	public void testArray() throws IOException, TemplateException {
-        Node node = template.parse("aaa~($a?,$b:'f2):'f3~bbb");
-        assertEquals("text=aaa|array,parameters=[variable=a,norenderifnotpresent,,variable=b#transform,quote=f2]#transform,quote=f3|text=bbb", template.representation(node));
-        template.addTransform("f2", upper);
-        template.addTransform("f3", new Transform<String[], String>() {
+		template.addTransform("f2", upper);
+		Transform toInt = new Transform<String, Integer>() {
+			@Override
+			public Integer apply(String value) {
+				return Integer.valueOf(value);
+			}
+		};
+		template.addTransform("f3", new Transform<String[], String>() {
 			@Override
 			public String apply(String[] value) {
 				String s = "";
@@ -477,18 +486,15 @@ public class NewExampleTest extends TestCase {
 				}
 				return s;
 			}
-		});
+		}); 
+		
+		Node node = template.parse("aaa~($a?,$b:'f2):'f3~bbb");
+		assertEquals("text=aaa|array,children=[variable=a,norenderifnotpresent,,variable=b#transform,quote=f2]#transform,quote=f3|text=bbb", template.representation(node));
+
         assertEquals("aaaDOEJohnbbb", getContent("a", "John", "b", "Doe"));
         assertEquals("aaabbb", getContent("b", "Doe"));
         
-        node = template.parse("~'myvar[$disk,($a?:'f1,$b:'f2):'f3]:'f4~");
-        Transform toInt = new Transform<String, Integer>() {
-			@Override
-			public Integer apply(String value) {
-				return Integer.valueOf(value);
-			}
-		};
-		template.addTransform("f1", toInt);
+        template.addTransform("f1", toInt);
         template.addTransform("f2", toInt);
         Transform multiplicate = new Transform<Integer[], Integer>() {
 			@Override
@@ -500,37 +506,39 @@ public class NewExampleTest extends TestCase {
 				return r;
 			}
 		};
-		template.addTransform("f3", multiplicate);
-		template.addTransform("f4", upper);
+        template.addTransform("f3", multiplicate);
+        template.addTransform("f4", upper);
+        node = template.parse("~'myvar[$disk,($a?:'f1,$b:'f2):'f3]:'f4~");
+		
 		setMessages("myvar", "The disk {0} contains {1,choice,0#no file|1#one file|1<{1,number,integer} files}.");
-        assertEquals("text=|message,quote=myvar,parameters=[variable=disk,,array,parameters=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3]#transform,quote=f4|text=", template.representation(node));
+        assertEquals("text=|message,quote=myvar,children=[variable=disk,,array,children=[variable=a,norenderifnotpresent#transform,quote=f1,,variable=b#transform,quote=f2]#transform,quote=f3]#transform,quote=f4|text=", template.representation(node));
         assertEquals("THE DISK C: CONTAINS 10 FILES.", getContent("a", "5", "b", "2", "disk", "C:"));
 	}
 
 	public void testMultipleFilters() throws IOException, TemplateException {
-	    Node node = template.parse("aaa~$a:'f2:'f3~bbb");
 	    template.addTransform("f2", upper);
         template.addTransform("f3", firstLower);
+        Node node = template.parse("aaa~$a:'f2:'f3~bbb");
 	    assertEquals("text=aaa|variable=a#transform,quote=f2#transform,quote=f3|text=bbb", template.representation(node));
 	    assertEquals("aaadOEbbb", getContent("a", "Doe"));
 	}
 
 	public void testCommandIf() throws IOException, TemplateException {
-	    Node node = template.parse("aaa~#if $a:'f~before ~$b~ after~#/if~bbb");
-	    template.addTransform("f", bool);
-        assertEquals("text=aaa|command[open]=if,variable=a#transform,quote=f,childs=[text=before ,,variable=b,,text= after,,command[close]=if]|text=bbb", template.representation(node));
+		template.addTransform("bool", bool);
+	    Node node = template.parse("aaa~#if $a:'bool~before ~$b~ after~#/if~bbb");
+        assertEquals("text=aaa|command[open]=if,variable=a#transform,quote=bool,children=[text=before ,,variable=b,,text= after,,command[close]=if]|text=bbb", template.representation(node));
         assertEquals("aaabbb", getContent("a", "false"));
         assertEquals("aaabefore Doe afterbbb", getContent("a", "true", "b", "Doe"));
 	}
 	
 	public void testCommandNotReferenced() throws IOException, TemplateException {
-		assertParseException("aaa~#command_not_referenced $a:'f~before ~$b~ after~#/command_not_referenced~bbb",
-				"Invalid syntax at position '-:l1:c77' - invalid command name 'command_not_referenced'!");
+		assertParseException("aaa~#command_not_referenced $a~before ~$b~ after~#/command_not_referenced~bbb",
+				"Invalid syntax at position '-:l1:c74' - invalid command name 'command_not_referenced'!");
     }
 	
 	public void testCommandOpenCloseMismatch() throws IOException, TemplateException {
-		assertParseException("aaa~#if $a:'f~before ~$b~ after~#/iter~bbb",
-				"Invalid syntax at position '-:l1:c39' - bad close tag (expected='if', actual='iter')");
+		assertParseException("aaa~#if $a~before ~$b~ after~#/iter~bbb",
+				"Invalid syntax at position '-:l1:c36' - bad close tag (expected='if', actual='iter')");
 		assertParseException("aaabefore ~$b~ after~#/if~bbb", 
 				"Invalid syntax at position '-:l1:c23' - reach close tag without opened tag!");
     }
@@ -543,7 +551,10 @@ public class NewExampleTest extends TestCase {
 	}
 	
 	public void testInvalidSyntaxAboutArrays() throws IOException, TemplateException {
-        assertParseException("aaa~($a?,$b:'f2]:'f3~bbb", "Invalid syntax at position '-:l1:c16' - reach character ']', invalid bracket type!");
+		template.addTransform("f1", dummy);
+		template.addTransform("f2", dummy);
+		template.addTransform("f3", dummy);
+		assertParseException("aaa~($a?,$b:'f2]:'f3~bbb", "Invalid syntax at position '-:l1:c16' - reach character ']', invalid bracket type!");
         assertParseException("~'myvar[($a?:'f1,$b:'f2)]:'f3~", "Invalid syntax at position '-:l1:c25' - reach character ']', a parameter can not be an array!");
         assertParseException("~'myvar[]:($a,$b)~", "Invalid syntax at position '-:l1:c11' - reach character '('");
     }
@@ -638,20 +649,20 @@ public class NewExampleTest extends TestCase {
 		
 		node = template.parse("Some text~$msg[\"Another text\"]~And the end");
 		setMessages("text", "the text is ''{0}''");
-        assertEquals("text=Some text|message,variable=msg,parameters=[string=Another text]|text=And the end", template.representation(node));
+        assertEquals("text=Some text|message,variable=msg,children=[string=Another text]|text=And the end", template.representation(node));
         assertEquals("Some textthe text is 'Another text'And the end", getContent("msg", "text"));
         
-        node = template.parse("Some text~$msg[\"Another text\":'g,$b:'f]~And the end");
-        assertEquals("text=Some text|message,variable=msg,parameters=[string=Another text#transform,quote=g,,variable=b#transform,quote=f]|text=And the end", template.representation(node));
         template.addTransform("g", upper);
         template.addTransform("f", firstLower);
+        node = template.parse("Some text~$msg[\"Another text\":'g,$b:'f]~And the end");
+        assertEquals("text=Some text|message,variable=msg,children=[string=Another text#transform,quote=g,,variable=b#transform,quote=f]|text=And the end", template.representation(node));
         setMessages("text", "the text is ''{0}''+{1}");
         assertEquals("Some textthe text is 'ANOTHER TEXT'+bYEAnd the end", getContent("msg", "text", "b", "BYE"));
         
         assertParseException("Some text~\"Another text~And the end", "Invalid syntax at position '-:l1:c24' - reach character '~', string not closed!");
         
         node = template.parse("Some text~$msg[\"Another text\":'g,$b:'f,\"\"]~And the end");
-        assertEquals("text=Some text|message,variable=msg,parameters=[string=Another text#transform,quote=g,,variable=b#transform,quote=f,,string=]|text=And the end", template.representation(node));
+        assertEquals("text=Some text|message,variable=msg,children=[string=Another text#transform,quote=g,,variable=b#transform,quote=f,,string=]|text=And the end", template.representation(node));
         assertParseException("~$\"Another text\"~", "Invalid syntax at position '-:l1:c3' - reach character '\"'");
         assertParseException("~$b\"Another text\"~", "Invalid syntax at position '-:l1:c4' - reach character '\"'");
         assertParseException("~$b[$c~", "Invalid syntax at position '-:l1:c7' - reach character '~'");
@@ -667,7 +678,7 @@ public class NewExampleTest extends TestCase {
 	
 	public void testIterate() throws IOException, TemplateException {
 		Node node = template.parse("~#iter $names~hello ~$name~~#/iter~");
-		assertEquals("text=|command[open]=iter,variable=names,childs=[text=hello ,,variable=name,,text=,,command[close]=iter]|text=", template.representation(node));
+		assertEquals("text=|command[open]=iter,variable=names,children=[text=hello ,,variable=name,,text=,,command[close]=iter]|text=", template.representation(node));
 	}
 
 //	public void testSections() throws IOException, TemplateException {
