@@ -29,6 +29,11 @@ public class NewTemplate {
     private Map<String, Transform> functions;
     private ArrayList<String> sectionsOrder;
     
+    public NewTemplate() {
+    	functions = new HashMap<String, Transform>();
+    }
+    
+    
     Node parse(String expression) throws IOException, TemplateException {
 		Node parent = new Node(Node.Type.Section, "-", 1, 0, false);
 		parent.setBuffer(DEFAULT_SECTION);
@@ -46,7 +51,6 @@ public class NewTemplate {
 	    Node currentNode = createNodeDown(Node.Type.Text, file, line, column, root);
 	    
 		boolean outsideAnExpression = true;
-		functions = new HashMap<String, Transform>();
 		
 		int currentChar = sr.read(); 
 		int previousChar = -1;
@@ -54,7 +58,7 @@ public class NewTemplate {
 			column++;
 			if (outsideAnExpression) {
 				if (currentChar != '~') {
-				    currentNode = currentNode.write(file, line, column, currentChar);
+				    currentNode = currentNode.write(file, line, column, currentChar, this);
 					if (currentChar == '\n') {
 						line++;
 						column = 0;
@@ -67,7 +71,7 @@ public class NewTemplate {
 						break;
 					} else {
 						if (nextChar == '~' && currentChar == '~') {
-							currentNode = currentNode.write(file, line, column, currentChar);
+							currentNode = currentNode.write(file, line, column, currentChar, this);
 							previousChar = currentChar;
 							currentChar = sr.read();
 							continue;
@@ -90,7 +94,7 @@ public class NewTemplate {
 			        currentNode = currentNode.stopSentence(file, line, column, currentChar);
 			        nextLoop = true;
 			    } else if (currentNode.getType() == Type.Sentence && ! currentNode.isClosed() && currentChar != '~') {
-			        currentNode = currentNode.write(file, line, column, currentChar);
+			        currentNode = currentNode.write(file, line, column, currentChar, this);
 			        nextLoop = true;
 			    }
 			    if (nextLoop) {
@@ -99,7 +103,7 @@ public class NewTemplate {
 			        continue;
 			    }
 				if (currentChar == '~') {
-					currentNode.validateAll(line, column, currentChar, true);
+					currentNode.validateAll(line, column, currentChar, true, this);
 					outsideAnExpression = true;
 					if (currentNode.getType() == Node.Type.CommandClose) {
 					    currentNode = currentNode.parentNode();
@@ -108,7 +112,7 @@ public class NewTemplate {
 				} else if (currentChar == ' ') {
 				    currentNode = currentNode.startCondition(file, line, column, currentChar);
 				} else if (currentChar == ':') {
-					currentNode = currentNode.startTransform(file, line, column, currentChar);
+					currentNode = currentNode.startTransform(file, line, column, currentChar, this);
 				} else if (currentChar == '[') {
 					currentNode = currentNode.openBracket(BracketType.Square, file, line, column, currentChar);
 				} else if (currentChar == ']') {
@@ -122,13 +126,13 @@ public class NewTemplate {
                 } else if (currentChar == '>') {
                     currentNode = currentNode.closeBracket(BracketType.Angle, file, line, column, currentChar);
                 } else if (currentChar == ',') {
-                    currentNode = currentNode.newSibling(file, line, column, currentChar);
+                    currentNode = currentNode.newSibling(file, line, column, currentChar, this);
                 } else if (currentChar == '#') {
                     currentNode = currentNode.openCommand(file, line, column, currentChar);
                 } else if (currentChar == '/') {
                     currentNode = currentNode.closeCommand(file, line, column, currentChar);
                 } else if (currentNode.allow(currentChar)) {
-                    currentNode = currentNode.write(file, line, column, currentChar);
+                    currentNode = currentNode.write(file, line, column, currentChar, this);
 				} else {
 					throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", currentNode.positionInformation(file, line, column), currentChar);
 				}
@@ -142,7 +146,7 @@ public class NewTemplate {
 	private Node createNodeDown(Type type, String file, int line, int column, Node parent) {
         Node newNode = new Node(type, file, line, column, false);
         newNode.setParent(parent);
-        parent.addChild(newNode);
+        parent.add(newNode);
         return newNode;
     }
 
@@ -150,18 +154,18 @@ public class NewTemplate {
         Node parent = currentNode.parentNode();
         Node newNode = new Node(type, file, line, column, false);
         newNode.setParent(parent);
-        parent.addChild(newNode);
+        parent.add(newNode);
         return newNode;
     }
 
-    private Node createNodeUpper(Type type, String file, int line, int column, Node currentNode) {
-	    Node newNode = new Node(type, file, line, column, false);
-	    Node parent = currentNode.parentNode();
-	    newNode.setParent(parent);
-	    parent.removeChild(currentNode);
-	    parent.addChild(newNode);
-	    return newNode;
-	}
+//    private Node createNodeUpper(Type type, String file, int line, int column, Node currentNode) {
+//	    Node newNode = new Node(type, file, line, column, false);
+//	    Node parent = currentNode.parentNode();
+//	    newNode.setParent(parent);
+//	    parent.removeChild(currentNode);
+//	    parent.addChild(newNode);
+//	    return newNode;
+//	}
 
 	static String representation(Node node) {
 		return node.representation();
