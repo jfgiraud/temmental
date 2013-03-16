@@ -308,31 +308,74 @@ public class NewExampleTest extends TestCase {
 		assertEquals("3+5", getContent("p1", 3, "p2", 5));
 		
 		assertParseException("The result of the addition is: ~'add<@items,$p1>~", "Invalid syntax at position '-:l1:c37' - reach character '<'");
-//		
-//		assertEquals("text=The result of the addition is: |message,quote=add,parameters=[expansion,variable=items,,variable=p1]|text=", template.representation(node));
-//		assertEquals("The result of the addition is: 14", getContent("items", Arrays.asList(2, 5, 6), "p1", 1));
-//	
-		Transform multiplicate = new Transform<Integer[], Integer>() {
+	}
+	
+	public void testQuoteTransformDyn2() throws IOException, TemplateException {
+		Transform add = new Transform<Integer[], Integer>() {
 			@Override
 			public Integer apply(Integer[] value) {
-				int r = 1;
+				int r = 0;
 				for (int i : value) {
-					r *= i;
+					r += i;
 				}
 				return r;
 			}
 		};
-		template.addTransform("multiplicate", multiplicate);
+		template.addTransform("add", add);
 		
-		node = template.parse("The result is: ~(@items,$p1):'multiplicate~");
-		assertEquals("text=The result is: |array,children=[expansion,variable=items,,variable=p1]#transform,quote=multiplicate|text=", template.representation(node));
+		Transform greaterthan = new Transform<Integer[], Transform>() {
+			@Override
+			public Transform apply(final Integer limit[]) {
+				return new Transform<Integer, Boolean>() {
+					@Override
+					public Boolean apply(Integer value) {
+						return value.compareTo(limit[0]) > 0;
+					}
+					
+				};
+			}
+		};
+		template.addTransform("greaterthan", greaterthan);
 		
-		assertEquals("The result is: 120", getContent("items", Arrays.asList(2, 5, 6), "p1", 2));
+		Node node = template.parse("The result is: ~(@items):'add:'greaterthan<$p1>~");
+		assertEquals("text=The result is: |array,children=[expansion,variable=items]#transform,quote=add#transform,quote=greaterthan,constructor=[variable=p1]|text=", template.representation(node));
 		
+		assertEquals("The result is: true", getContent("items", Arrays.asList(2, 5, 6), "p1", 2, "operation", "multiplicate"));
+		assertEquals("The result is: false", getContent("items", Arrays.asList(2, 5, 6), "p1", 20, "operation", "multiplicate"));
 	}
 	
 	public void testVariableTransformDyn() throws IOException, TemplateException {
-		fail();
+		Transform add = new Transform<Integer[], Integer>() {
+			@Override
+			public Integer apply(Integer[] value) {
+				int r = 0;
+				for (int i : value) {
+					r += i;
+				}
+				return r;
+			}
+		};
+		template.addTransform("add", add);
+		
+		Transform greaterthan = new Transform<Integer[], Transform>() {
+			@Override
+			public Transform apply(final Integer limit[]) {
+				return new Transform<Integer, Boolean>() {
+					@Override
+					public Boolean apply(Integer value) {
+						return value.compareTo(limit[0]) > 0;
+					}
+					
+				};
+			}
+		};
+		template.addTransform("greaterthan", greaterthan);
+		
+		Node node = template.parse("The result is: ~(@items):'add:$operation<$p1>~");
+		assertEquals("text=The result is: |array,children=[expansion,variable=items]#transform,quote=add#transform,variable=operation,constructor=[variable=p1]|text=", template.representation(node));
+		
+		assertEquals("The result is: true", getContent("items", Arrays.asList(2, 5, 6), "p1", 2, "operation", greaterthan));
+		assertEquals("The result is: false", getContent("items", Arrays.asList(2, 5, 6), "p1", 20, "operation", greaterthan));
 	}
 	
 	public void testQuoteMessageAcceptsFilters() throws IOException, TemplateException {

@@ -638,7 +638,29 @@ public class Node {
 		 	return getInModel(model);
 		} else if (type == Type.VariableFilterDyn) {
 			//FIXME
-			throw new TemplateException("Unsupported node type=" + type);
+			
+			String propertyKey = buffer.toString();
+			Transform function = (Transform) getInModel(model);
+			
+			if (function == null) {
+				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
+			}
+			
+			List<Object> parameters = createParameterList(model, template, out, children.subList(1, children.size()));
+
+			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]));
+
+			if (function != null) {
+				Object o = children.get(0).value(out, model, template);
+				if (o != null) {
+					return applyFilter(propertyKey, function, o);
+				} else {
+					return null;
+				}
+			} else {
+				throw new TemplateException("No transform function named '%s' is associated with the template to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
+			}
+
 		} else if (type == Type.QuoteFilterDyn) {
 			//FIXME
 			
