@@ -18,63 +18,6 @@ public class TemplateUtils {
 
     private TemplateUtils() {
     }
-    
-    /**
-     * Returns a list of items for which the given function is true.
-     * @param <T> The type of items
-     * @param items The collection of items
-     * @param function The function to apply on an item. If the result is true, the item is added to the result.
-     * @return a list of items
-     */
-	public static <T> List<T> filter(Iterable<T> items, ConditionalFunction<T> function) {
-		ArrayList<T> result = new ArrayList<T>();
-		int index = 0;
-    	for (T item: items) {
-    		if (function.condition(item, index)) {
-    			result.add(item);
-    		}
-    		index++;
-    	}
-    	return result;
-	}
-
-	/**
-	 * Convert a collection of items to a list of models using the given function.
-	 * @param <T> The type of items
-	 * @param items The collection of items
-	 * @param function The function to use to convert items to models
-	 * @return a list of Models
-	 */
-	public static <T> List<Map<String,Object>> convert(Iterable<T> items, ConvertFunction<T> function) {
-		ArrayList<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
-    	int index = 0;
-    	for (T item: items) {
-    		Map<String, Object> model = new HashMap<String, Object>();
-    		function.populate(model, item, index++);
-    		result.add(model);
-    	}
-    	return result;
-	}
-	
-    /**
-     * Filter and convert a collection of items to a list of models using the given function.
-     * @param <T> The type of items
-     * @param items The collection of items
-     * @param function The function to apply on an item. If the result is true, the item is converted to a model and the model is added to the result. 
-     * @return the list of Models
-     */
-	public static <T> List<Map<String,Object>> filterAndConvert(Iterable<T> items, ConditionalConvertFunction<T> function) {
-		ArrayList<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
-    	int index = 0;
-    	for (T item: items) {
-    		if (function.condition(item, index)) {
-    			Map<String, Object> model = new HashMap<String, Object>();
-    			function.populate(model, item, index++);
-    			result.add(model);
-    		}
-    	}
-    	return result;
-	}
 
 	/**
 	 * Creates a list with the given models.

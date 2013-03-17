@@ -87,7 +87,11 @@ public class NewTemplate {
 				}
 			} else {
 			    boolean nextLoop = false;
-			    if (currentNode.getType() == Type.Unknown && currentChar == '"') {
+			    if (currentNode.getType() == Type.Unknown && ((currentChar >= '0' && currentChar <= '9') 
+			    		/*|| (currentChar >= 'a' && currentChar <= 'z') || (currentChar >= 'A' && currentChar <= 'Z')*/)) {
+			        currentNode = currentNode.startLitteral(file, line, column, currentChar);
+			        nextLoop = true;
+			    } else if (currentNode.getType() == Type.Unknown && currentChar == '"') {
 			        currentNode = currentNode.startSentence(file, line, column, currentChar);
 			        nextLoop = true;
 			    } else if (currentNode.getType() == Type.Sentence && currentChar == '"') {

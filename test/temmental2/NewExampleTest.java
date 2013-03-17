@@ -97,6 +97,14 @@ public class NewExampleTest extends TestCase {
         assertEquals("Some text data... with 'b", getContent());
 	}
 	
+	public void testNumber() throws IOException, TemplateException { 
+	    Node node = template.parse("~3~");
+        assertEquals("text=|number=3|text=", node.representation());
+        
+        node = template.parse("~35~");
+        assertEquals("text=|number=35|text=", node.representation());
+	}
+	
 	public void testParseTextWithNode() throws IOException, TemplateException { 
 	    Node node = template.parse("Some text data... with $b");
         assertEquals("text=Some text data... with $b", node.representation());
@@ -321,13 +329,13 @@ public class NewExampleTest extends TestCase {
 		};
 		template.addTransform("add", add);
 		
-		Transform greaterthan = new Transform<Integer[], Transform>() {
+		Transform greaterthan = new Transform<Integer, Transform>() {
 			@Override
-			public Transform apply(final Integer limit[]) {
+			public Transform apply(final Integer limit) {
 				return new Transform<Integer, Boolean>() {
 					@Override
 					public Boolean apply(Integer value) {
-						return value.compareTo(limit[0]) > 0;
+						return value.compareTo(limit) > 0;
 					}
 					
 				};
@@ -338,8 +346,8 @@ public class NewExampleTest extends TestCase {
 		Node node = template.parse("The result is: ~(@items):'add:'greaterthan<$p1>~");
 		assertEquals("text=The result is: |array,children=[expansion,variable=items]#transform,quote=add#transform,quote=greaterthan,constructor=[variable=p1]|text=", template.representation(node));
 		
-		assertEquals("The result is: true", getContent("items", Arrays.asList(2, 5, 6), "p1", 2, "operation", "multiplicate"));
-		assertEquals("The result is: false", getContent("items", Arrays.asList(2, 5, 6), "p1", 20, "operation", "multiplicate"));
+		assertEquals("The result is: true", getContent("items", Arrays.asList(2, 5, 6), "p1", 2));
+		assertEquals("The result is: false", getContent("items", Arrays.asList(2, 5, 6), "p1", 20));
 	}
 	
 	public void testVariableTransformDyn() throws IOException, TemplateException {
@@ -663,6 +671,9 @@ public class NewExampleTest extends TestCase {
 
 	public void testParseVariableKO_10() throws IOException, TemplateException {
 		assertParseException("~$myvar:filter~", "Invalid syntax at position '-:l1:c9' - reach character 'f'");
+		assertParseException("~$myvar:true~", "Invalid syntax at position '-:l1:c9' - reach character 't'");
+		assertParseException("~$myvar:false~", "Invalid syntax at position '-:l1:c9' - reach character 'f'");
+		
 	}
 
 	public void testParseVariableKO_09() throws IOException, TemplateException {

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class Node {
 	
-	enum Type { Section, Sentence, Text, Unknown, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion, QuoteFilterDyn, VariableFilterDyn };
+	enum Type { Literral, Section, Sentence, Text, Unknown, UnknownFilter, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion, QuoteFilterDyn, VariableFilterDyn };
 
 	private Type type; 
 	
@@ -85,13 +85,20 @@ public class Node {
 	        buffer.write(c);
 	        return this;
 	    }
-		if (type == Type.Unknown) {
+		if (type == Type.Unknown || type == Type.UnknownFilter) {
 			if (c == '@') {
 				type = Type.ArrayExpansion;
 			} else if (c == '$') {
 				type = startTransform ? Type.VariableFilter : Type.Variable;
 			} else if (c == '\'') {
 				type = startTransform ? Type.QuoteFilter : Type.Quote;
+			} else {
+				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), c);
+			}
+			return this;
+		} else if (type == Type.Literral) {
+			if ((c >= '0' && c <= '9') /*|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')*/) {
+				buffer.write(c);
 			} else {
 				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), c);
 			}
@@ -219,6 +226,8 @@ public class Node {
 			return children.get(0).representation() + "#transform,quote=" + buffer.toString() + optional + cons_representation(1);
 		} else if (type == Type.Array) {
 		    return "array" + children_representation(0);
+		} else if (type == Type.Literral) {
+			return "number=" + buffer.toString();
 		} else if (type == Type.ArrayExpansion) {
 		    return "expansion,variable=" + buffer.toString() + optional;
 		} else if (type == Type.Command) {
@@ -247,7 +256,15 @@ public class Node {
 	}
 
 	void validateAll(int line, int column, int c, boolean checkAncestors, NewTemplate template) throws TemplateException {
-	    if (type == Type.Sentence) { 
+		if (type == Type.Literral) {
+			String value = buffer.toString();
+			if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+			} else if (value.matches("\\d+\\.?\\d*")) {
+				 
+			} else {
+				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(fileInformation, line, column - value.length()), value.getBytes()[0]);
+			}
+		} else if (type == Type.Sentence) { 
 	        if (! closed) {
 	            throw new TemplateException("Invalid syntax at position '%s' - reach character '%c', string not closed!", positionInformation(fileInformation, line, column), c);
 	        }
@@ -330,7 +347,7 @@ public class Node {
 
 	Node startTransform(String file, int line, int column, int currentChar, NewTemplate template) throws TemplateException {
 		validateAll(line, column, currentChar, false, template);
-		Node newFilter = new Node(Type.Unknown, file, line, column, true);
+		Node newFilter = new Node(Type.UnknownFilter, file, line, column, true);
 		Node _parent = parentNode();
 		newFilter.setParent(_parent);
 		_parent.remove(this);
@@ -587,7 +604,12 @@ public class Node {
                 	}
             	} else {
             		if (s.getClass().isArray() && ((Object[]) s).length == 1) {
-            			s = filter.apply(((Object[]) s)[0]);
+            			Object o = ((Object[]) s)[0];
+            			try {
+            				s = filter.apply(o);
+            			} catch (ClassCastException e) {
+            	            throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", o.getClass().getCanonicalName(), renderBufferError(), posinf());
+            	        }
             		} else {
             			s = filter.apply(s);
             		}
@@ -610,7 +632,6 @@ public class Node {
             }
             return s;
         } catch (ClassCastException e) {
-        	e.printStackTrace();
             throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", s.getClass().getCanonicalName(), renderBufferError(), posinf());
         } catch (TemplateException e) {
             throw e; 
@@ -730,6 +751,11 @@ public class Node {
 			}
 		} else if (type == Type.CommandClose) {
 			return null;
+		} else if (type == Type.Literral) {
+			String value = buffer.toString();
+			if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))
+				return Boolean.parseBoolean(value);
+			return Integer.parseInt(value);
 		} else {
 			throw new TemplateException("Unsupported node type=" + type);
 		}
@@ -830,6 +856,12 @@ public class Node {
 //			b += c.renderBufferError();
 //		}
 		return b;
+	}
+
+	public Node startLitteral(String file, int line, int column, int currentChar) {
+		type = Type.Literral;
+		buffer.write(currentChar);
+		return this;
 	}
 
 }
