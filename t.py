@@ -18,7 +18,7 @@ $p3 $op #filter
 '''
 
 
-s="~$property[$p1,$p2:'lower,$p3:$op,\"Et du texte\"]:'upper~"
+s="~$property[$p1,$p2:'lower,$p3[$p1,$p2:'upper]:$op,\"Et du texte\"]:'upper:'lower~"
 
 def parse(input):
     stack=[]
@@ -45,19 +45,36 @@ def parse(input):
 
 stack = parse(s)
 
-i=0
-c=0
-for e in stack:
-    if e == '#[':
-        if c == 0:
-            print(i) 
-        c+=1
-    elif e == '#]':
-        c-=1
-        if c == 0:
-            print(i) 
-    i+=1
-        
 
+def search(b, e, stack):
+    i=0
+    c=0
+    x=y=None
+    for e in stack[::]:
+        if e == '#[':
+            x=i 
+            c+=1
+        elif e == '#]':
+            c-=1
+            y=i
+        i+=1
+        if y is not None:
+            return(x, y)
+    return (x,y)
+
+def remove(b, e, stack):
+    print stack
+    (x,y) = search(b, e, stack)
+    if (x is not None) ^ (y is not None):
+        raise Exception('Invalid syntax.')
+    if x is not None:
+        stack.insert(y+1, y-x-1)
+        stack.insert(y+2, '#array')
+        del stack[y]
+        del stack[x]
+        return remove(b, e, stack)
+    else:
+        return stack
+
+stack=remove('#[', '#]', stack)
 print(stack)
-
