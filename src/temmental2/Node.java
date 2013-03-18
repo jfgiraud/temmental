@@ -319,7 +319,6 @@ public class Node {
 				throw new TemplateException("Unknown filter name '%s' at position '%s'!", name, positionInformation(fileInformation, line, column));
 			}
 		} else if (type == Type.UnknownFilter) {
-			System.out.println("name="+buffer.toString() + " type="+type + " parent=" + parent.buffer.toString()) ;
 		} else if (type != Type.Text && type != Type.Array) {
 			if (name.equals("")) {
 				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c', empty name!", positionInformation(fileInformation, line, column), c);
@@ -620,17 +619,14 @@ public class Node {
             		}
             	}
             } else {
-            	System.out.println("#2");
                 //http://www.java2s.com/Tutorial/Java/0125__Reflection/CreatearraywithArraynewInstance.htm
                 Object[] objs = (Object[]) s;
                 Object o = Array.newInstance(typeIn, objs.length);
                 for (int i = 0; i < objs.length; i++) {
                     Object val = objs[i];
                     if (convertToString) {
-//                        System.out.println("hello");
                         Array.set(o, i, val.toString());
                     } else {
-//                        System.out.println("bye");
                         Array.set(o, i, val);
                     }
                 }
@@ -638,6 +634,7 @@ public class Node {
             }
             return s;
         } catch (ClassCastException e) {
+        	e.printStackTrace();
             throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", s.getClass().getCanonicalName(), renderBufferError(), posinf());
         } catch (TemplateException e) {
             throw e; 
@@ -646,7 +643,7 @@ public class Node {
         }
     }
 
-    private Method getApply(Transform filter) {
+    private static Method getApply(Transform filter) {
         Method[] methods = filter.getClass().getMethods();
         for (Method method : methods) {
             if (method.getName().equals("apply"))
@@ -704,11 +701,14 @@ public class Node {
 				return null;
 			}
 			
+			
 			Transform function = template.getTransform(propertyKey); 
 			if (function == null) {
 				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
 			}
+
 			List<Object> parameters = createParameterList(model, template, out, children.subList(1, children.size()));
+			
 			function = (Transform) applyFilter(propertyKey, function, parameters.toArray(new Object[1]), true);
 			
 			if (function != null) {
@@ -790,16 +790,20 @@ public class Node {
 		return Arrays.asList(Type.UnknownFilter, Type.QuoteFilter, Type.VariableFilter, Type.QuoteFilterDyn, Type.VariableFilterDyn).contains(n.type);
 	}
 	
-	private static List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out, List<Node> items) throws TemplateException, IOException {
+	private List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out, List<Node> items) throws TemplateException, IOException {
 		List<Object> parameters = new ArrayList<Object>();
 		for (Node child : items) {
-			
 			if (isFilterTypeNode(child)) {
 				if (child.children.get(0).type == Type.UnknownFilter) {
 					String varname = child.buffer.toString();
-					System.out.println("##"+varname);
 					Transform transform = template.getTransform(varname);
-					parameters.add(transform);
+					boolean dynFilter = (child.type == Type.QuoteFilterDyn || child.type == Type.VariableFilterDyn);
+					if (dynFilter) {
+						List<Object> pam = createParameterList(model, template, out, child.children.subList(1, child.children.size()));
+						parameters.add(applyFilter(varname, transform, pam.toArray(new Object[1]), dynFilter));
+					} else {
+						parameters.add(transform);
+					}
 				} else {
 					Object o = child.value(out, model, template);
 					if (o == null) {
@@ -807,7 +811,7 @@ public class Node {
 					}
 					parameters.add(o);
 				}
-			} else if (child.type != Type.ArrayExpansion) {
+			} else  if (child.type != Type.ArrayExpansion) {
 				Object o = child.value(out, model, template);
 				if (o == null) {
 					return null;

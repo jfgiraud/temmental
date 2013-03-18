@@ -95,10 +95,29 @@ public class TransformFunctionsTest extends TestCase {
 				return value + 1;
 			}
 		};
+		Transform add2 = new Transform<Integer[], Transform>() {
+			@Override
+			public Transform apply(Integer values[]) {
+				int t = 0;
+				for (Integer c : values) {
+					t += c;
+				}
+				final int r = t; 
+				return new Transform<Integer, Integer>() {
+					@Override
+					public Integer apply(Integer value) {
+						return value + r;
+					}
+				};
+			}
+		};
 		template.addTransform("add1", add1);
-		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:'map<:'add1>", "collection", Arrays.asList(1, 2, 3));
+		template.addTransform("add2", add2);
 		assertParseAndApplyEquals("2", "~$n:'add<1>", "n", 1);
 		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:'map<:'add<1>>", "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("[6, 7, 8]", "~$collection:'map<:'add<5>>", "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:'map<:'add1>", "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("[7, 8, 9]", "~$collection:'map<:'add2<1,5>>", "collection", Arrays.asList(1, 2, 3));
 	}
 
 	private void assertParseAndApplyExceptionEquals(String expected, String pattern, Object ... map) {
@@ -114,7 +133,6 @@ public class TransformFunctionsTest extends TestCase {
 
 	private void assertParseAndApplyEquals(String expected, String pattern, Object ... map) throws IOException, TemplateException {
 		Node node = template.parse(pattern);
-		System.out.println(node.representation());
 		StringWriter out = new StringWriter();
 		template.printFile(out, createModel(map));
 		assertEquals(expected, out.toString());

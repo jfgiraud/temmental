@@ -191,14 +191,9 @@ public class TransformFunctions {
 				return new Transform<List, List>() {
 					@Override
 					public List apply(List values) {
-						List l = new ArrayList<>();
+						List l = new ArrayList();
 						for (Object o : values) {
-							Object n = t.apply(o);
-							if (n instanceof Transform) {
-								l.add( ((Transform) n).apply(o) );
-							} else {
-								l.add(n);
-							}
+							l.add(t.apply(o));
 						}
 						return l;
 					}
@@ -206,5 +201,23 @@ public class TransformFunctions {
 			}
 			
 		});
+	    
+//	    COLLECTIONS.put("map", new Transform<Transform, Transform>() {
+//			@Override
+//			public Transform apply(final Transform t) {
+//				if (t == null) {
+//					throw new RuntimeException("Transform function not found!");
+//				}
+//				return new Transform<Number, Number>() {
+//					@Override
+//					public Number apply(Number value) {
+//						return (Number) t.apply(value);
+//					}
+//				};
+//			}
+//			
+//		});
+	    
+	    
 	}
 }
