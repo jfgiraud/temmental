@@ -47,7 +47,7 @@ public class NewTemplate {
 		return parent;
 	}
 
-	private Node parse(Node root, String file, int line, int column, StringReader sr) throws IOException, TemplateException {
+	Node parse(Node root, String file, int line, int column, StringReader sr) throws IOException, TemplateException {
 	    Node currentNode = createNodeDown(Node.Type.Text, file, line, column, root);
 	    
 		boolean outsideAnExpression = true;
@@ -100,6 +100,15 @@ public class NewTemplate {
 			    } else if (currentNode.getType() == Type.Sentence && ! currentNode.isClosed() && currentChar != '~') {
 			        currentNode = currentNode.write(file, line, column, currentChar, this);
 			        nextLoop = true;
+			    } else if (currentNode.getType() == Type.Unknown && currentChar == '{') {
+			        currentNode = currentNode.startExpression(file, line, column, currentChar);
+			        nextLoop = true;
+			    } else if (currentNode.getType() == Type.Expression && currentChar == '}') {
+			        currentNode = currentNode.stopExpression(file, line, column, currentChar);
+			        nextLoop = true;
+			    } else if (currentNode.getType() == Type.Expression && ! currentNode.isClosed() && currentChar != '~') {
+			        currentNode = currentNode.write(file, line, column, currentChar, this);
+			        nextLoop = true;
 			    }
 			    if (nextLoop) {
 			        previousChar = currentChar;
@@ -129,6 +138,10 @@ public class NewTemplate {
                     currentNode = currentNode.openBracket(BracketType.Angle, file, line, column, currentChar);
                 } else if (currentChar == '>') {
                     currentNode = currentNode.closeBracket(BracketType.Angle, file, line, column, currentChar);
+                } else if (currentChar == '{') {
+                    currentNode = currentNode.openBracket(BracketType.Curly, file, line, column, currentChar);
+                } else if (currentChar == '}') {
+                    currentNode = currentNode.closeBracket(BracketType.Curly, file, line, column, currentChar);
                 } else if (currentChar == ',') {
                     currentNode = currentNode.newSibling(file, line, column, currentChar, this);
                 } else if (currentChar == '#') {

@@ -86,7 +86,7 @@ public class TransformFunctionsTest extends TestCase {
 		assertParseAndApplyEquals("Off", "~$b:'ifel<\"On\",\"Off\">~", "b", Boolean.FALSE);
 	}
 	
-	public void testMap() throws IOException, TemplateException {
+	public void testMapQuoteDyn() throws IOException, TemplateException {
 		template.addTransform("map", TransformFunctions.COLLECTIONS.get("map"));
 		template.addTransform("add", TransformFunctions.MATH.get("add"));
 		Transform add1 = new Transform<Integer, Integer>() {
@@ -120,6 +120,44 @@ public class TransformFunctionsTest extends TestCase {
 		assertParseAndApplyEquals("[7, 8, 9]", "~$collection:'map<:'add2<1,5>>", "collection", Arrays.asList(1, 2, 3));
 	}
 
+	public void testMapVariableDyn() throws IOException, TemplateException {
+		Transform map = TransformFunctions.COLLECTIONS.get("map");
+		template.addTransform("map", map);
+		Transform add = TransformFunctions.MATH.get("add");
+		template.addTransform("add", add);
+		
+		Transform add1 = new Transform<Integer, Integer>() {
+			@Override
+			public Integer apply(Integer value) {
+				return value + 1;
+			}
+		};
+		Transform add2 = new Transform<Integer[], Transform>() {
+			@Override
+			public Transform apply(Integer values[]) {
+				int t = 0;
+				for (Integer c : values) {
+					t += c;
+				}
+				final int r = t; 
+				return new Transform<Integer, Integer>() {
+					@Override
+					public Integer apply(Integer value) {
+						return value + r;
+					}
+				};
+			}
+		};
+		template.addTransform("add1", add1);
+		template.addTransform("add2", add2);
+		
+//		assertParseAndApplyEquals("2", "~$n:$op<1>", "n", 1, "op", add);
+		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:$map<:$op<1>>", "map", map, "op", add, "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("[6, 7, 8]", "~$collection:$map<:$op<5>>", "map", map, "op", add, "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:'map<:$op>", "map", map, "op", add1, "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("[7, 8, 9]", "~$collection:$map<:$op<1,5>>", "map", map, "op", add2, "collection", Arrays.asList(1, 2, 3));
+	}
+	
 	private void assertParseAndApplyExceptionEquals(String expected, String pattern, Object ... map) {
 		try {
 			StringWriter out = new StringWriter();

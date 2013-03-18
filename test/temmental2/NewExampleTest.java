@@ -82,7 +82,13 @@ public class NewExampleTest extends TestCase {
 		Node node = template.parse("Some text data...");
 		assertEquals("text=Some text data...", node.representation());
 		assertEquals("Some text data...", getContent());
-	
+	}
+
+	public void testArithmeticOperation() throws IOException, TemplateException {
+		// ~{$c+1}~
+		Node node = template.parse("~{$n:'add<1> + 1}~");
+		assertEquals("text=|expr=[$n:'add<1> + 1]|text=", node.representation());
+		assertEquals("6", getContent("n", 5));
 	}
 	
 	private String getContent(Object ... map) throws TemplateException, IOException {
@@ -695,9 +701,9 @@ public class NewExampleTest extends TestCase {
 	// -----------------------------------------------------------------------------------------------------------------
 	
 	public void testParseString() throws IOException, TemplateException {
-		Node node = template.parse("Some text~\"Another text\"~And the end");
-		assertEquals("text=Some text|string=Another text|text=And the end", template.representation(node));
-		assertEquals("Some textAnother textAnd the end", getContent());
+		Node node = template.parse("Some text~\"Another text<é>\"~And the end");
+		assertEquals("text=Some text|string=Another text<é>|text=And the end", template.representation(node));
+		assertEquals("Some textAnother text<é>And the end", getContent());
 		
 		node = template.parse("Some text~$msg[\"Another text\"]~And the end");
 		setMessages("text", "the text is ''{0}''");

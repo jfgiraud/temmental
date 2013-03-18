@@ -1,6 +1,7 @@
 package temmental2;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class Node {
 	
-	enum Type { Literral, Section, Sentence, Text, Unknown, UnknownFilter, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion, QuoteFilterDyn, VariableFilterDyn };
+	enum Type { Literral, Section, Sentence, Text, Unknown, UnknownFilter, Variable, Quote, QuoteMessage, VariableMessage, VariableFilter, QuoteFilter, Array, Command, CommandClose/*, CommandSection*/, ArrayExpansion, QuoteFilterDyn, VariableFilterDyn, Expression };
 
 	private Type type; 
 	
@@ -81,7 +82,7 @@ public class Node {
 	
 	Node write(String file, int line, int column, int c, NewTemplate template) throws TemplateException {
 		bufferError.write(c);
-	    if (type == Type.Text || type == Type.Sentence) {
+	    if (type == Type.Text || type == Type.Sentence || type == Type.Expression) {
 	        buffer.write(c);
 	        return this;
 	    }
@@ -240,6 +241,8 @@ public class Node {
 			return "??? " + children_representation(0);
 		} else if (type == Type.UnknownFilter) {
 			return "unknownfilter";
+		} else if (type == Type.Expression) {
+			return "expr=[" + buffer.toString() + "]";
 		} else {
 			throw new RuntimeException("Unsupported node type '" + type + "'.");
 		}
@@ -319,7 +322,8 @@ public class Node {
 				throw new TemplateException("Unknown filter name '%s' at position '%s'!", name, positionInformation(fileInformation, line, column));
 			}
 		} else if (type == Type.UnknownFilter) {
-		} else if (type != Type.Text && type != Type.Array) {
+		} else if (type == Type.Expression) {
+		} else if (type != Type.Text && type != Type.Sentence && type != Type.Array) {
 			if (name.equals("")) {
 				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c', empty name!", positionInformation(fileInformation, line, column), c);
 			}
@@ -383,6 +387,8 @@ public class Node {
 				type = Type.VariableMessage;
 			else
 				throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
+		} else if (! startTransform && type == Type.Unknown && bracketType == BracketType.Curly) {
+			type = Type.Expression;
 		} else if (! startTransform && type == Type.Unknown && bracketType == BracketType.Round) {
 		    type = Type.Array;
 		} else {
@@ -507,6 +513,23 @@ public class Node {
 		return this;
 	}
 
+	Node startExpression(String file, int line, int column, int currentChar) throws TemplateException {
+		if (type != Type.Unknown) {
+            throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
+        }
+		type = Type.Expression;
+		opened = true;
+		return this;
+	}
+
+	Node stopExpression(String file, int line, int column, int currentChar) throws TemplateException {
+		if (type != Type.Expression) {
+            throw new TemplateException("Invalid syntax at position '%s' - reach character '%c'", positionInformation(file, line, column), currentChar);
+        }
+		closed = true;
+		return this;
+	}
+	
 	boolean allow(int currentChar) {
 		if (type == Type.Text)
 			return true;
@@ -634,11 +657,11 @@ public class Node {
             }
             return s;
         } catch (ClassCastException e) {
-        	e.printStackTrace();
             throw new TemplateException("Invalid filter chain. Filter '%s' expects '%s%s'. It receives '%s'. Unable to render '%s' at position '%s'.", filterName, typeIn.getCanonicalName(), isArray ? "[]" : "", s.getClass().getCanonicalName(), renderBufferError(), posinf());
         } catch (TemplateException e) {
             throw e; 
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new TemplateException(e, "Unable to apply filter to render '%s' at position '%s' (%s).", renderBufferError(), posinf(), e.getMessage());
         }
     }
@@ -667,12 +690,12 @@ public class Node {
 		} else if (type == Type.Sentence) {
 			return buffer.toString();
 		} else if (type == Type.Variable) {
-		 	return getInModel(model);
+		 	return getInModel(model, buffer.toString());
 		} else if (type == Type.VariableFilterDyn) {
 			//FIXME
 			
 			String propertyKey = buffer.toString();
-			Transform function = (Transform) getInModel(model);
+			Transform function = (Transform) getInModel(model, buffer.toString());
 			
 			if (function == null) {
 				throw new TemplateException("No transform function '%s' to render '%s' at position '%s'.", propertyKey, renderBufferError(), posinf());
@@ -761,13 +784,24 @@ public class Node {
 			if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))
 				return Boolean.parseBoolean(value);
 			return Integer.parseInt(value);
+		} else if (type == Type.Expression) { 
+			System.out.println("bufer=" + buffer.toString());
+			String[] output = ReversePolishNotation.infixToRPN(buffer.toString().split(" "));
+			Node tmp = new Node(Type.Text, "-", 0, 0, false); // TODO
+			for (String part : output) {
+				System.out.println("part=" + part);
+				StringReader sr = new StringReader("~" + part + "~");
+				template.parse(tmp, "-", 0, 0, sr);
+				System.out.println("part=" + part + " ==> " + tmp.representation());
+			}
+			throw new TemplateException("A implementer " + buffer.toString());
 		} else {
 			throw new TemplateException("Unsupported node type=" + type);
 		}
 	}
 
 	private Object applyMessage(Map<String, ? extends Object> model, NewTemplate template, Writer out, boolean quote) throws TemplateException, IOException {
-		String propertyKey = ! quote ? (String) getInModel(model) : buffer.toString();
+		String propertyKey = ! quote ? (String) getInModel(model, buffer.toString()) : buffer.toString();
 		if (propertyKey == null) {
 			return null;
 		}
@@ -793,10 +827,18 @@ public class Node {
 	private List<Object> createParameterList(Map<String, ? extends Object> model, NewTemplate template, Writer out, List<Node> items) throws TemplateException, IOException {
 		List<Object> parameters = new ArrayList<Object>();
 		for (Node child : items) {
+			System.out.println(child.representation());
+			System.out.println(isFilterTypeNode(child));
 			if (isFilterTypeNode(child)) {
 				if (child.children.get(0).type == Type.UnknownFilter) {
 					String varname = child.buffer.toString();
-					Transform transform = template.getTransform(varname);
+					Transform transform;
+					System.out.println("## " + varname + " " + child.type + " " );
+					if (child.type == Type.QuoteFilterDyn || child.type == Type.QuoteFilter) {
+						transform = template.getTransform(varname);
+					} else {
+						transform = (Transform) getInModel(model, varname);
+					}
 					boolean dynFilter = (child.type == Type.QuoteFilterDyn || child.type == Type.VariableFilterDyn);
 					if (dynFilter) {
 						List<Object> pam = createParameterList(model, template, out, child.children.subList(1, child.children.size()));
@@ -818,7 +860,7 @@ public class Node {
 				}
 				parameters.add(o);
 			} else {
-				Object o = child.getInModel(model);
+				Object o = child.getInModel(model, child.buffer.toString());
 				if (o.getClass().isArray()) {
 					for (Object p : (Object[]) o) {
 						parameters.add(p);
@@ -829,6 +871,7 @@ public class Node {
 					}
             	}
 			}
+			System.out.println("--");
 		}
 		return parameters;
 	}
@@ -836,7 +879,7 @@ public class Node {
 
 	
 	private Object applyTransformOnNode(String varname, Node node, Map<String, ? extends Object> model, NewTemplate template, Writer out, boolean quote) throws TemplateException, IOException {
-		Transform transform = ! quote ? (Transform) getInModel(model) : template.getTransform(varname);
+		Transform transform = ! quote ? (Transform) getInModel(model, buffer.toString()) : template.getTransform(varname);
 		if (transform != null) {
 			Object o = node.value(out, model, template);
 			if (o != null) {
@@ -853,8 +896,8 @@ public class Node {
 		}
 	}
 	
-	private Object getInModel(Map<String, ? extends Object> model) throws TemplateException {
-		String varname = buffer.toString();
+	private Object getInModel(Map<String, ? extends Object> model, String varname) throws TemplateException {
+//		String varname = buffer.toString();
 		if (optional == RenderType.Optional) {
 			if (model.containsKey(varname)) {
 				return model.get(varname);
