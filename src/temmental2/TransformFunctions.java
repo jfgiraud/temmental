@@ -2,14 +2,18 @@ package temmental2;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TransformFunctions {
 	
 	public static final Map<String, Transform> MATH;
 	public static final Map<String, Transform> CONDITIONAL;
+	public static final Map<String, Transform> COLLECTIONS;
+	
 //	public static final Map<String, Transform> TEXT;
 //	public static final Map<String, Transform> DATE;
 	
@@ -23,7 +27,8 @@ public class TransformFunctions {
 	static {
 		MATH = new HashMap<String, Transform>();
 		CONDITIONAL = new HashMap<String, Transform>();
-
+		COLLECTIONS = new HashMap<String, Transform>();
+		
 	    MATH.put("gt", new Transform<Number, Transform>() {
 			@Override
 			public Transform apply(final Number withValue) {
@@ -91,6 +96,18 @@ public class TransformFunctions {
 					@Override
 					public Boolean apply(Number value) {
 						return compareTo(value, withValue) != 0;
+					}
+				};
+			}
+	    });
+	    
+	    MATH.put("add", new Transform<Number, Transform>() {
+			@Override
+			public Transform apply(final Number withValue) {
+				return new Transform<Number, Number>() {
+					@Override
+					public Number apply(Number value) {
+						return value.intValue() + withValue.intValue();
 					}
 				};
 			}
@@ -164,5 +181,30 @@ public class TransformFunctions {
 	    		return false;
 	    	}
 	    });
+	    
+	    COLLECTIONS.put("map", new Transform<Transform, Transform>() {
+			@Override
+			public Transform apply(final Transform t) {
+				if (t == null) {
+					throw new RuntimeException("Transform function not found!");
+				}
+				return new Transform<List, List>() {
+					@Override
+					public List apply(List values) {
+						List l = new ArrayList<>();
+						for (Object o : values) {
+							Object n = t.apply(o);
+							if (n instanceof Transform) {
+								l.add( ((Transform) n).apply(o) );
+							} else {
+								l.add(n);
+							}
+						}
+						return l;
+					}
+				};
+			}
+			
+		});
 	}
 }

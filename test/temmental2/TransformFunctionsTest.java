@@ -86,6 +86,21 @@ public class TransformFunctionsTest extends TestCase {
 		assertParseAndApplyEquals("Off", "~$b:'ifel<\"On\",\"Off\">~", "b", Boolean.FALSE);
 	}
 	
+	public void testMap() throws IOException, TemplateException {
+		template.addTransform("map", TransformFunctions.COLLECTIONS.get("map"));
+		template.addTransform("add", TransformFunctions.MATH.get("add"));
+		Transform add1 = new Transform<Integer, Integer>() {
+			@Override
+			public Integer apply(Integer value) {
+				return value + 1;
+			}
+		};
+		template.addTransform("add1", add1);
+		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:'map<:'add1>", "collection", Arrays.asList(1, 2, 3));
+		assertParseAndApplyEquals("2", "~$n:'add<1>", "n", 1);
+		assertParseAndApplyEquals("[2, 3, 4]", "~$collection:'map<:'add<1>>", "collection", Arrays.asList(1, 2, 3));
+	}
+
 	private void assertParseAndApplyExceptionEquals(String expected, String pattern, Object ... map) {
 		try {
 			StringWriter out = new StringWriter();
@@ -104,5 +119,6 @@ public class TransformFunctionsTest extends TestCase {
 		template.printFile(out, createModel(map));
 		assertEquals(expected, out.toString());
 	}
+	
 
 }
