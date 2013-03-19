@@ -18,13 +18,13 @@ $p3 $op #filter
 '''
 
 
-s="~$property[$p1,$p2:'lower,$p3[$p1,$p2:'upper]:$op,\"Et du texte\"]:'upper:'lower~"
+s="~$property[$p1,$p2?:'lower,$p3[$p1,$p2:'upper]?:$op?,\"Et du texte\"]:'upper:'lower~"
 
 def parse(input):
     stack=[]
     word=''
     for c in input:
-        if c in ('[', ']', ',', ':', '~'):
+        if c in ('[', ']', ',', ':', '~', '?'):
             if word != '':
                 stack.append(word)
                 if len(stack)>1 and stack[-2] == '#filter':
@@ -32,10 +32,12 @@ def parse(input):
             word=''
             if c == '[':
                 stack.append('#[')
-            if c == ']':
+            elif c == ']':
                 stack.append('#]')
                 stack.append('#msg')
-            if c == ':':
+            elif c == '?':
+                stack.append("#?")
+            elif c == ':':
                 stack.append('#filter')
             continue
         word += c
@@ -45,49 +47,49 @@ def parse(input):
 
 stack = parse(s)
 
+class RpnStack:
+    
+    def __init__(self, transforms={}):
+        self.__stack = []
+        self.__transforms = transforms
 
-def search(bt, et, stack):
-    i=0
-    c=0
-    x=y=None
-    for e in stack[::]:
-        if e == bt:
-            x=i 
-            c+=1
-        elif e == et:
-            c-=1
-            y=i
-        i+=1
-        if y is not None:
-            return(x, y)
-    return (x,y)
+    def push(self, word):
+        if word == '#?':
+            if self.__stack[-1].startswith('#'):
+                a=self.pop()
+                a+='?'
+                self.push(a)
+        elif word == '#swap':
+            a=self.pop()
+            b=self.pop()
+            self.push(a)
+            self.push(b)
+        elif word.startswith('#filter'):
+            optional='?' in word
+            f=self.pop()
+            print(f[1:])
+            if f.startswith("'"):
+                self.push((f[1:], self.__transforms[f[1:]]))
+                #raise Exception('Not supported')
+        else:
+            self.__stack.append(word)
 
-def remove(bt, et, stack):
-    print stack
-    (x,y) = search(bt, et, stack)
-    if (x is not None) ^ (y is not None):
-        raise Exception('Invalid syntax.')
-    if x is not None:
-        stack.insert(y+1, y-x-1)
-        stack.insert(y+2, '#array')
-        del stack[y]
-        del stack[x]
-        return remove(bt, et, stack)
-    else:
-        return stack
+    def pop(self):
+        return self.__stack.pop()
 
-def remove_swap(stack):
-    if '#swap' in stack:
-        i=stack.index('#swap')
-        t=stack[i-2]
-        stack[i-2]=stack[i-1]
-        stack[i-1]=t
-        del stack[i]
-        return remove_swap(stack)
-    else:
-        return stack
+    def __getitem__(self, f, t=None):
+        if t is None:
+            return self.__stack[f]
+        else:
+            return self.__stack[f:t]
 
 print(s)
-stack=remove_swap(stack)
-stack=remove('#[', '#]', stack)
+#stack=remove_swap(stack)
+#stack=remove('#[', '#]', stack)
+#print(stack)
+
+stk=RpnStack({'upper': str.upper, 'lower': str.lower })
 print(stack)
+for e in stack:
+    stk.push(e)
+print(stk[:])
