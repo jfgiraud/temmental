@@ -58,7 +58,7 @@ public class RpnStack extends Stack {
 		if (debug)
 			System.err.println(toString());
 		if (depth()>1) {
-			Object last = last();
+			Object last = value();
 			if (last.equals("#func")) {
 				rot(); // var 'func #func
 				tolist(1); // 'func #func (var)
@@ -69,11 +69,11 @@ public class RpnStack extends Stack {
 			} else if (last.equals("#>")) {
 				drop();
 				int i=1;
-				while (i<=depth() && ! pick(i).equals("#<")) {
+				while (i<=depth() && ! value(i).equals("#<")) {
 					i++;
 				}
 				tolist(i-1);
-				remove(2);
+				nip(); //remove(2);
 				swap();
 				push("#func");
 				tolist(3);
@@ -86,7 +86,8 @@ public class RpnStack extends Stack {
 	}
 
 	private void assertFunction() {
-		Object o = drop();
+		Object o = value();
+		drop();
 		System.out.println(o);
 		if (o instanceof String) {
 			String s = (String) o;
@@ -98,7 +99,7 @@ public class RpnStack extends Stack {
 	}
 
 	private void change_word(String word, int currentChar) {
-		if (currentChar != '<' && currentChar != '>' && depth() > 0 && last().equals("#func")) {
+		if (currentChar != '<' && currentChar != '>' && depth() > 0 && value().equals("#func")) {
 			push(word);
 			swap();
 			eval();
