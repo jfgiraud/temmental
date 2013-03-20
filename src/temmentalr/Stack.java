@@ -11,6 +11,11 @@ public class Stack {
 		elements = new ArrayList<Object>();
 	}
 	
+	public Stack(List<Object> tocopy) {
+		this();
+		elements.addAll(tocopy);
+	}
+	
 	// with return value
 	
 	public Object value() {
@@ -25,7 +30,7 @@ public class Stack {
 		return this.elements.remove(depth()-i);
 	}
 	
-	private Object pop() {
+	protected Object pop() {
 		return remove(1);
 	}
 	

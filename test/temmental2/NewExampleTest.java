@@ -78,12 +78,6 @@ public class NewExampleTest extends TestCase {
 	// Parsing variables
 	// -----------------------------------------------------------------------------------------------------------------
 	
-//	public void testParseText() throws IOException, TemplateException {
-//		Node node = template.parse("Some text data...");
-//		assertEquals("text=Some text data...", node.representation());
-//		assertEquals("Some text data...", getContent());
-//	}
-
 	public void testArithmeticOperation() throws IOException, TemplateException {
 		// ~{$c+1}~
 		Node node = template.parse("~{$n:'add<1> + 1}~");
@@ -95,32 +89,6 @@ public class NewExampleTest extends TestCase {
 		StringWriter out = new StringWriter();
 		template.printFile(out, createModel(map));
 		return out.toString();
-	}
-	
-//	public void testParseTextWithQuote() throws IOException, TemplateException { 
-//	    Node node = template.parse("Some text data... with 'b");
-//        assertEquals("text=Some text data... with 'b", node.representation());
-//        assertEquals("Some text data... with 'b", getContent());
-//	}
-	
-	public void testNumber() throws IOException, TemplateException { 
-	    Node node = template.parse("~3~");
-        assertEquals("text=|number=3|text=", node.representation());
-        
-        node = template.parse("~35~");
-        assertEquals("text=|number=35|text=", node.representation());
-	}
-	
-	public void testParseTextWithNode() throws IOException, TemplateException { 
-	    Node node = template.parse("Some text data... with $b");
-        assertEquals("text=Some text data... with $b", node.representation());
-        assertEquals("Some text data... with $b", getContent());
-	}
-	
-	public void testParseTextWithTilde() throws IOException, TemplateException {
-	    Node node = template.parse("Some text data... with ~~");
-        assertEquals("text=Some text data... with ~", node.representation());
-        assertEquals("Some text data... with ~", getContent());
 	}
 	
 	public void testParseVariableRequired() throws IOException, TemplateException {
@@ -733,7 +701,13 @@ public class NewExampleTest extends TestCase {
 		assertParseException("~myvar~", "Invalid syntax at position '-:l1:c2' - reach character 'm'");
 	}
 
-	
+	public void testNumber() throws IOException, TemplateException { 
+	    Node node = template.parse("~3~");
+        assertEquals("text=|number=3|text=", node.representation());
+        
+        node = template.parse("~35~");
+        assertEquals("text=|number=35|text=", node.representation());
+	}	
 	public void testIterate() throws IOException, TemplateException {
 		Node node = template.parse("~#iter $names~hello ~$name~~#/iter~");
 		assertEquals("text=|command[open]=iter,variable=names,children=[text=hello ,,variable=name,,text=,,command[close]=iter]|text=", template.representation(node));
