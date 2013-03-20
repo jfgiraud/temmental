@@ -11,6 +11,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import temmental2.Node;
+import temmental2.TemplateException;
 import temmentalr.RpnStack;
 
 public class RpnStackTest {
@@ -21,6 +23,22 @@ public class RpnStackTest {
 	public void setUp() {
 		interpreter = new RpnStack();
 	}
+	
+	@Test
+	public void testParseText() throws IOException {
+		parse("Some text data...");
+		assertParsingEquals(text("Some text data..."));
+	}
+
+	@Test
+	public void testParseTextWithQuote() throws IOException, TemplateException { 
+	    parse("Some text data... with 'b");
+	    assertParsingEquals(text("Some text data... with 'b"));
+	}
+	
+	
+	
+	// -- 
 	
 	@Test
 	public void testParseVariable() throws IOException {
@@ -95,7 +113,12 @@ public class RpnStackTest {
 	        self.assertParsingEquals(func(func('\'function', '$p1'), '$variabl'))
 */
 	
-	
+	private String text(String text) {
+		List<String> list = new ArrayList<String>();
+		list.add(text);
+		list.add("#text");
+		return list.toString();
+	}
 	
 	private String func(String name, String ... parameters) {
 		List<String> list = new ArrayList<String>();
@@ -114,7 +137,7 @@ public class RpnStackTest {
 	}
 
 	private void parse(String s) throws IOException {
-		interpreter.parse(s);
+		interpreter.parse(s, "-", 1, 1);
 	}
 
 }

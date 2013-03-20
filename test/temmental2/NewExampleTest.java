@@ -78,11 +78,11 @@ public class NewExampleTest extends TestCase {
 	// Parsing variables
 	// -----------------------------------------------------------------------------------------------------------------
 	
-	public void testParseText() throws IOException, TemplateException {
-		Node node = template.parse("Some text data...");
-		assertEquals("text=Some text data...", node.representation());
-		assertEquals("Some text data...", getContent());
-	}
+//	public void testParseText() throws IOException, TemplateException {
+//		Node node = template.parse("Some text data...");
+//		assertEquals("text=Some text data...", node.representation());
+//		assertEquals("Some text data...", getContent());
+//	}
 
 	public void testArithmeticOperation() throws IOException, TemplateException {
 		// ~{$c+1}~
@@ -97,11 +97,11 @@ public class NewExampleTest extends TestCase {
 		return out.toString();
 	}
 	
-	public void testParseTextWithQuote() throws IOException, TemplateException { 
-	    Node node = template.parse("Some text data... with 'b");
-        assertEquals("text=Some text data... with 'b", node.representation());
-        assertEquals("Some text data... with 'b", getContent());
-	}
+//	public void testParseTextWithQuote() throws IOException, TemplateException { 
+//	    Node node = template.parse("Some text data... with 'b");
+//        assertEquals("text=Some text data... with 'b", node.representation());
+//        assertEquals("Some text data... with 'b", getContent());
+//	}
 	
 	public void testNumber() throws IOException, TemplateException { 
 	    Node node = template.parse("~3~");

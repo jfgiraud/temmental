@@ -6,6 +6,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import temmental2.Node;
+
 public class RpnStack extends Stack {
 	
 	private static final boolean debug = true;
@@ -18,34 +20,71 @@ public class RpnStack extends Stack {
 		return result;
 	}
 	
-	public void parse(String expression) throws IOException {
+	private void debug(String format, Object ... parameters) {
+		if (debug)
+			System.err.println(String.format(format, parameters));
+	}
+	
+	public void parse(String expression, String file, int line, int column) throws IOException {
 		StringReader sr = new StringReader(expression);
 		StringWriter buffer = new StringWriter();
+		boolean outsideAnExpression = true;
 		try {
 			int currentChar = sr.read(); 
 			while (currentChar != -1) {
-				if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
-					String word = buffer.toString();
-					if (! "".equals(word)) {
-						change_word(word, currentChar);
-					}
-					buffer = new StringWriter();
-					if (currentChar == ':') {
-						push("#func");
-					} else if (currentChar == '<') {
-						push("#<");
-					} else if (currentChar == '>') {
-						push("#>");
-						eval();
+				column++;
+				if (outsideAnExpression) {
+					if (currentChar != '~') {
+						buffer.write(currentChar);
+						if (currentChar == '\n') {
+							line++;
+							column = 0;
+						} 
+						debug("%c %c => %s", currentChar, '#', buffer.toString());
+					} else {
+						int nextChar = sr.read();
+						if (nextChar == -1) {
+							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+							outsideAnExpression = false;
+							break;
+						} else {
+							if (nextChar == '~' && currentChar == '~') {
+								buffer.write(currentChar);
+								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+								currentChar = sr.read();
+								continue;
+							} else {
+								outsideAnExpression = false;
+								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+								currentChar = nextChar;
+								continue;
+							}
+						}
 					}
 				} else {
-					buffer.write(currentChar);
+					if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
+						String word = buffer.toString();
+						if (! "".equals(word)) {
+							change_word(word, currentChar, outsideAnExpression);
+						}
+						buffer = new StringWriter();
+						if (currentChar == ':') {
+							push("#func");
+						} else if (currentChar == '<') {
+							push("#<");
+						} else if (currentChar == '>') {
+							push("#>");
+							eval();
+						}
+					} else {
+						buffer.write(currentChar);
+					}
 				}
 				currentChar = sr.read(); 
 			}
 			String word = buffer.toString();
 			if (! "".equals(word)) {
-				change_word(word, currentChar);
+				change_word(word, currentChar, outsideAnExpression);
 			}
 		} finally {
 			sr.close();
@@ -98,16 +137,22 @@ public class RpnStack extends Stack {
 		// TODO Auto-generated method stub
 	}
 
-	private void change_word(String word, int currentChar) {
-		if (currentChar != '<' && currentChar != '>' && depth() > 0 && value().equals("#func")) {
+	private void change_word(String word, int currentChar, boolean outsideAnExpression) {
+		if (outsideAnExpression) {
 			push(word);
-			swap();
-			eval();
+			push("#text");
+			tolist(2);
 		} else {
-			push(word);
-		}
-		if (currentChar == '>') {
-			eval();
+			if (currentChar != '<' && currentChar != '>' && depth() > 0 && value().equals("#func")) {
+				push(word);
+				swap();
+				eval();
+			} else {
+				push(word);
+			}
+			if (currentChar == '>') {
+				eval();
+			}
 		}
 	}
 
