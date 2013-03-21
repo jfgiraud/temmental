@@ -1,15 +1,12 @@
 package temmentalr;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import temmental2.Node;
 
 public class RpnStack extends Stack {
 	
@@ -49,6 +46,11 @@ public class RpnStack extends Stack {
 						if (nextChar == -1) {
 							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 							outsideAnExpression = false;
+							String word = buffer.toString();
+							if (! "".equals(word)) {
+								change_word(word, file, line, column, currentChar, true);
+							}
+							buffer = new StringWriter();
 							break;
 						} else {
 							if (nextChar == '~' && currentChar == '~') {
@@ -57,8 +59,13 @@ public class RpnStack extends Stack {
 								currentChar = sr.read();
 								continue;
 							} else {
-								outsideAnExpression = false;
 								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+								outsideAnExpression = false;
+								String word = buffer.toString();
+								if (! "".equals(word)) {
+									change_word(word, file, line, column, currentChar, true);
+								}
+								buffer = new StringWriter();
 								currentChar = nextChar;
 								continue;
 							}
@@ -66,6 +73,7 @@ public class RpnStack extends Stack {
 					}
 				} else {
 					if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
+						debug("# %c => %s", currentChar, buffer.toString());
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -82,12 +90,16 @@ public class RpnStack extends Stack {
 					} else {
 						buffer.write(currentChar);
 					}
+					if (currentChar == '~') {
+						outsideAnExpression = true;
+					}
 				}
 				currentChar = sr.read(); 
 			}
 			String word = buffer.toString();
 			if (! "".equals(word)) {
 				change_word(word, file, line, column, currentChar, outsideAnExpression);
+				buffer = new StringWriter();
 			}
 		} finally {
 			sr.close();
@@ -160,32 +172,44 @@ public class RpnStack extends Stack {
 			out.write((String) stk.pop());
 		} else if ("#eval".equals(operation)) {
 			stk.drop();
-			String v = (String) stk.pop();
-			if (v.startsWith("$")) {
-				v = v.substring(1);
-				if (! model.containsKey(v)) {
-					throw new TemplateException("Key '%s' is not present or has null value in the model map.", v);
-				} else {
-					out.write((String) model.get(v));
+			String key = (String) stk.pop();
+			if (key.startsWith("$")) {
+				key = key.substring(1);
+				boolean optional = (key.charAt(key.length()-1) == '?');
+				if (optional)
+					key = key.substring(0, key.length()-1);
+				System.out.println(optional);
+				System.out.println(key);
+				Object o = getInModel(model, key, optional);
+				if (o != null) {
+					out.write(o.toString());
 				}
 			} else {
-				throw new TemplateException("Unsupported case #eval for '%s'", v);
+				throw new TemplateException("Unsupported case #eval for '%s'", key);
+			}
+		}
+	}
+	
+	
+	private static Object getInModel(Map<String, Object> model, String varname, boolean optional) throws TemplateException {
+		if (optional) {
+			if (model.containsKey(varname)) {
+				return model.get(varname);
+			} else {
+				return model.get(varname);
+			}
+		} else {
+			if (! model.containsKey(varname)) {
+				throw new TemplateException("Key '%s' is not present or has null value in the model map.", varname);
+			} else {
+				return model.get(varname);
 			}
 		}
 	}
 	
 	public void write(Writer out, Map<String, Object> model) throws IOException, TemplateException {
-		int n = depth();
-		try {
-			dupn(n);
-			for (int i=0; i<n; i++) {
-				writeObject(out, model, pop());
-			}
-		} finally {
-			int np = depth();
-			while (np > n) {
-				drop();
-			}
+		for (int i=depth(); i>0; i--) {
+			writeObject(out, model, value(i));
 		}
 	}
 

@@ -66,6 +66,14 @@ public class RpnStackTest {
 	}
 	
 	@Test
+	public void testVariableWithTextBeforeAndAfter() throws IOException, TemplateException {
+	    parse("The city of ~$city~, with a population of ~$population~ inhabitants, is the ~$rank~th largest city in ~$state~.");
+	    assertParsingEquals(text("The city of "), eval("$city"), text(", with a population of "), eval("$population"), text(" inhabitants, is the "), eval("$rank"), text("th largest city in "), eval("$state"), text("."));
+	    populateModel("city", "Bordeaux", "population", 242945, "rank", 9, "state", "France");
+	    assertWriteEquals("The city of Bordeaux, with a population of 242945 inhabitants, is the 9th largest city in France.");
+	}
+	
+	@Test
 	public void testParseVariableRequiredButNotFound() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
 	    assertParsingEquals(eval("$text_to_replace"));
@@ -73,19 +81,20 @@ public class RpnStackTest {
 	    assertWriteThrowsException("Key 'text_to_replace' is not present or has null value in the model map.");
 	}
 	
-	// -- 
-	
-	@Test
-	public void testParseVariable() throws IOException, TemplateException {
-		parse("~$variable~");
-		assertParsingEquals(eval("$variable"));
-	}
-
 	@Test
 	public void testParseVariableOptional() throws IOException, TemplateException {
-		parse("~$variable?~");
-		assertParsingEquals(eval("$variable?"));
+	    parse("~$text_to_replace?~");
+	    assertParsingEquals(eval("$text_to_replace?"));
+	    assertWriteEquals("");
+
+	    parse("~$text_to_replace?~");
+	    assertParsingEquals(eval("$text_to_replace?"));
+	    populateModel("text_to_replace", "Some text data...");
+	    assertWriteEquals("Some text data...");
 	}
+
+	
+	// -- 
 	
 	@Test
 	public void testParseSimpleQuoteOnVar() throws IOException, TemplateException {
@@ -190,15 +199,20 @@ public class RpnStackTest {
 		assertTrue("[-:l1:c12, #pos]".matches("[-:l\\d+:c\\d+, #pos]".replace("$", "\\$").replace("[", "\\[").replace("]", "\\]")));
 	}
 
-	private void assertParsingEquals(String expected) {
-		expected = "["+expected+"]";
-		expected = expected.replace("$", "\\$").replace("[", "\\[").replace("]", "\\]").replace("?", "\\?");
-		System.out.println(interpreter.toString());
-		System.out.println(expected);
-		assertTrue(interpreter.toString().matches(expected));
+	private void assertParsingEquals(String ... expectedStack) {
+		String shouldBe = "\\[";
+		for (String expected : expectedStack) {
+			if (! shouldBe.equals("\\["))
+				shouldBe += ", ";
+			expected = expected.replace("$", "\\$").replace("[", "\\[").replace("]", "\\]").replace("?", "\\?");
+			shouldBe += expected;
+		}
+		shouldBe += "\\]";
+		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 
 	private void parse(String s) throws IOException, TemplateException {
+		interpreter.clear();
 		interpreter.parse(s, "-", 1, 1);
 	}
 
@@ -221,7 +235,6 @@ public class RpnStackTest {
 
 	private void assertParseThrowsException(String expectedMessage, String pattern) {
 		try {
-			interpreter.clear();
 			parse(pattern);
 			interpreter.printStack(System.out);
 			fail("An exception must be raised.");

@@ -90,18 +90,6 @@ public class NewExampleTest extends TestCase {
 		template.printFile(out, createModel(map));
 		return out.toString();
 	}
-	
-	public void testParseVariableRequired() throws IOException, TemplateException {
-	    Node node = template.parse("~$myvar~");
-        assertEquals("text=|variable=myvar|text=", template.representation(node));
-        assertEquals("The text", getContent("myvar", "The text"));
-        try {
-        	getContent();
-        	fail("An exception must be thrown.");
-        } catch (TemplateException e) {
-        	assertEquals("Key 'myvar' is not present or has null value in the model map (needed for '$myvar' at position '-:l1:c1').", e.getMessage());
-        }
-	}
 
 	public void testParseVariableOptionalNothingRenderedIfNotPresent() throws IOException, TemplateException {
 	    Node node = template.parse("~$myvar?~");

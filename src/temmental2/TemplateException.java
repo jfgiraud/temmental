@@ -7,7 +7,7 @@ package temmental2;
 public class TemplateException extends Exception
 {
    
-    TemplateException(String format, Object ... params) {
+    public TemplateException(String format, Object ... params) {
         super(String.format(format, params).replace(" at position ''", ""));
     }
     
