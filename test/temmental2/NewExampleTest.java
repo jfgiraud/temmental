@@ -91,45 +91,6 @@ public class NewExampleTest extends TestCase {
 		return out.toString();
 	}
 
-	public void testParseVariableOptionalNothingRenderedIfNotPresent() throws IOException, TemplateException {
-	    Node node = template.parse("~$myvar?~");
-	    assertEquals("text=|variable=myvar,norenderifnotpresent|text=", template.representation(node));
-	    assertEquals("", getContent());
-	    assertEquals("The text", getContent("myvar", "The text"));
-	    
-	    node = template.parse("~$my.var_XX.99?~");
-        assertEquals("text=|variable=my.var_XX.99,norenderifnotpresent|text=", template.representation(node));
-	}
-	
-    public void testParseVariableOptionalRenderNameIfNotPresent() throws IOException, TemplateException {
-        Node node = template.parse("~$myvar!~");
-        assertEquals("text=|variable=myvar,rendernameifnotpresent|text=", template.representation(node));
-        assertEquals("myvar", getContent());
-        assertEquals("The text", getContent("myvar", "The text"));
-    }
-
-    public void testParseVariableCanNotChangeOptionalFlag() throws IOException, TemplateException {
-        try {
-            template.parse("~$myvar!?~");
-            fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c9' - reach character '?'", e.getMessage());
-        }
-        try {
-            template.parse("~$myvar??~");
-            fail("An exception must be thrown.");
-        } catch (Exception e) {
-            assertEquals("Invalid syntax at position '-:l1:c9' - reach character '?'", e.getMessage());
-        }
-    }
-
-    
-	public void testParseVariableWithTextBeforeAndTextAfter() throws IOException, TemplateException {
-		Node node = template.parse("cb\u00e9a~$myvar~ab\u00e9c");
-		assertEquals("text=cb\u00e9a|variable=myvar|text=ab\u00e9c", template.representation(node));
-		assertEquals("cbéaThe textabéc", getContent("myvar", "The text"));
-	}
-
 	public void testParseVariableWithOptionalVariableFilter() throws IOException, TemplateException {
 	    Node node = template.parse("~$myvar:$filter?~");
 	    assertEquals("text=|variable=myvar#transform,variable=filter,norenderifnotpresent|text=", template.representation(node));
@@ -137,13 +98,6 @@ public class NewExampleTest extends TestCase {
 	    assertEquals("", getContent("myvar", "The text"));
 	}
 
-	public void testParseVariableWithStaticFilter() throws IOException, TemplateException {
-		template.addTransform("filter", upper);
-        Node node = template.parse("~$myvar:'filter~");
-        
-        assertEquals("text=|variable=myvar#transform,quote=filter|text=", template.representation(node));
-        assertEquals("THE TEXT", getContent("myvar", "The text"));
-	}
 	
 	public void testParseVariableWithStaticFilterNotPresent() throws IOException, TemplateException {
         assertParseException("~$myvar:'filter~", "Unknown filter name 'filter' at position '-:l1:c16'!");

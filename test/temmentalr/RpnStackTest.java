@@ -30,6 +30,16 @@ public class RpnStackTest {
 	}
 	
 	@Test
+	public void testValidIdentifiers() {
+		assertTrue(RpnStack.isValidIdentifier("'foo"));
+		assertFalse(RpnStack.isValidIdentifier("foo"));
+		assertTrue(RpnStack.isValidIdentifier("$foo"));
+		assertTrue(RpnStack.isValidIdentifier("$foo?"));
+		assertFalse(RpnStack.isValidIdentifier("'foo?"));
+		assertTrue(RpnStack.isValidIdentifier("'foo"));
+	}
+	
+	@Test
 	public void testParseText() throws IOException, TemplateException {
 		parse("Some text data...");
 		assertParsingEquals(text("Some text data..."));
@@ -56,7 +66,14 @@ public class RpnStackTest {
 	    assertParsingEquals(text("Some text data... with ~"));
 	    assertWriteEquals("Some text data... with ~");
 	}
-	
+
+	@Test
+	public void testAccents() throws IOException, TemplateException {
+	    parse("Text with accents: ÍntèrnáTîönàlïzâÇïôn");
+	    assertParsingEquals(text("Text with accents: ÍntèrnáTîönàlïzâÇïôn"));
+	    assertWriteEquals("Text with accents: ÍntèrnáTîönàlïzâÇïôn");
+	}
+
 	@Test
 	public void testParseVariableRequired() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
@@ -74,7 +91,7 @@ public class RpnStackTest {
 	}
 	
 	@Test
-	public void testParseVariableRequiredButNotFound() throws IOException, TemplateException {
+	public void testVariableRequiredButNotFound() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
 	    assertParsingEquals(eval("$text_to_replace"));
 	    populateModel();
@@ -82,25 +99,31 @@ public class RpnStackTest {
 	}
 	
 	@Test
-	public void testParseVariableOptional() throws IOException, TemplateException {
+	public void testVariableIsOptionalAndNotFound() throws IOException, TemplateException {
 	    parse("~$text_to_replace?~");
 	    assertParsingEquals(eval("$text_to_replace?"));
 	    assertWriteEquals("");
+	}
 
+	@Test
+	public void testVariableIsOptionalAndFound() throws IOException, TemplateException {
 	    parse("~$text_to_replace?~");
 	    assertParsingEquals(eval("$text_to_replace?"));
 	    populateModel("text_to_replace", "Some text data...");
 	    assertWriteEquals("Some text data...");
 	}
 
+	@Test
+	public void testQuoteFunction() throws IOException, TemplateException {
+		parse("The uppercase of '~$text~' is '~$text:'upper~'");
+		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
+		populateModel("text", "Eleanor of Aquitaine");
+		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is: 'ELEANOR OF AQUITAINE'");
+	}
 	
 	// -- 
 	
-	@Test
-	public void testParseSimpleQuoteOnVar() throws IOException, TemplateException {
-		parse("~$variable:'function~");
-		assertParsingEquals(func("'function", "$variable"));
-	}
+	
 	
 	@Test
 	public void testParseTwoQuoteOnVar() throws IOException, TemplateException {
@@ -208,6 +231,8 @@ public class RpnStackTest {
 			shouldBe += expected;
 		}
 		shouldBe += "\\]";
+//		System.out.println(interpreter.toString());
+//		System.out.println(shouldBe);
 		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 

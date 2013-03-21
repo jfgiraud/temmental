@@ -1,12 +1,16 @@
 package temmentalr;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import sun.org.mozilla.javascript.Interpreter;
 
 public class RpnStack extends Stack {
 	
@@ -40,11 +44,11 @@ public class RpnStack extends Stack {
 							line++;
 							column = 0;
 						} 
-						debug("%c %c => %s", currentChar, '#', buffer.toString());
+//						debug("%c %c => %s", currentChar, '#', buffer.toString());
 					} else {
 						int nextChar = sr.read();
 						if (nextChar == -1) {
-							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+//							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 							outsideAnExpression = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
@@ -55,11 +59,11 @@ public class RpnStack extends Stack {
 						} else {
 							if (nextChar == '~' && currentChar == '~') {
 								buffer.write(currentChar);
-								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+//								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 								currentChar = sr.read();
 								continue;
 							} else {
-								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+//								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 								outsideAnExpression = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
@@ -73,7 +77,7 @@ public class RpnStack extends Stack {
 					}
 				} else {
 					if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
-						debug("# %c => %s", currentChar, buffer.toString());
+//						debug("# %c => %s", currentChar, buffer.toString());
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -132,10 +136,8 @@ public class RpnStack extends Stack {
 		}
 	}
 
-	private void assertIdentifier(String pos, String word) throws TemplateException {
-		if (! word.startsWith("'") && ! word.startsWith("$")) {
-			throw new TemplateException("Invalid identifier syntax for '%s' at '%s'.", word, pos); 
-		}
+	static boolean isValidIdentifier(String word) {
+		return word.matches("'\\w+") || word.matches("\\$\\w+(\\?)?");  
 	}
 
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
@@ -156,7 +158,9 @@ public class RpnStack extends Stack {
 
 	private void push_word(String word, String file, int line, int column) throws TemplateException {
 		String pos = String.format("%s:l%d:c%d", file, line, column-word.length()-1);
-		assertIdentifier(pos, word);
+		if (! isValidIdentifier(word)) {
+			throw new TemplateException("Invalid identifier syntax for '%s' at '%s'.", word, pos); 
+		}
 		push(word); // #func newword
 		push(pos);
 		push("#pos");
@@ -165,30 +169,7 @@ public class RpnStack extends Stack {
 		tolist(3); // #func [ newword pos #eval ]
 	}
 
-	private static void writeObject(Writer out, Map<String, Object> model, Object value) throws IOException, TemplateException {
-		Stack stk = new Stack((List) value);
-		String operation = (String) stk.pop();
-		if ("#text".equals(operation)) {
-			out.write((String) stk.pop());
-		} else if ("#eval".equals(operation)) {
-			stk.drop();
-			String key = (String) stk.pop();
-			if (key.startsWith("$")) {
-				key = key.substring(1);
-				boolean optional = (key.charAt(key.length()-1) == '?');
-				if (optional)
-					key = key.substring(0, key.length()-1);
-				System.out.println(optional);
-				System.out.println(key);
-				Object o = getInModel(model, key, optional);
-				if (o != null) {
-					out.write(o.toString());
-				}
-			} else {
-				throw new TemplateException("Unsupported case #eval for '%s'", key);
-			}
-		}
-	}
+	
 	
 	
 	private static Object getInModel(Map<String, Object> model, String varname, boolean optional) throws TemplateException {
@@ -207,8 +188,43 @@ public class RpnStack extends Stack {
 		}
 	}
 	
+	private static void writeObject(Writer out, Map<String, Object> model, Object value) throws IOException, TemplateException {
+		Stack stk = new Stack((List) value);
+		String operation = (String) stk.pop();
+		if ("#text".equals(operation)) { // [ blabla #text ]
+			out.write((String) stk.pop());
+		} else if ("#eval".equals(operation)) { // [ [ $var ] [ position #pos ] #func ]
+			stk.drop();
+			String key = (String) stk.pop();
+			if (key.startsWith("$")) {
+				key = key.substring(1);
+				boolean optional = (key.charAt(key.length()-1) == '?');
+				if (optional)
+					key = key.substring(0, key.length()-1);
+//				System.out.println(optional);
+//				System.out.println(key);
+				Object o = getInModel(model, key, optional);
+				if (o != null) {
+					out.write(o.toString());
+				}
+			} else {
+				throw new TemplateException("Unsupported case #eval for '%s'", key);
+			}
+		} else {
+			throw new TemplateException("Unsupported operation '%s'", operation);
+		}
+	}
+	
 	public void write(Writer out, Map<String, Object> model) throws IOException, TemplateException {
+		printStack(System.out);
+		PrintWriter pw = new PrintWriter(System.out);
+		
 		for (int i=depth(); i>0; i--) {
+			pw.println(value(i));
+			writeObject(pw, model, value(i));
+			pw.print("\n");
+			pw.flush();
+			
 			writeObject(out, model, value(i));
 		}
 	}
