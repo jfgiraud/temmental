@@ -27,7 +27,7 @@ public class RpnStack extends Stack {
 			System.err.println(String.format(format, parameters));
 	}
 	
-	public void parse(String expression, String file, int line, int column) throws IOException {
+	public void parse(String expression, String file, int line, int column) throws IOException, TemplateException {
 		StringReader sr = new StringReader(expression);
 		StringWriter buffer = new StringWriter();
 		boolean outsideAnExpression = true;
@@ -93,33 +93,27 @@ public class RpnStack extends Stack {
 		}
 	}
 
-	private boolean seemsToBeEval(Object o) {
-		debug("seemsToBeEval => " + o);
-		if (! (o instanceof String))
-			return false;
-		String s = (String) o;
-		if (s.startsWith("#"))
-			return false;
-		return true;
-	}
-	
-	private void eval() {
+	private void eval() throws TemplateException {
 		debug(toString());
 		if (depth()>1) {
 			Object last = value();
 			if (last.equals("#func")) {
+				debug("#### func beg");
+				debug(stackToString());
 				// var 'func #func
 				rot(); // 'func #func var
 				tolist(1); // 'func #func (var)
-				rolld(3); // (var) 'func #func
+				unrot(); // (var) 'func #func
 				
-				if (seemsToBeEval(value(1))) {
-					swap(); // (var) #func 'func
-					push("#eval"); // (var) #func 'func #eval
-					tolist(2); // (var) #func ('func #eval)
-					swap(); // (var) ('func #eval)  #func
-				}
-				
+//				debug(">>> value => " + value(2));
+//				debug(">>> seemsToBeEval => " + seemsToBeEval(value(2)));
+//				if (seemsToBeEval(value(2))) {
+//					swap(); // (var) #func 'func
+//					push("#eval"); // (var) #func 'func #eval
+//					tolist(2); // (var) #func ('func #eval)
+//					swap(); // (var) ('func #eval)  #func
+//				}
+//				debug(toString());
 				over(); // (var) 'func #func 'func
 				assertFunction();
 				tolist(3); // ( (var) 'func #func )
@@ -141,15 +135,21 @@ public class RpnStack extends Stack {
 		debug(toString());
 	}
 
-	private void assertFunction() {
-		Object o = value();
-		drop();
+	private void assertFunction() throws TemplateException {
+		debug("#### assertFunction");
+		dup();
+		get(1);
+		Object o = pop();
+		debug("# assert " + o.toString());
+		get(2);
+		Object pos = pop();
+		debug(stackToString());
 		if (o instanceof String) {
 			String s = (String) o;
 			if (! s.startsWith("'") && ! s.startsWith("$")) {
-				throw new RuntimeException(String.format("Invalid function name '%s'", s));
+				throw new TemplateException("zzz" + pos); 
 			}
-		}
+		} 
 	}
 
 	private void push_pos(String file, int line, int column) {
@@ -158,7 +158,7 @@ public class RpnStack extends Stack {
 		tolist(2);
 	}
 	
-	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) {
+	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
 		debug("Word is %s", word);
 		if (outsideAnExpression) {
 			push(word);

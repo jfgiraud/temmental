@@ -74,69 +74,69 @@ public class RpnStackTest {
 	// -- 
 	
 	@Test
-	public void testParseVariable() throws IOException {
+	public void testParseVariable() throws IOException, TemplateException {
 		parse("~$variable~");
 		assertParsingEquals(eval("$variable"));
 	}
 
 	@Test
-	public void testParseVariableOptional() throws IOException {
+	public void testParseVariableOptional() throws IOException, TemplateException {
 		parse("~$variable?~");
 		assertParsingEquals(eval("$variable?"));
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVar() throws IOException {
+	public void testParseSimpleQuoteOnVar() throws IOException, TemplateException {
 		parse("~$variable:'function~");
 		assertParsingEquals(func("'function", "$variable"));
 	}
 	
 	@Test
-	public void testParseTwoQuoteOnVar() throws IOException {
+	public void testParseTwoQuoteOnVar() throws IOException, TemplateException {
 		parse("~$variable:'function1:'function2~");
 		assertParsingEquals(func("'function2", func("'function1", "$variable")));
 	}
 
 	@Test
-	public void testParseSimpleQuoteOnVarWithInit() throws IOException {
+	public void testParseSimpleQuoteOnVarWithInit() throws IOException, TemplateException {
 		parse("~$variable:'function<$p1>~");
 		assertParsingEquals(func(func("'function", "$p1"), "$variable"));
 	}
 
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits() throws IOException {
+	public void testParseSimpleQuoteOnVarWithInits() throws IOException, TemplateException {
 		parse("~$variable:'function<$p1,$p2>~");
 		assertParsingEquals(func(func("'function", "$p1", "$p2"), "$variable"));
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits2() throws IOException {
+	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException {
 		parse("~$variable:'function<$p1:'function2,$p2>~");
 		assertParsingEquals(func(func("'function", func("'function2", "$p1"), "$p2"), "$variable"));
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits3() throws IOException {
+	public void testParseSimpleQuoteOnVarWithInits3() throws IOException, TemplateException {
 		parse("~$variable:'function<$p1:'function2:'function3,$p2>~");
 		assertParsingEquals(func(func("'function", func("'function3", func("'function2", "$p1")), "$p2"), "$variable"));
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInitsAndAnother() throws IOException {
+	public void testParseSimpleQuoteOnVarWithInitsAndAnother() throws IOException, TemplateException {
 		parse("~$variable:'function1<$p1,$p2>:'function2~");
 		assertParsingEquals(func("'function2", func(func("'function1", "$p1", "$p2"), "$variable")));
 	}
 	
 	@Test
-	public void testParseTwoVarFilterOnVar() throws IOException {
+	public void testParseTwoVarFilterOnVar() throws IOException, TemplateException {
 		parse("~$variable:$function1?:$function2~");
 		assertParsingEquals(func("$function2", func("$function1?", "$variable")));
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits3b() throws IOException {
-		parse("~$variable?:function<$p1:'function2:'function3,$p2?>~");
-		assertParsingEquals(func(func("'function", func("'function3", func("'function2", "$p1")), "$p2?"), "$variable?"));
+	public void testParseSimpleQuoteOnVarWithInits3b() throws IOException, TemplateException {
+		parse("~$variable?:function~");
+		assertParsingEquals(func("'function", "$variable?"));
 	}
 	
 	/*
@@ -194,7 +194,7 @@ public class RpnStackTest {
 		assertTrue(interpreter.toString().matches(expected));
 	}
 
-	private void parse(String s) throws IOException {
+	private void parse(String s) throws IOException, TemplateException {
 		interpreter.parse(s, "-", 1, 1);
 	}
 

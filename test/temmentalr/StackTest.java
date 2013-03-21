@@ -82,6 +82,17 @@ public class StackTest {
 	}
 	
 	@Test
+	public void testRotTooFewArguments() {
+		stack.push("1");
+		stack.push("2");
+		stack.rot();
+		assertEquals(3, stack.depth());
+		assertEquals("1", stack.value(1));
+		assertEquals("3", stack.value(2));
+		assertEquals("2", stack.value(3));
+	}
+	
+	@Test
 	public void testDupn() {
 		stack.push("1");
 		stack.push("2");
