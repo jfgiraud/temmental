@@ -1,6 +1,7 @@
 package temmentalr;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import sun.org.mozilla.javascript.Interpreter;
 import temmental2.Node;
 
 public class RpnStack extends Stack {
@@ -94,28 +96,13 @@ public class RpnStack extends Stack {
 	}
 
 	private void eval() throws TemplateException {
-		debug(toString());
 		if (depth()>1) {
 			Object last = value();
 			if (last.equals("#func")) {
-				debug("#### func beg");
-				debug(stackToString());
 				// var 'func #func
 				rot(); // 'func #func var
 				tolist(1); // 'func #func (var)
 				unrot(); // (var) 'func #func
-				
-//				debug(">>> value => " + value(2));
-//				debug(">>> seemsToBeEval => " + seemsToBeEval(value(2)));
-//				if (seemsToBeEval(value(2))) {
-//					swap(); // (var) #func 'func
-//					push("#eval"); // (var) #func 'func #eval
-//					tolist(2); // (var) #func ('func #eval)
-//					swap(); // (var) ('func #eval)  #func
-//				}
-//				debug(toString());
-				over(); // (var) 'func #func 'func
-				assertFunction();
 				tolist(3); // ( (var) 'func #func )
 			} else if (last.equals("#>")) {
 				drop();
@@ -132,56 +119,39 @@ public class RpnStack extends Stack {
 				eval();
 			}
 		}
-		debug(toString());
 	}
 
-	private void assertFunction() throws TemplateException {
-		debug("#### assertFunction");
-		dup();
-		get(1);
-		Object o = pop();
-		debug("# assert " + o.toString());
-		get(2);
-		Object pos = pop();
-		debug(stackToString());
-		if (o instanceof String) {
-			String s = (String) o;
-			if (! s.startsWith("'") && ! s.startsWith("$")) {
-				throw new TemplateException("zzz" + pos); 
-			}
-		} 
+	private void assertIdentifier(String pos, String word) throws TemplateException {
+		if (! word.startsWith("'") && ! word.startsWith("$")) {
+			throw new TemplateException("Invalid identifier syntax for '%s' at '%s'.", word, pos); 
+		}
 	}
 
-	private void push_pos(String file, int line, int column) {
-		push(String.format("%s:l%d:c%d", file, line, column));
-		push("#pos");
-		tolist(2);
-	}
-	
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
-		debug("Word is %s", word);
 		if (outsideAnExpression) {
 			push(word);
 			push("#text");
 			tolist(2);
 		} else {
 			if (currentChar != '<' && currentChar != '>' && depth() > 0 && value().equals("#func")) {
-				push(word);
-				push_pos(file, line, column-word.length()-1);
-				push("#eval");
-				tolist(3);
-				swap();
-				eval();
+				push_word(word, file, line, column);
+				swap(); // [ word pos #eval ] #func 
 			} else {
-				push(word);
-				push_pos(file, line, column-word.length()-1);
-				push("#eval");
-				tolist(3);
+				push_word(word, file, line, column);
 			}
-			if (currentChar == '>') {
-				eval();
-			}
+			eval();
 		}
+	}
+
+	private void push_word(String word, String file, int line, int column) throws TemplateException {
+		String pos = String.format("%s:l%d:c%d", file, line, column-word.length()-1);
+		assertIdentifier(pos, word);
+		push(word); // #func newword
+		push(pos);
+		push("#pos");
+		tolist(2); // #func newword pos
+		push("#eval"); // #func newword pos #eval
+		tolist(3); // #func [ newword pos #eval ]
 	}
 
 	private static void writeObject(Writer out, Map<String, Object> model, Object value) throws IOException, TemplateException {

@@ -1,5 +1,9 @@
 package temmentalr;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -224,14 +228,17 @@ public class Stack {
 		return this.elements.toString();
 	}
 	
-	public String stackToString() {
-		String s = "";
-		for (int i=depth(); i>0; i--) {
-			s += i + ": " + value(i) + "\n";
-		}
-		return s;
+	public void printStack(PrintStream out) throws IOException {
+		printStack(new PrintWriter(out));
 	}
-
 	
+	public void printStack(PrintWriter out) throws IOException {
+		for (int i=depth(); i>0; i--) {
+			out.write(i + ": ");
+			out.write(((String) value(i).toString()));
+			out.write('\n');
+		}
+		out.flush();
+	}
 
 }

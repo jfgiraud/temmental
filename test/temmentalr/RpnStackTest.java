@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,9 +136,11 @@ public class RpnStackTest {
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits3b() throws IOException, TemplateException {
-		parse("~$variable?:function~");
-		assertParsingEquals(func("'function", "$variable?"));
+	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
+		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
+		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
+		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c29'.", "~$variable?:'function1<$p1>:function2~");
+		assertParseThrowsException("Invalid identifier syntax for 'function3' at '-:l1:c28'.", "~$variable?:'function1<$p1:function3>:'function2~");
 	}
 	
 	/*
@@ -189,8 +193,8 @@ public class RpnStackTest {
 	private void assertParsingEquals(String expected) {
 		expected = "["+expected+"]";
 		expected = expected.replace("$", "\\$").replace("[", "\\[").replace("]", "\\]").replace("?", "\\?");
-		System.out.println(expected);
 		System.out.println(interpreter.toString());
+		System.out.println(expected);
 		assertTrue(interpreter.toString().matches(expected));
 	}
 
@@ -204,15 +208,27 @@ public class RpnStackTest {
 		assertEquals(expected, out.toString());
 	}
 
-	private void assertWriteThrowsException(String expected) {
+	private void assertWriteThrowsException(String expectedMessage) {
 		StringWriter out = new StringWriter();
 		try {
 			interpreter.write(out, model);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
-			assertEquals(expected, e.getMessage());
+			assertEquals(expectedMessage, e.getMessage());
 		}
 		
+	}
+
+	private void assertParseThrowsException(String expectedMessage, String pattern) {
+		try {
+			interpreter.clear();
+			parse(pattern);
+			interpreter.printStack(System.out);
+			fail("An exception must be raised.");
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			assertEquals(expectedMessage, e.getMessage());
+		}
 	}
 
 
