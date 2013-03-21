@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import sun.org.mozilla.javascript.Interpreter;
 import temmental2.Node;
 
 public class RpnStack extends Stack {
