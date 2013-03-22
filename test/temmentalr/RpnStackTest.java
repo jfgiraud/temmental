@@ -124,7 +124,15 @@ public class RpnStackTest {
 				return value.toUpperCase();
 			}
 		});
-		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is: 'ELEANOR OF AQUITAINE'");
+		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
+	}
+	
+	@Test
+	public void testQuoteFunctionNotKnown() throws IOException, TemplateException {
+		parse("The required function 'upper is not known for rendering '~$text:'upper~'. An exception will be raised.");
+		assertParsingEquals(text("The required function 'upper is not known for rendering '"), func("'upper", "$text"), text("'. An exception will be raised."));
+		populateModel("text", "Eleanor of Aquitaine");
+		assertWriteThrowsException("No transform function named ''upper' is associated with the template for rendering at position 'foo'.");
 	}
 	
 	// -- 

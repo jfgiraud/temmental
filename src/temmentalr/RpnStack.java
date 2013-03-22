@@ -1,8 +1,6 @@
 package temmentalr;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -10,8 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import sun.org.mozilla.javascript.Interpreter;
 
 public class RpnStack extends Stack {
 	
@@ -138,7 +134,7 @@ public class RpnStack extends Stack {
 					i++;
 				}
 				tolist(i-1);
-				nip(); //remove(2);
+				nip(); 
 				swap();
 				push("#func");
 				tolist(3);
@@ -204,25 +200,41 @@ public class RpnStack extends Stack {
 		}
 	}
 	
-	private static void writeObject(Writer out, Map<String, Object> model, Object value) throws IOException, TemplateException {
+	private static boolean isRequired(String varname) {
+		return varname != null && varname.startsWith("'");
+	}
+	
+	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, Object value) throws IOException, TemplateException {
 		Stack stk = new Stack((List) value);
 		String operation = (String) stk.pop();
+		System.out.println("writeObject>> " + operation);
 		if ("#text".equals(operation)) { // [ blabla #text ]
-			out.write((String) stk.pop());
+			return stk.pop();
 		} else if ("#eval".equals(operation)) { // [ [ $var ] [ position #pos ] #func ]
 			stk.drop();
 			String key = (String) stk.pop();
-			if (key.startsWith("$")) {
-				Object o = getInModel(model, key);
-				if (o != null) {
-					out.write(o.toString());
-				}
+			if (key.startsWith("'")) {
+				return key.substring(1);
+			} else if (key.startsWith("$")) {
+				return getInModel(model, key);
 			} else {
 				throw new TemplateException("Unsupported case #eval for '%s'", key);
 			}
 		} else if ("#func".equals(operation)) {
-			stk.printStack(System.out);
-//			String key = (String) stk.pop();
+			stk.dup();
+			stk.get(1);
+			String name = (String) stk.pop();
+			Transform fp = functions.get((String) writeObject(out, functions, model, stk.pop()));
+			if (fp == null && isRequired(name)) {
+				String pos = "foo"; // FIXME
+				throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", name, pos );
+			} else if (fp == null) {
+				return null;
+			}
+			List parameters = new ArrayList();
+			for (Object parameter : (List) stk.pop()) {
+				parameters.add(writeObject(out, functions, model, parameter));
+			}
 //			if (key.startsWith("'")) {
 //				Object o = getInModel(model, key);
 //				if (o != null) {
@@ -231,7 +243,7 @@ public class RpnStack extends Stack {
 //			} else {
 //				throw new TemplateException("Unsupported case #eval for '%s'", key);
 //			}
-			
+			return fp.apply(parameters.get(0));
 		} else {
 			throw new TemplateException("Unsupported operation '%s'", operation);
 		}
@@ -239,15 +251,13 @@ public class RpnStack extends Stack {
 	
 	public void write(Writer out, Map<String, Object> model) throws IOException, TemplateException {
 		printStack(System.out);
-		PrintWriter pw = new PrintWriter(System.out);
 		
 		for (int i=depth(); i>0; i--) {
-			pw.println(value(i));
-			writeObject(pw, model, value(i));
-			pw.print("\n");
-			pw.flush();
-			
-			writeObject(out, model, value(i));
+			Object o = writeObject(out, functions, model, value(i));
+			if (o != null) {
+				out.write(o.toString());
+				System.out.println(i+">> " + o.toString());
+			}
 		}
 	}
 
