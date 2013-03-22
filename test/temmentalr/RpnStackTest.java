@@ -222,7 +222,11 @@ public class RpnStackTest {
 	}
 
 	private void populateTransform(Object ... map) throws TemplateException {
-		model.putAll(createModel(map));
+        if (map.length %2 != 0)
+            throw new TemplateException("Invalid number of elements (key/value list implies an even size).");
+        for (int i=0; i<map.length/2; i++) {
+        	interpreter.addFunction((String) map[2*i], (Transform) map[2*i+1]);
+        }
 	}
 	
 	@Test

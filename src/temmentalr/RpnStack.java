@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,18 @@ import sun.org.mozilla.javascript.Interpreter;
 public class RpnStack extends Stack {
 	
 	private static final boolean debug = true;
+
+	private Map<String, Transform> functions;
 	
+	public RpnStack() {
+		this(new ArrayList<>());
+	}
+
+	public RpnStack(List<Object> tocopy) {
+		super(tocopy);
+		functions = new HashMap<String, Transform>();
+	}
+
 	private List<Integer> chars(int ... chars) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		for (int c : chars) {
@@ -237,6 +249,10 @@ public class RpnStack extends Stack {
 			
 			writeObject(out, model, value(i));
 		}
+	}
+
+	public void addFunction(String name, Transform function) {
+		functions.put(name, function);		
 	}
 
 }
