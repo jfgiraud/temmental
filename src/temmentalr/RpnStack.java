@@ -172,7 +172,11 @@ public class RpnStack extends Stack {
 	
 	
 	
-	private static Object getInModel(Map<String, Object> model, String varname, boolean optional) throws TemplateException {
+	private static Object getInModel(Map<String, Object> model, String varname) throws TemplateException {
+		varname = varname.substring(1);
+		boolean optional = (varname.charAt(varname.length()-1) == '?');
+		if (optional)
+			varname = varname.substring(0, varname.length()-1);
 		if (optional) {
 			if (model.containsKey(varname)) {
 				return model.get(varname);
@@ -197,19 +201,25 @@ public class RpnStack extends Stack {
 			stk.drop();
 			String key = (String) stk.pop();
 			if (key.startsWith("$")) {
-				key = key.substring(1);
-				boolean optional = (key.charAt(key.length()-1) == '?');
-				if (optional)
-					key = key.substring(0, key.length()-1);
-//				System.out.println(optional);
-//				System.out.println(key);
-				Object o = getInModel(model, key, optional);
+				Object o = getInModel(model, key);
 				if (o != null) {
 					out.write(o.toString());
 				}
 			} else {
 				throw new TemplateException("Unsupported case #eval for '%s'", key);
 			}
+		} else if ("#func".equals(operation)) {
+			stk.printStack(System.out);
+//			String key = (String) stk.pop();
+//			if (key.startsWith("'")) {
+//				Object o = getInModel(model, key);
+//				if (o != null) {
+//					out.write(o.toString());
+//				}
+//			} else {
+//				throw new TemplateException("Unsupported case #eval for '%s'", key);
+//			}
+			
 		} else {
 			throw new TemplateException("Unsupported operation '%s'", operation);
 		}

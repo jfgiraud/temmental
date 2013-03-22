@@ -118,6 +118,12 @@ public class RpnStackTest {
 		parse("The uppercase of '~$text~' is '~$text:'upper~'");
 		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
 		populateModel("text", "Eleanor of Aquitaine");
+		populateTransform("upper", new Transform<String, String>() {
+			@Override
+			public String apply(String value) {
+				return value.toUpperCase();
+			}
+		});
 		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is: 'ELEANOR OF AQUITAINE'");
 	}
 	
@@ -211,12 +217,14 @@ public class RpnStackTest {
 		return list(params.toString(), name, "#func").toString();
 	}
 
-	
-	
 	private void populateModel(Object ... map) throws TemplateException {
 		model.putAll(createModel(map));
 	}
 
+	private void populateTransform(Object ... map) throws TemplateException {
+		model.putAll(createModel(map));
+	}
+	
 	@Test
 	public void testMacthes() {
 		assertTrue("[-:l1:c12, #pos]".matches("[-:l\\d+:c\\d+, #pos]".replace("$", "\\$").replace("[", "\\[").replace("]", "\\]")));
