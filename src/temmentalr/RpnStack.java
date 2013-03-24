@@ -123,10 +123,11 @@ public class RpnStack extends Stack {
 			Object last = value();
 			if (last.equals("#func")) {
 				// var 'func #func
-				rot(); // 'func #func var
-				tolist(1); // 'func #func (var)
-				unrot(); // (var) 'func #func
-				tolist(3); // ( (var) 'func #func )
+				drop(); // var 'func 
+				RpnElem func = (RpnElem) pop(); // var 
+				tolist(1); // [ var ]
+				List parameters = (List) pop();
+				push(new RpnFunc(func, parameters));
 			} else if (last.equals("#>")) {
 				drop();
 				int i=1;
@@ -134,10 +135,12 @@ public class RpnStack extends Stack {
 					i++;
 				}
 				tolist(i-1);
-				nip(); 
-				swap();
-				push("#func");
-				tolist(3);
+				List parameters = (List) pop();
+				drop();
+				RpnElem func = (RpnElem) pop();
+				
+				push(new RpnFunc(func, parameters));
+				
 				swap();
 				eval();
 			}
@@ -162,48 +165,20 @@ public class RpnStack extends Stack {
 		push(new RpnWord(word, file, line, column-word.length()-1));
 	}
 	
-	private static boolean isRequired(String varname) {
-		return varname != null && varname.startsWith("'");
-	}
-	
 	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, Object value) throws IOException, TemplateException {
 		
 		if (value instanceof String)
 			return value;
 
 		if (value instanceof RpnWord) {
-			return ((RpnWord) value).writeObject(model);
+			return ((RpnWord) value).writeObject(functions, model);
 		}
 		
-		Stack stk = new Stack((List) value);
-		String operation = (String) stk.pop();
-		System.out.println("writeObject>> " + operation);
-		if ("#func".equals(operation)) {
-			
-			RpnWord word = (RpnWord) stk.pop();
-
-			Transform fp = functions.get(word.writeObject(model));
-			if (fp == null && isRequired(word.word)) {
-				throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", word.word, word.pos);
-			} else if (fp == null) {
-				return null;
-			}
-			List parameters = new ArrayList();
-			for (Object parameter : (List) stk.pop()) {
-				parameters.add(writeObject(out, functions, model, parameter));
-			}
-//			if (key.startsWith("'")) {
-//				Object o = getInModel(model, key);
-//				if (o != null) {
-//					out.write(o.toString());
-//				}
-//			} else {
-//				throw new TemplateException("Unsupported case #eval for '%s'", key);
-//			}
-			return fp.apply(parameters.get(0));
-		} else {
-			throw new TemplateException("Unsupported operation '%s'", operation);
+		if (value instanceof RpnFunc) {
+			return ((RpnFunc) value).writeObject(functions, model);
 		}
+		
+		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
 	}
 	
 	public void write(Writer out, Map<String, Object> model) throws IOException, TemplateException {

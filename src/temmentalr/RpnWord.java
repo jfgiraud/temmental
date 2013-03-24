@@ -2,7 +2,7 @@ package temmentalr;
 
 import java.util.Map;
 
-public class RpnWord {
+public class RpnWord implements RpnElem {
 	
 	String word;
 	String pos;
@@ -45,7 +45,8 @@ public class RpnWord {
 		}
 	}
 	
-	public Object writeObject(Map<String, Object> model) throws TemplateException {
+	@Override
+	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException {
 		if (word.startsWith("'")) {
 			return word.substring(1);
 		} else if (word.startsWith("$")) {
@@ -53,6 +54,14 @@ public class RpnWord {
 		} else {
 			throw new TemplateException("Unsupported case #eval for '%s'", word);
 		}
+	}
+
+	public String getWord() {
+		return word;
+	}
+
+	public String getPos() {
+		return pos;
 	}
 
 }
