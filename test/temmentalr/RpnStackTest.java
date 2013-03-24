@@ -31,12 +31,12 @@ public class RpnStackTest {
 	
 	@Test
 	public void testValidIdentifiers() {
-		assertTrue(RpnStack.isValidIdentifier("'foo"));
-		assertFalse(RpnStack.isValidIdentifier("foo"));
-		assertTrue(RpnStack.isValidIdentifier("$foo"));
-		assertTrue(RpnStack.isValidIdentifier("$foo?"));
-		assertFalse(RpnStack.isValidIdentifier("'foo?"));
-		assertTrue(RpnStack.isValidIdentifier("'foo"));
+		assertTrue(RpnWord.isValidIdentifier("'foo"));
+		assertFalse(RpnWord.isValidIdentifier("foo"));
+		assertTrue(RpnWord.isValidIdentifier("$foo"));
+		assertTrue(RpnWord.isValidIdentifier("$foo?"));
+		assertFalse(RpnWord.isValidIdentifier("'foo?"));
+		assertTrue(RpnWord.isValidIdentifier("'foo"));
 	}
 	
 	@Test
@@ -132,7 +132,7 @@ public class RpnStackTest {
 		parse("The required function 'upper is not known for rendering '~$text:'upper~'. An exception will be raised.");
 		assertParsingEquals(text("The required function 'upper is not known for rendering '"), func("'upper", "$text"), text("'. An exception will be raised."));
 		populateModel("text", "Eleanor of Aquitaine");
-		assertWriteThrowsException("No transform function named ''upper' is associated with the template for rendering at position 'foo'.");
+		assertWriteThrowsException("No transform function named ''upper' is associated with the template for rendering at position '-:l1:c65'.");
 	}
 	
 	// -- 
@@ -209,7 +209,7 @@ public class RpnStackTest {
 	}
 	
 	private String text(String text) {
-		return list(text, "#text").toString();
+		return text;//list(text, "#text").toString();
 	}
 	
 	private String func(String name, Object ... parameters) {
@@ -251,8 +251,8 @@ public class RpnStackTest {
 			shouldBe += expected;
 		}
 		shouldBe += "\\]";
-//		System.out.println(interpreter.toString());
-//		System.out.println(shouldBe);
+		System.out.println(interpreter.toString());
+		System.out.println(shouldBe);
 		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 

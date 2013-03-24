@@ -14,7 +14,7 @@ public class RpnStack extends Stack {
 	private static final boolean debug = true;
 
 	private Map<String, Transform> functions;
-	
+
 	public RpnStack() {
 		this(new ArrayList<>());
 	}
@@ -144,15 +144,9 @@ public class RpnStack extends Stack {
 		}
 	}
 
-	static boolean isValidIdentifier(String word) {
-		return word.matches("'\\w+") || word.matches("\\$\\w+(\\?)?");  
-	}
-
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
 		if (outsideAnExpression) {
 			push(word);
-			push("#text");
-			tolist(2);
 		} else {
 			if (currentChar != '<' && currentChar != '>' && depth() > 0 && value().equals("#func")) {
 				push_word(word, file, line, column);
@@ -165,39 +159,7 @@ public class RpnStack extends Stack {
 	}
 
 	private void push_word(String word, String file, int line, int column) throws TemplateException {
-		String pos = String.format("%s:l%d:c%d", file, line, column-word.length()-1);
-		if (! isValidIdentifier(word)) {
-			throw new TemplateException("Invalid identifier syntax for '%s' at '%s'.", word, pos); 
-		}
-		push(word); // #func newword
-		push(pos);
-		push("#pos");
-		tolist(2); // #func newword pos
-		push("#eval"); // #func newword pos #eval
-		tolist(3); // #func [ newword pos #eval ]
-	}
-
-	
-	
-	
-	private static Object getInModel(Map<String, Object> model, String varname) throws TemplateException {
-		varname = varname.substring(1);
-		boolean optional = (varname.charAt(varname.length()-1) == '?');
-		if (optional)
-			varname = varname.substring(0, varname.length()-1);
-		if (optional) {
-			if (model.containsKey(varname)) {
-				return model.get(varname);
-			} else {
-				return model.get(varname);
-			}
-		} else {
-			if (! model.containsKey(varname)) {
-				throw new TemplateException("Key '%s' is not present or has null value in the model map.", varname);
-			} else {
-				return model.get(varname);
-			}
-		}
+		push(new RpnWord(word, file, line, column-word.length()-1));
 	}
 	
 	private static boolean isRequired(String varname) {
@@ -205,29 +167,24 @@ public class RpnStack extends Stack {
 	}
 	
 	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, Object value) throws IOException, TemplateException {
+		
+		if (value instanceof String)
+			return value;
+
+		if (value instanceof RpnWord) {
+			return ((RpnWord) value).writeObject(model);
+		}
+		
 		Stack stk = new Stack((List) value);
 		String operation = (String) stk.pop();
 		System.out.println("writeObject>> " + operation);
-		if ("#text".equals(operation)) { // [ blabla #text ]
-			return stk.pop();
-		} else if ("#eval".equals(operation)) { // [ [ $var ] [ position #pos ] #func ]
-			stk.drop();
-			String key = (String) stk.pop();
-			if (key.startsWith("'")) {
-				return key.substring(1);
-			} else if (key.startsWith("$")) {
-				return getInModel(model, key);
-			} else {
-				throw new TemplateException("Unsupported case #eval for '%s'", key);
-			}
-		} else if ("#func".equals(operation)) {
-			stk.dup();
-			stk.get(1);
-			String name = (String) stk.pop();
-			Transform fp = functions.get((String) writeObject(out, functions, model, stk.pop()));
-			if (fp == null && isRequired(name)) {
-				String pos = "foo"; // FIXME
-				throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", name, pos );
+		if ("#func".equals(operation)) {
+			
+			RpnWord word = (RpnWord) stk.pop();
+
+			Transform fp = functions.get(word.writeObject(model));
+			if (fp == null && isRequired(word.word)) {
+				throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", word.word, word.pos);
 			} else if (fp == null) {
 				return null;
 			}
