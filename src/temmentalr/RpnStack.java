@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +43,7 @@ public class RpnStack extends Stack {
 		StringReader sr = new StringReader(expression);
 		StringWriter buffer = new StringWriter();
 		boolean outsideAnExpression = true;
+		boolean sentence = false;
 		try {
 			int currentChar = sr.read(); 
 			while (currentChar != -1) {
@@ -84,7 +87,10 @@ public class RpnStack extends Stack {
 						}
 					}
 				} else {
-					if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
+					if (chars('\"').contains(currentChar)) {
+						sentence = ! sentence;
+						buffer.write(currentChar);
+					} else if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar) && ! sentence) {
 //						debug("# %c => %s", currentChar, buffer.toString());
 						String word = buffer.toString();
 						if (! "".equals(word)) {
@@ -102,7 +108,7 @@ public class RpnStack extends Stack {
 					} else {
 						buffer.write(currentChar);
 					}
-					if (currentChar == '~') {
+					if (currentChar == '~' && ! sentence) {
 						outsideAnExpression = true;
 					}
 				}
@@ -162,7 +168,11 @@ public class RpnStack extends Stack {
 	}
 
 	private void push_word(String word, String file, int line, int column) throws TemplateException {
-		push(new RpnWord(word, file, line, column-word.length()-1));
+		if (word.startsWith("\"") && word.endsWith("\"")) {
+			push(word.substring(1, word.length()-1));
+		} else {
+			push(new RpnWord(word, file, line, column-word.length()-1));
+		}
 	}
 	
 	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, Object value) throws IOException, TemplateException {
@@ -196,5 +206,18 @@ public class RpnStack extends Stack {
 	public void addFunction(String name, Transform function) {
 		functions.put(name, function);		
 	}
+	
+//	public void addFunction(final String name, final Method method) {
+//		functions.put(name, new Transform<Object,Object>() {
+//			@Override
+//			public Object apply(Object value) {
+//				try {
+//					return method.invoke(value);
+//				} catch (Exception e) {
+//					throw new RuntimeException("Unable to apply '" + name + "' function. ", e);
+//				}
+//			}
+//		});		
+//	}
 
 }

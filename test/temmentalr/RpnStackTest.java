@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +128,15 @@ public class RpnStackTest {
 		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
 	}
 	
+//	@Test
+//	public void testQuoteFunctionWithFunction() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+//		parse("The uppercase of '~$text~' is '~$text:'upper~'");
+//		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
+//		populateModel("text", "Eleanor of Aquitaine");
+//		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+//		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
+//	}
+	
 	@Test
 	public void testQuoteFunctionNotKnown() throws IOException, TemplateException {
 		parse("The required function 'upper is not known for rendering '~$text:'upper~'. An exception will be raised.");
@@ -135,20 +145,66 @@ public class RpnStackTest {
 		assertWriteThrowsException("No transform function named ''upper' is associated with the template for rendering at position '-:l1:c65'.");
 	}
 	
+	@Test
+	public void testQuoteFunctionFollowedByAnotherFunction() throws IOException, TemplateException {
+		parse("Applying bold and italic functions gives ~$text:'bold:'italic~");
+		assertParsingEquals(text("Applying bold and italic functions gives "), 
+				func("'italic", func("'bold", "$text")));
+		populateModel("text", "Eleanor of Aquitaine");
+		populateTransform("bold", new Transform<String, String>() {
+			@Override
+			public String apply(String value) {
+				return "<b>" + value + "</b>";
+			}
+		});
+		populateTransform("italic", new Transform<String, String>() {
+			@Override
+			public String apply(String value) {
+				return "<i>" + value + "</i>";
+			}
+		});
+		assertWriteEquals("Applying bold and italic functions gives <i><b>Eleanor of Aquitaine</b></i>");
+	}
+	
+
+	@Test
+	public void testString() throws IOException, TemplateException {
+		parse("Something before...~\"A text inside < expression > with double quotes and tilde ~ ...\"~Something after...");
+		assertParsingEquals(text("Something before..."), text("A text inside < expression > with double quotes and tilde ~ ..."), text("Something after..."));
+		assertWriteEquals("Something before...A text inside < expression > with double quotes and tilde ~ ...Something after...");
+	}
+	
+	
 	// -- 
 	
-	
-	
 	@Test
-	public void testParseTwoQuoteOnVar() throws IOException, TemplateException {
-		parse("~$variable:'function1:'function2~");
-		assertParsingEquals(func("'function2", func("'function1", "$variable")));
+	public void testQuoteFunctionWithInitializer() throws IOException, TemplateException {
+		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\">~");
+		assertParsingEquals(text("Applying bold and italic functions gives "), 
+				func(func("'encapsulate", "b"), "$text"));
+		populateModel("text", "Eleanor of Aquitaine");
+		populateTransform("encapsulate", new Transform<String, Transform>() {
+			@Override
+			public Transform apply(final String tag) {
+				return new Transform<String, String>() {
+					@Override
+					public String apply(String value) {
+						return "<"+tag+">"+value+"</"+tag+">";
+					}
+				};
+			}
+		});
+		assertWriteEquals("Applying bold and italic functions gives <i><b>Eleanor of Aquitaine</b></i>");
 	}
-
+	
+	
 	@Test
 	public void testParseSimpleQuoteOnVarWithInit() throws IOException, TemplateException {
 		parse("~$variable:'function<$p1>~");
 		assertParsingEquals(func(func("'function", "$p1"), "$variable"));
+		
+		parse("~$variable:'function<\"b\">~");
+		assertParsingEquals(func(func("'function", text("b")), "$variable"));
 	}
 
 	@Test
@@ -217,10 +273,18 @@ public class RpnStackTest {
 			name = eval(name);
 		List<Object> params = new ArrayList<Object>();
 		for (Object o : parameters) {
-			if ((o instanceof String) && ! ((String) o).startsWith("[")) 
-				params.add(eval((String) o));
-			else 
+			System.out.println(">>" + o + " " + o.getClass().getName());
+			if (o instanceof String) {
+				if (((String) o).startsWith("$")) 
+					params.add(eval((String) o));
+				else if (((String) o).startsWith("'")) 
+					params.add(eval((String) o));	
+				else  
+					params.add(o);	
+
+			} else { 
 				params.add(o);
+			}
 		}
 		return list(params.toString(), name, "#func").toString();
 	}
@@ -233,7 +297,10 @@ public class RpnStackTest {
         if (map.length %2 != 0)
             throw new TemplateException("Invalid number of elements (key/value list implies an even size).");
         for (int i=0; i<map.length/2; i++) {
-        	interpreter.addFunction((String) map[2*i], (Transform) map[2*i+1]);
+//        	if (map[2*i+1] instanceof Transform)
+        		interpreter.addFunction((String) map[2*i], (Transform) map[2*i+1]);
+//        	else 
+//        		interpreter.addFunction((String) map[2*i], (Method) map[2*i+1]);
         }
 	}
 	
