@@ -35,15 +35,6 @@ public class RpnFunc implements RpnElem {
 			return null;
 		}
 
-//		List<Object> parameters2 = new ArrayList<>();
-//		for (Object parameter : parameters) {
-//			if (parameter instanceof RpnElem) {
-//				parameters2.add(((RpnElem) parameter).writeObject(functions, model));
-//			} else {
-//				parameters2.add(parameter);
-//			}
-//		}
-		
 		Method apply = getApplyMethod(fp);
 		
 		Class typeIn = Object.class; 
@@ -54,24 +45,11 @@ public class RpnFunc implements RpnElem {
             typeIn = typeIn.getComponentType();
         boolean convertToString = typeIn == String.class;
         
-        System.out.println("isarray " + isArray);
-        System.out.println("typeIn " + typeIn);
-//        System.out.println("func " + func.getWord());
-//        System.out.println("0 " + parameters2.get(0));
-//        Object[] objs = (Object[]) s;
-
-        
         Object args;
-        
         if (isArray) {
         	args = Array.newInstance(typeIn, parameters.size());
         	for (int i = 0; i < parameters.size(); i++) {
         		Object val = parameters.get(i);
-//        		if (convertToString) {
-//        			Array.set(args, i, val.toString());
-//        		} else {
-//        			Array.set(args, i, val);
-//        		}
         		if (val instanceof RpnElem) {
         			Array.set(args, i, ((RpnElem) val).writeObject(functions, model));
         		} else {

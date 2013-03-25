@@ -198,21 +198,29 @@ public class RpnStackTest {
 	
 	@Test
 	public void testQuoteFunctionWithInitializer() throws IOException, TemplateException {
-		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\",\"c\">~");
-		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b", "c"), "$text"));
+		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\",\"i\">~");
+		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b", "i"), "$text"));
 		populateModel("text", "Eleanor of Aquitaine");
 		populateTransform("encapsulate", new Transform<String[], Transform>() {
 			@Override
-			public Transform apply(final String tag[]) {
+			public Transform apply(final String tags[]) {
 				return new Transform<String, String>() {
 					@Override
 					public String apply(String value) {
-						return "<"+tag[0]+tag[1]+">"+value+"</"+tag[0]+tag[1]+">";
+						String s = "";
+						for (int i=0; i<tags.length; i++) {
+							s += "<" + tags[i] + ">";
+						}
+						s += value;
+						for (int i=tags.length-1; i>=0; i--) {
+							s += "</" + tags[i] + ">";
+						}
+						return s;
 					}
 				};
 			}
 		});
-		assertWriteEquals("Applying bold and italic functions gives <b>Eleanor of Aquitaine</b>");
+		assertWriteEquals("Applying bold and italic functions gives <b><i>Eleanor of Aquitaine</i></b>");
 	}
 	
 	

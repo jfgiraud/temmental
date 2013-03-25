@@ -18,7 +18,7 @@ public class RpnStack extends Stack {
 	private Map<String, Transform> functions;
 
 	public RpnStack() {
-		this(new ArrayList<>());
+		this(new ArrayList());
 	}
 
 	public RpnStack(List<Object> tocopy) {
