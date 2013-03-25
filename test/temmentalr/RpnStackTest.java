@@ -178,10 +178,9 @@ public class RpnStackTest {
 	// -- 
 	
 	@Test
-	public void testQuoteFunctionWithInitializer() throws IOException, TemplateException {
+	public void testQuoteFunctionWithInitializerOneParam() throws IOException, TemplateException {
 		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\">~");
-		assertParsingEquals(text("Applying bold and italic functions gives "), 
-				func(func("'encapsulate", "b"), "$text"));
+		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b"), "$text"));
 		populateModel("text", "Eleanor of Aquitaine");
 		populateTransform("encapsulate", new Transform<String, Transform>() {
 			@Override
@@ -194,7 +193,26 @@ public class RpnStackTest {
 				};
 			}
 		});
-		assertWriteEquals("Applying bold and italic functions gives <i><b>Eleanor of Aquitaine</b></i>");
+		assertWriteEquals("Applying bold and italic functions gives <b>Eleanor of Aquitaine</b>");
+	}
+	
+	@Test
+	public void testQuoteFunctionWithInitializer() throws IOException, TemplateException {
+		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\",\"c\">~");
+		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b", "c"), "$text"));
+		populateModel("text", "Eleanor of Aquitaine");
+		populateTransform("encapsulate", new Transform<String[], Transform>() {
+			@Override
+			public Transform apply(final String tag[]) {
+				return new Transform<String, String>() {
+					@Override
+					public String apply(String value) {
+						return "<"+tag[0]+tag[1]+">"+value+"</"+tag[0]+tag[1]+">";
+					}
+				};
+			}
+		});
+		assertWriteEquals("Applying bold and italic functions gives <b>Eleanor of Aquitaine</b>");
 	}
 	
 	
@@ -261,7 +279,8 @@ public class RpnStackTest {
 	}
 	
 	private String eval(String text) {
-		return list(text, "[-:l\\d+:c\\d+, #pos]", "#eval").toString();
+		//return list(text, "[-:l\\d+:c\\d+, #pos]", "#eval").toString();
+		return "eval\\(" + text + "\\)";
 	}
 	
 	private String text(String text) {
@@ -269,7 +288,7 @@ public class RpnStackTest {
 	}
 	
 	private String func(String name, Object ... parameters) {
-		if (! name.startsWith("["))
+		if (! name.startsWith("eval"))
 			name = eval(name);
 		List<Object> params = new ArrayList<Object>();
 		for (Object o : parameters) {
@@ -286,7 +305,7 @@ public class RpnStackTest {
 				params.add(o);
 			}
 		}
-		return list(params.toString(), name, "#func").toString();
+		return name + params.toString();
 	}
 
 	private void populateModel(Object ... map) throws TemplateException {

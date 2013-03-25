@@ -15,7 +15,7 @@ public class RpnFunc implements RpnElem {
 	}
 	
 	public String toString() {
-		return "[" + parameters + ", " + func + ", #func]";
+		return func + parameters.toString();
 	}
 
 	private static boolean isRequired(String varname) {
@@ -23,15 +23,16 @@ public class RpnFunc implements RpnElem {
 	}
 	
 	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException {
-
-		Transform fp = functions.get(func.writeObject(functions, model));
+		Object o = func.writeObject(functions, model);
+		Transform fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
+		
 		if (fp == null && isRequired(func.getWord())) {
 			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", func.getWord(), func.getPos());
 		} else if (fp == null) {
 			return null;
 		}
 
-		List parameters2 = new ArrayList<>();
+		List<Object> parameters2 = new ArrayList<>();
 		for (Object parameter : parameters) {
 			if (parameter instanceof RpnElem) {
 				parameters2.add(((RpnElem) parameter).writeObject(functions, model));
@@ -39,14 +40,6 @@ public class RpnFunc implements RpnElem {
 				parameters2.add(parameter);
 			}
 		}
-//		if (key.startsWith("'")) {
-//			Object o = getInModel(model, key);
-//			if (o != null) {
-//				out.write(o.toString());
-//			}
-//		} else {
-//			throw new TemplateException("Unsupported case #eval for '%s'", key);
-//		}
 		return fp.apply(parameters2.get(0));
 	}
 	

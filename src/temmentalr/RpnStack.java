@@ -198,7 +198,6 @@ public class RpnStack extends Stack {
 			Object o = writeObject(out, functions, model, value(i));
 			if (o != null) {
 				out.write(o.toString());
-				System.out.println(i+">> " + o.toString());
 			}
 		}
 	}

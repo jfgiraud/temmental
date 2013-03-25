@@ -18,7 +18,7 @@ public class RpnWord implements RpnElem {
 	@Override
 	public String toString() {
 		// [ word [ pos #pos ] #eval ]
-		return "[" + word + ", [" + pos + ", #pos], #eval]"; 
+		return "eval(" + word + ")"; 
 	}
 
 	static boolean isValidIdentifier(String word) {
