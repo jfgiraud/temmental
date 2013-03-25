@@ -1,5 +1,8 @@
 package temmentalr;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +35,75 @@ public class RpnFunc implements RpnElem {
 			return null;
 		}
 
-		List<Object> parameters2 = new ArrayList<>();
-		for (Object parameter : parameters) {
-			if (parameter instanceof RpnElem) {
-				parameters2.add(((RpnElem) parameter).writeObject(functions, model));
-			} else {
-				parameters2.add(parameter);
-			}
+//		List<Object> parameters2 = new ArrayList<>();
+//		for (Object parameter : parameters) {
+//			if (parameter instanceof RpnElem) {
+//				parameters2.add(((RpnElem) parameter).writeObject(functions, model));
+//			} else {
+//				parameters2.add(parameter);
+//			}
+//		}
+		
+		Method apply = getApplyMethod(fp);
+		
+		Class typeIn = Object.class; 
+        boolean isArray = false;
+        typeIn = apply.getParameterTypes()[0]; 
+        isArray = typeIn.isArray();
+        if (isArray)
+            typeIn = typeIn.getComponentType();
+        boolean convertToString = typeIn == String.class;
+        
+        System.out.println("isarray " + isArray);
+        System.out.println("typeIn " + typeIn);
+//        System.out.println("func " + func.getWord());
+//        System.out.println("0 " + parameters2.get(0));
+//        Object[] objs = (Object[]) s;
+
+        
+        Object args;
+        
+        if (isArray) {
+        	args = Array.newInstance(typeIn, parameters.size());
+        	for (int i = 0; i < parameters.size(); i++) {
+        		Object val = parameters.get(i);
+//        		if (convertToString) {
+//        			Array.set(args, i, val.toString());
+//        		} else {
+//        			Array.set(args, i, val);
+//        		}
+        		if (val instanceof RpnElem) {
+        			Array.set(args, i, ((RpnElem) val).writeObject(functions, model));
+        		} else {
+        			Array.set(args, i, val);
+        		}
+        	}
+        } else {
+        	if (parameters.size() > 1) {
+        		throw new TemplateException("Unable to apply function: Too much arguments"); //FIXME
+        	}
+        	Object val = parameters.get(0);
+    		if (val instanceof RpnElem) {
+    			args = ((RpnElem) val).writeObject(functions, model);
+    		} else {
+    			args = val;
+    		}
+        }
+        
+		try {
+			return apply.invoke(fp, args);
+		} catch (Exception e) {
+			throw new TemplateException(e, "Unable to apply function " + args); //FIXME 
 		}
-		return fp.apply(parameters2.get(0));
+	}
+	
+	private Method getApplyMethod(Transform t) {
+		Method[] methods = t.getClass().getMethods();
+        for (Method method : methods) {
+            if (method.getName().equals("apply"))
+                return method;
+        }
+        return null;
 	}
 	
 	public String getWord() {
