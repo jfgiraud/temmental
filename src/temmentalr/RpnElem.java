@@ -2,12 +2,15 @@ package temmentalr;
 
 import java.util.Map;
 
-public interface RpnElem {
+public abstract class RpnElem {
 
-	Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException;
+	abstract Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException;
 	
-	String getWord();
+	abstract String getWord();
 
-	String getPos();
+	abstract String getPos();
 	
+	static boolean isRequired(String varname) {
+		return varname != null && varname.startsWith("'") || ! varname.endsWith("?");
+	}
 }

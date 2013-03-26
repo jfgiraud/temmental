@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RpnFunc implements RpnElem {
+public class RpnFunc extends RpnElem {
 
 	private RpnElem func;
 	private List parameters;
@@ -19,10 +19,6 @@ public class RpnFunc implements RpnElem {
 	
 	public String toString() {
 		return func + parameters.toString();
-	}
-
-	private static boolean isRequired(String varname) {
-		return varname != null && varname.startsWith("'");
 	}
 	
 	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException {
@@ -50,6 +46,10 @@ public class RpnFunc implements RpnElem {
         	args = Array.newInstance(typeIn, parameters.size());
         	for (int i = 0; i < parameters.size(); i++) {
         		Object val = parameters.get(i);
+        		if (val == null) {
+        			throw new TemplateException("Unable to apply function: null argument"); //FIXME
+        		}
+        		// FIXME il ne manquerait pas un test isRequired??
         		if (val instanceof RpnElem) {
         			Array.set(args, i, ((RpnElem) val).writeObject(functions, model));
         		} else {
@@ -61,11 +61,22 @@ public class RpnFunc implements RpnElem {
         		throw new TemplateException("Unable to apply function: Too much arguments"); //FIXME
         	}
         	Object val = parameters.get(0);
+        	if (val == null) {
+        		throw new TemplateException("Unable to apply function: null argument"); //FIXME
+        	}
     		if (val instanceof RpnElem) {
     			args = ((RpnElem) val).writeObject(functions, model);
     		} else {
     			args = val;
     		}
+    		if (args == null) {
+    			if (((RpnElem) val).isRequired(((RpnElem) val).getWord())) {
+    				// FIXME pas top le test
+    				throw new TemplateException("Unable to apply function: null argument"+val.getClass().getName()); //FIXME
+    			} else {
+    				return null;
+    			}
+        	}
         }
         
 		try {

@@ -2,7 +2,7 @@ package temmentalr;
 
 import java.util.Map;
 
-public class RpnWord implements RpnElem {
+public class RpnWord extends RpnElem {
 	
 	String word;
 	String pos;
@@ -27,14 +27,13 @@ public class RpnWord implements RpnElem {
 
 	private static Object getInModel(Map<String, Object> model, String varname) throws TemplateException {
 		varname = varname.substring(1);
-		boolean optional = (varname.charAt(varname.length()-1) == '?');
-		if (optional)
-			varname = varname.substring(0, varname.length()-1);
+		boolean optional = ! isRequired(varname);
 		if (optional) {
+			varname = varname.substring(0, varname.length()-1);
 			if (model.containsKey(varname)) {
 				return model.get(varname);
 			} else {
-				return model.get(varname);
+				return null;
 			}
 		} else {
 			if (! model.containsKey(varname)) {

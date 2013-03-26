@@ -146,9 +146,9 @@ public class RpnStackTest {
 	}
 	
 	@Test
-	public void testQuoteFunctionFollowedByAnotherFunction() throws IOException, TemplateException {
-		parse("Applying bold and italic functions gives ~$text:'bold:'italic~");
-		assertParsingEquals(text("Applying bold and italic functions gives "), 
+	public void testQuoteFunctionChain() throws IOException, TemplateException {
+		parse("Apply a chain of functions ~$text:'bold:'italic~");
+		assertParsingEquals(text("Apply a chain of functions "), 
 				func("'italic", func("'bold", "$text")));
 		populateModel("text", "Eleanor of Aquitaine");
 		populateTransform("bold", new Transform<String, String>() {
@@ -163,7 +163,7 @@ public class RpnStackTest {
 				return "<i>" + value + "</i>";
 			}
 		});
-		assertWriteEquals("Applying bold and italic functions gives <i><b>Eleanor of Aquitaine</b></i>");
+		assertWriteEquals("Apply a chain of functions <i><b>Eleanor of Aquitaine</b></i>");
 	}
 	
 
@@ -179,8 +179,8 @@ public class RpnStackTest {
 	
 	@Test
 	public void testQuoteFunctionWithInitializerOneParam() throws IOException, TemplateException {
-		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\">~");
-		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b"), "$text"));
+		parse("Apply a parameterized function ~$text:'encapsulate<\"b\">~");
+		assertParsingEquals(text("Apply a parameterized function "), func(func("'encapsulate", "b"), "$text"));
 		populateModel("text", "Eleanor of Aquitaine");
 		populateTransform("encapsulate", new Transform<String, Transform>() {
 			@Override
@@ -193,7 +193,7 @@ public class RpnStackTest {
 				};
 			}
 		});
-		assertWriteEquals("Applying bold and italic functions gives <b>Eleanor of Aquitaine</b>");
+		assertWriteEquals("Apply a parameterized function <b>Eleanor of Aquitaine</b>");
 	}
 	
 	@Test
@@ -225,20 +225,25 @@ public class RpnStackTest {
 	
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInit() throws IOException, TemplateException {
-		parse("~$variable:'function<$p1>~");
-		assertParsingEquals(func(func("'function", "$p1"), "$variable"));
-		
-		parse("~$variable:'function<\"b\">~");
-		assertParsingEquals(func(func("'function", text("b")), "$variable"));
+	public void testParameterizedQuoteFunctionChain() throws IOException, TemplateException {
+		parse("~$variable:'add<$toAdd1>:'add<$toAdd2>~");
+		populateTransform("add", new Transform<Integer, Transform>() {
+			@Override
+			public Transform apply(final Integer toAdd) {
+				return new Transform<Integer, Integer>() {
+					@Override
+					public Integer apply(Integer value) {
+						return value.intValue() + toAdd.intValue();
+					}
+				};
+			}
+		});
+		populateModel("variable", 5);
+		populateModel("toAdd1", 3);
+		populateModel("toAdd2", 2);
+		assertWriteEquals("10");
 	}
 
-	@Test
-	public void testParseSimpleQuoteOnVarWithInits() throws IOException, TemplateException {
-		parse("~$variable:'function<$p1,$p2>~");
-		assertParsingEquals(func(func("'function", "$p1", "$p2"), "$variable"));
-	}
-	
 	@Test
 	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException {
 		parse("~$variable:'function<$p1:'function2,$p2>~");
@@ -260,7 +265,17 @@ public class RpnStackTest {
 	@Test
 	public void testParseTwoVarFilterOnVar() throws IOException, TemplateException {
 		parse("~$variable:$function1?:$function2~");
+		populateTransform("addOne", new Transform<Integer, Integer>() {
+			@Override
+			public Integer apply(Integer value) {
+				return value.intValue() + 1;
+			}
+		});
+		populateModel("variable", 5);
+		populateModel("function2", "addOne");
+//		populateModel("function1", "addOne");
 		assertParsingEquals(func("$function2", func("$function1?", "$variable")));
+		assertWriteEquals("");
 	}
 	
 	@Test
