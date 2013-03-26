@@ -169,9 +169,9 @@ public class RpnStackTest {
 
 	@Test
 	public void testString() throws IOException, TemplateException {
-		parse("Something before...~\"A text inside < expression > with double quotes and tilde ~ ...\"~Something after...");
-		assertParsingEquals(text("Something before..."), text("A text inside < expression > with double quotes and tilde ~ ..."), text("Something after..."));
-		assertWriteEquals("Something before...A text inside < expression > with double quotes and tilde ~ ...Something after...");
+		parse("Something before...~\"A text with double quotes, tilde ~, brackets >< ...\"~Something after...");
+		assertParsingEquals(text("Something before..."), text("A text with double quotes, tilde ~, brackets >< ..."), text("Something after..."));
+		assertWriteEquals("Something before...A text with double quotes, tilde ~, brackets >< ...Something after...");
 	}
 	
 	

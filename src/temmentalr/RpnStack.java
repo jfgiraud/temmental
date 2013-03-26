@@ -45,6 +45,7 @@ public class RpnStack extends Stack {
 		boolean outsideAnExpression = true;
 		boolean sentence = false;
 		try {
+			int previousChar = 0;
 			int currentChar = sr.read(); 
 			while (currentChar != -1) {
 				column++;
@@ -55,11 +56,11 @@ public class RpnStack extends Stack {
 							line++;
 							column = 0;
 						} 
-//						debug("%c %c => %s", currentChar, '#', buffer.toString());
+						debug("%c %c => %s", currentChar, '#', buffer.toString());
 					} else {
 						int nextChar = sr.read();
 						if (nextChar == -1) {
-//							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 							outsideAnExpression = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
@@ -70,28 +71,46 @@ public class RpnStack extends Stack {
 						} else {
 							if (nextChar == '~' && currentChar == '~') {
 								buffer.write(currentChar);
-//								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+								previousChar = currentChar;
 								currentChar = sr.read();
 								continue;
 							} else {
-//								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
+								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 								outsideAnExpression = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
 									change_word(word, file, line, column, currentChar, true);
 								}
 								buffer = new StringWriter();
+								previousChar = currentChar;
 								currentChar = nextChar;
 								continue;
 							}
 						}
 					}
 				} else {
-					if (chars('\"').contains(currentChar)) {
-						sentence = ! sentence;
+					if (chars('"').contains(currentChar) || sentence) {
 						buffer.write(currentChar);
-					} else if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar) && ! sentence) {
-//						debug("# %c => %s", currentChar, buffer.toString());
+						debug("# %c => %s 3", currentChar, buffer.toString());
+						if (currentChar == '"' && previousChar != '\\') {
+//							sentence = ! sentence;
+							if (sentence) {
+								sentence = false;
+								String word = buffer.toString();
+								if (! "".equals(word)) {
+									change_word(word, file, line, column, currentChar, outsideAnExpression);
+								}
+								buffer = new StringWriter();
+							} else {
+								sentence = true;
+							}
+						}
+						previousChar = currentChar;
+						currentChar = sr.read(); 
+						continue;
+					} else if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
+						debug("# %c => %s", currentChar, buffer.toString());
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -108,10 +127,11 @@ public class RpnStack extends Stack {
 					} else {
 						buffer.write(currentChar);
 					}
-					if (currentChar == '~' && ! sentence) {
+					if (currentChar == '~') {
 						outsideAnExpression = true;
 					}
 				}
+				previousChar = currentChar;
 				currentChar = sr.read(); 
 			}
 			String word = buffer.toString();
