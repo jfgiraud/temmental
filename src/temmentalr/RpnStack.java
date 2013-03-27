@@ -226,17 +226,17 @@ public class RpnStack extends Stack {
 		functions.put(name, function);		
 	}
 	
-//	public void addFunction(final String name, final Method method) {
-//		functions.put(name, new Transform<Object,Object>() {
-//			@Override
-//			public Object apply(Object value) {
-//				try {
-//					return method.invoke(value);
-//				} catch (Exception e) {
-//					throw new RuntimeException("Unable to apply '" + name + "' function. ", e);
-//				}
-//			}
-//		});		
-//	}
+	public void addFunction(final String name, final Method method) {
+		functions.put(name, new Transform<Object,Object>() {
+			@Override
+			public Object apply(Object value) {
+				try {
+					return method.invoke(value);
+				} catch (Exception e) {
+					throw new RuntimeException("Unable to apply '" + name + "' function. ", e);
+				}
+			}
+		});		
+	}
 
 }

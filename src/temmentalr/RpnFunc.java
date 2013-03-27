@@ -24,6 +24,10 @@ public class RpnFunc extends RpnElem {
 	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException {
 		Object o = func.writeObject(functions, model);
 		Transform fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
+
+		System.out.println(">>>>>>>" + func.toString());
+		System.out.println(">>>>>>>" + o);
+		System.out.println(">>>>>>>" + fp);
 		
 		if (fp == null && isRequired(func.getWord())) {
 			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", func.getWord(), func.getPos());
@@ -41,47 +45,52 @@ public class RpnFunc extends RpnElem {
             typeIn = typeIn.getComponentType();
         boolean convertToString = typeIn == String.class;
         
+        
+        System.out.println(">>>>>>>" + typeIn + " " + isArray);
+        
         Object args;
-        if (isArray) {
-        	args = Array.newInstance(typeIn, parameters.size());
-        	for (int i = 0; i < parameters.size(); i++) {
-        		Object val = parameters.get(i);
-        		if (val == null) {
-        			throw new TemplateException("Unable to apply function: null argument"); //FIXME
-        		}
-        		// FIXME il ne manquerait pas un test isRequired??
-        		if (val instanceof RpnElem) {
-        			Array.set(args, i, ((RpnElem) val).writeObject(functions, model));
-        		} else {
-        			Array.set(args, i, val);
-        		}
-        	}
-        } else {
-        	if (parameters.size() > 1) {
-        		throw new TemplateException("Unable to apply function: Too much arguments"); //FIXME
-        	}
-        	Object val = parameters.get(0);
-        	if (val == null) {
+//        typeIn = Object.class;
+
+        System.out.println("typeIn="+typeIn);
+        args = Array.newInstance(typeIn, parameters.size());
+        for (int i = 0; i < parameters.size(); i++) {
+        	Object parameter = parameters.get(i);
+        	Object afterProcess;
+        	if (parameter == null) {
         		throw new TemplateException("Unable to apply function: null argument"); //FIXME
         	}
-    		if (val instanceof RpnElem) {
-    			args = ((RpnElem) val).writeObject(functions, model);
-    		} else {
-    			args = val;
-    		}
-    		if (args == null) {
-    			if (((RpnElem) val).isRequired(((RpnElem) val).getWord())) {
-    				// FIXME pas top le test
-    				throw new TemplateException("Unable to apply function: null argument"+val.getClass().getName()); //FIXME
-    			} else {
-    				return null;
-    			}
+        	if (parameter instanceof RpnElem) {
+        		afterProcess = ((RpnElem) parameter).writeObject(functions, model);
+        	} else {
+        		afterProcess = parameter;
         	}
+        	if (afterProcess == null) {
+        		if (((RpnElem) parameter).isRequired(((RpnElem) parameter).getWord())) {
+        			// FIXME pas top le test
+        			throw new TemplateException("Unable to apply function: null argument"+parameter.getClass().getName()); //FIXME
+        		} else {
+        			return null;
+        		}
+        	}
+        	if (parameter instanceof RpnWord) {
+        		System.out.println("apres " + ((RpnWord) parameter).getWord());
+        	}
+        	Array.set(args, i, afterProcess);
         }
-        
+        if (parameters.size() == 1) {
+        	System.out.println("get1");
+        	args = ((Object[]) args)[0];
+        }
+
 		try {
 			return apply.invoke(fp, args);
 		} catch (Exception e) {
+			System.out.println("apply="+apply);
+			System.out.println("fp="+fp);
+			System.out.println("size="+parameters.size());
+			for (int i=0; i<parameters.size(); i++) {
+				System.out.println("p["+i+"]="+parameters.get(i) + " %% " + parameters.get(i).getClass().getName());
+			}
 			throw new TemplateException(e, "Unable to apply function " + args); //FIXME 
 		}
 	}
@@ -89,6 +98,7 @@ public class RpnFunc extends RpnElem {
 	private Method getApplyMethod(Transform t) {
 		Method[] methods = t.getClass().getMethods();
         for (Method method : methods) {
+        	System.out.println("method=" + method);
             if (method.getName().equals("apply"))
                 return method;
         }

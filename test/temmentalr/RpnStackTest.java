@@ -128,14 +128,14 @@ public class RpnStackTest {
 		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
 	}
 	
-//	@Test
-//	public void testQuoteFunctionWithFunction() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-//		parse("The uppercase of '~$text~' is '~$text:'upper~'");
-//		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
-//		populateModel("text", "Eleanor of Aquitaine");
-//		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
-//		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
-//	}
+	@Test
+	public void testQuoteFunctionWithFunction() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("The uppercase of '~$text~' is '~$text:'upper~'");
+		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
+		populateModel("text", "Eleanor of Aquitaine");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
+	}
 	
 	@Test
 	public void testQuoteFunctionNotKnown() throws IOException, TemplateException {
@@ -245,9 +245,14 @@ public class RpnStackTest {
 	}
 
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException {
-		parse("~$variable:'function<$p1:'function2,$p2>~");
-		assertParsingEquals(func(func("'function", func("'function2", "$p1"), "$p2"), "$variable"));
+	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$variable:'function<$p1,$p2:'function2>~");
+		assertParsingEquals(func(func("'function", "$p1", func("'function2", "$p2")), "$variable"));
+		populateTransform("function", String.class.getDeclaredMethod("replaceAll", String.class, String.class));
+		populateTransform("function2", String.class.getDeclaredMethod("toUpperCase"));
+		populateModel("variable", "toto", "p1", "o", "p2", "a");
+		
+		assertWriteEquals("10");
 	}
 	
 	@Test
@@ -339,10 +344,10 @@ public class RpnStackTest {
         if (map.length %2 != 0)
             throw new TemplateException("Invalid number of elements (key/value list implies an even size).");
         for (int i=0; i<map.length/2; i++) {
-//        	if (map[2*i+1] instanceof Transform)
+        	if (map[2*i+1] instanceof Transform)
         		interpreter.addFunction((String) map[2*i], (Transform) map[2*i+1]);
-//        	else 
-//        		interpreter.addFunction((String) map[2*i], (Method) map[2*i+1]);
+        	else 
+        		interpreter.addFunction((String) map[2*i], (Method) map[2*i+1]);
         }
 	}
 	
