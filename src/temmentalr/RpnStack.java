@@ -259,25 +259,36 @@ public class RpnStack extends Stack {
 //		}
 //	});
 	public void addFunction(final String name, final Method method) {
-		functions.put(name, new Transform<String[], Transform>() {
-			@Override
-			public Transform apply(final String[] value) {
-				return new Transform<String, String>() {
-					@Override
-					public String apply(String text) {
-//						try {
-//							return method.invoke(text, value);
-//						} catch (Exception e) {
-//							throw new RuntimeException("zzz"); //FIXME
-//						}
-						System.out.println("^^^^^^^^^^^^^ " + name);
-						if (name.equals("upper"))
-							return ((String) text).toUpperCase();
-						return null;
+		if (method.getParameterTypes().length>0) {
+			addFunction(name, new Transform<Object[], Transform>() {
+				@Override
+				public Transform apply(final Object[] value) {
+					return new Transform<Object, Object>() {
+						@Override
+						public Object apply(Object text) {
+							try {
+								return method.invoke(text, value);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							return text;
+						}
+					};
+				}
+			});
+		} else {
+			addFunction(name, new Transform<Object, Object>() {
+				@Override
+				public Object apply(Object value) {
+					try {
+						return method.invoke(value);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				};
-			}
-		});
+					return value;
+				}
+			});
+		}
 	}
 
 }

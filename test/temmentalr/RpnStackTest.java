@@ -134,7 +134,19 @@ public class RpnStackTest {
 		parse("The uppercase of '~$text~' is '~$text:'upper~'");
 		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
 		populateModel("text", "Eleanor of Aquitaine");
-		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase", null));
+//		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase", null));
+		final Method method = String.class.getDeclaredMethod("toUpperCase", null);
+		populateTransform("upper", new Transform<Object, Object>() {
+			@Override
+			public Object apply(Object value) {
+				try {
+					return method.invoke(value);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return value;
+			}
+		});
 		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
 	}
 	
@@ -247,38 +259,12 @@ public class RpnStackTest {
 
 	@Test
 	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method method = String.class.getDeclaredMethod("replaceAll", String.class, String.class);
-		String var = "toto";
-		assertEquals("tAtA", method.invoke(var, new String[] { "o","A" }));
-		
-		
 		parse("~$variable:'function<$p1,$p2:'function2>~");
 		assertParsingEquals(func(func("'function", "$p1", func("'function2", "$p2")), "$variable"));
-		populateTransform("function", String.class.getDeclaredMethod("replaceAll", String.class, String.class));
+		populateTransform("function", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
 		populateTransform("function2", String.class.getDeclaredMethod("toUpperCase"));
-		
-//		
-//		populateTransform("function", new Transform<String[], Transform>() {
-//			@Override
-//			public Transform apply(final String[] value) {
-//				return new Transform<String, String>() {
-//					@Override
-//					public String apply(String text) {
-//						return text.replaceAll(value[0], value[1]);
-//					}
-//				};
-//			}
-//		});
-//		populateTransform("function2", new Transform<String, String>() {
-//			@Override
-//			public String apply(String value) {
-//				return value.toUpperCase();
-//			}
-//		});
-		
 		populateModel("variable", "toto", "p1", "o", "p2", "a");
-		
-		assertWriteEquals("10");
+		assertWriteEquals("tAtA");
 	}
 	
 	@Test
