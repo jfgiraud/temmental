@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,7 +134,7 @@ public class RpnStackTest {
 		parse("The uppercase of '~$text~' is '~$text:'upper~'");
 		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
 		populateModel("text", "Eleanor of Aquitaine");
-		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase", null));
 		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
 	}
 	
@@ -245,11 +246,36 @@ public class RpnStackTest {
 	}
 
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Method method = String.class.getDeclaredMethod("replaceAll", String.class, String.class);
+		String var = "toto";
+		assertEquals("tAtA", method.invoke(var, new String[] { "o","A" }));
+		
+		
 		parse("~$variable:'function<$p1,$p2:'function2>~");
 		assertParsingEquals(func(func("'function", "$p1", func("'function2", "$p2")), "$variable"));
 		populateTransform("function", String.class.getDeclaredMethod("replaceAll", String.class, String.class));
 		populateTransform("function2", String.class.getDeclaredMethod("toUpperCase"));
+		
+//		
+//		populateTransform("function", new Transform<String[], Transform>() {
+//			@Override
+//			public Transform apply(final String[] value) {
+//				return new Transform<String, String>() {
+//					@Override
+//					public String apply(String text) {
+//						return text.replaceAll(value[0], value[1]);
+//					}
+//				};
+//			}
+//		});
+//		populateTransform("function2", new Transform<String, String>() {
+//			@Override
+//			public String apply(String value) {
+//				return value.toUpperCase();
+//			}
+//		});
+		
 		populateModel("variable", "toto", "p1", "o", "p2", "a");
 		
 		assertWriteEquals("10");
@@ -285,8 +311,8 @@ public class RpnStackTest {
 	
 	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
-		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
-		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
+//		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
+//		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
 		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c29'.", "~$variable?:'function1<$p1>:function2~");
 		assertParseThrowsException("Invalid identifier syntax for 'function3' at '-:l1:c28'.", "~$variable?:'function1<$p1:function3>:'function2~");
 	}
@@ -356,7 +382,7 @@ public class RpnStackTest {
 		assertTrue("[-:l1:c12, #pos]".matches("[-:l\\d+:c\\d+, #pos]".replace("$", "\\$").replace("[", "\\[").replace("]", "\\]")));
 	}
 
-	private void assertParsingEquals(String ... expectedStack) {
+	private void assertParsingEquals(String ... expectedStack) throws IOException {
 		String shouldBe = "\\[";
 		for (String expected : expectedStack) {
 			if (! shouldBe.equals("\\["))

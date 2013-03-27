@@ -25,10 +25,10 @@ public class RpnFunc extends RpnElem {
 		Object o = func.writeObject(functions, model);
 		Transform fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
 
-		System.out.println(">>>>>>>" + func.toString());
-		System.out.println(">>>>>>>" + o);
-		System.out.println(">>>>>>>" + fp);
-		
+		System.out.println(">>>f>>>>" + func.toString());
+		System.out.println(">>>o>>>>" + o);
+		System.out.println(">>>fp>>>>" + fp);
+
 		if (fp == null && isRequired(func.getWord())) {
 			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", func.getWord(), func.getPos());
 		} else if (fp == null) {
@@ -46,12 +46,12 @@ public class RpnFunc extends RpnElem {
         boolean convertToString = typeIn == String.class;
         
         
-        System.out.println(">>>>>>>" + typeIn + " " + isArray);
+//        System.out.println(">>>>>>>" + typeIn + " " + isArray);
         
         Object args;
 //        typeIn = Object.class;
 
-        System.out.println("typeIn="+typeIn);
+//        System.out.println("typeIn="+typeIn + "   " + func.getWord());
         args = Array.newInstance(typeIn, parameters.size());
         for (int i = 0; i < parameters.size(); i++) {
         	Object parameter = parameters.get(i);
@@ -72,33 +72,35 @@ public class RpnFunc extends RpnElem {
         			return null;
         		}
         	}
-        	if (parameter instanceof RpnWord) {
-        		System.out.println("apres " + ((RpnWord) parameter).getWord());
-        	}
+//        	if (parameter instanceof RpnWord) {
+//        		System.out.println("apres " + ((RpnWord) parameter).getWord());
+//        	}
         	Array.set(args, i, afterProcess);
         }
         if (parameters.size() == 1) {
-        	System.out.println("get1");
+//        	System.out.println("get1 " + fp.getClass().getTypeParameters());
         	args = ((Object[]) args)[0];
         }
 
 		try {
 			return apply.invoke(fp, args);
 		} catch (Exception e) {
-			System.out.println("apply="+apply);
-			System.out.println("fp="+fp);
-			System.out.println("size="+parameters.size());
-			for (int i=0; i<parameters.size(); i++) {
-				System.out.println("p["+i+"]="+parameters.get(i) + " %% " + parameters.get(i).getClass().getName());
-			}
-			throw new TemplateException(e, "Unable to apply function " + args); //FIXME 
+//			System.out.println("func="+ func.getWord());
+//			System.out.println("apply="+apply);
+//			System.out.println("fp="+fp);
+//			System.out.println("size="+((Object[]) args).length);
+//			System.out.println("class="+args.getClass());
+//			for (int i=0; i<((Object[]) args).length; i++) {
+//				System.out.println("p["+i+"]="+((Object[]) args)[i] + " %% " + ((Object[]) args)[i].getClass().getName());
+//			}
+			throw new TemplateException(e, "Unable to apply function '" + func.getWord() + "'"); //FIXME 
 		}
 	}
 	
 	private Method getApplyMethod(Transform t) {
 		Method[] methods = t.getClass().getMethods();
         for (Method method : methods) {
-        	System.out.println("method=" + method);
+//        	System.out.println("method=" + method);
             if (method.getName().equals("apply"))
                 return method;
         }

@@ -146,6 +146,12 @@ public class RpnStack extends Stack {
 
 	private void eval() throws TemplateException {
 		if (depth()>1) {
+//			Object avDernier = value(2);
+//			if (avDernier.equals("#func")) {
+//				// var #func 'func
+//				swap();
+//			}
+			
 			Object last = value();
 			if (last.equals("#func")) {
 				// var 'func #func
@@ -155,35 +161,51 @@ public class RpnStack extends Stack {
 				List parameters = (List) pop();
 				push(new RpnFunc(func, parameters));
 			} else if (last.equals("#>")) {
-				drop();
-				int i=1;
-				while (i<=depth() && ! value(i).equals("#<")) {
-					i++;
-				}
-				tolist(i-1);
-				List parameters = (List) pop();
-				drop();
-				RpnElem func = (RpnElem) pop();
-				
-				push(new RpnFunc(func, parameters));
-				
-				swap();
+				try {
+					printStack(System.out);
+					drop();
+					int i=1;
+					while (i<=depth() && ! value(i).equals("#<")) {
+						i++;
+					}
+					tolist(i-1);
+					printStack(System.out);
+					List parameters = (List) pop();
+					drop();
+					RpnElem func = (RpnElem) pop();
+
+					push(new RpnFunc(func, parameters));
+
+					swap();
 				eval();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
+		
 		if (outsideAnExpression) {
 			push(word);
 		} else {
-			if (currentChar != '<' && currentChar != '>' && depth() > 0 && value().equals("#func")) {
+			System.out.println(String.format("===> %c" , currentChar));
+			if (currentChar != '<' /*&& currentChar != '>'*/ && depth() > 0 && value().equals("#func")) {
 				push_word(word, file, line, column);
 				swap(); // [ word pos #eval ] #func 
 			} else {
 				push_word(word, file, line, column);
 			}
 			eval();
+		}
+		try {
+			System.out.println("==== push word " + word );
+			printStack(System.out);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -225,18 +247,37 @@ public class RpnStack extends Stack {
 	public void addFunction(String name, Transform function) {
 		functions.put(name, function);		
 	}
-	
+//	populateTransform("function", new Transform<String[], Transform>() {
+//		@Override
+//		public Transform apply(final String[] value) {
+//			return new Transform<String, String>() {
+//				@Override
+//				public String apply(String text) {
+//					return text.replaceAll(value[0], value[1]);
+//				}
+//			};
+//		}
+//	});
 	public void addFunction(final String name, final Method method) {
-		functions.put(name, new Transform<Object,Object>() {
+		functions.put(name, new Transform<String[], Transform>() {
 			@Override
-			public Object apply(Object value) {
-				try {
-					return method.invoke(value);
-				} catch (Exception e) {
-					throw new RuntimeException("Unable to apply '" + name + "' function. ", e);
-				}
+			public Transform apply(final String[] value) {
+				return new Transform<String, String>() {
+					@Override
+					public String apply(String text) {
+//						try {
+//							return method.invoke(text, value);
+//						} catch (Exception e) {
+//							throw new RuntimeException("zzz"); //FIXME
+//						}
+						System.out.println("^^^^^^^^^^^^^ " + name);
+						if (name.equals("upper"))
+							return ((String) text).toUpperCase();
+						return null;
+					}
+				};
 			}
-		});		
+		});
 	}
 
 }
