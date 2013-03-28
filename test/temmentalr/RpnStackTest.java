@@ -101,7 +101,7 @@ public class RpnStackTest {
 	public void testVariableRequiredButNotFound() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
 	    assertParsingEquals(eval("$text_to_replace"));
-	    assertWriteThrowsException("Key 'text_to_replace' is not present or has null value in the model map.");
+	    assertWriteThrowsException("Key 'text_to_replace' is not present or has null value in the model map at position '-:l1:c2'.");
 	}
 	
 	@Test
@@ -310,6 +310,33 @@ public class RpnStackTest {
 	}
 	
 	@Test
+	public void testParseQuoteMessageWithOptionalParameterNotSet() throws IOException, TemplateException {
+		parse("Text before...~'hello[$firstname?]~Text after...");
+		populateProperty("hello", "Bonjour {0} !");
+		assertParsingEquals(text("Text before..."), message("'hello", "$firstname?"), text("Text after...")); 
+		assertWriteEquals("Text before...Text after...");
+	}
+	
+	@Test
+	public void testParseQuoteMessageWithRequiredParameterNotSet() throws IOException, TemplateException {
+		parse("Text before...~'hello[$firstname]~Text after...");
+		populateProperty("hello", "Bonjour {0} !");
+		assertParsingEquals(text("Text before..."), message("'hello", "$firstname"), text("Text after...")); 
+		assertWriteThrowsException("Key 'firstname' is not present or has null value in the model map at position '-:l1:c23'.");
+	}
+	
+	@Test
+	public void testParseQuoteMessageWithRequiredParameterSet() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("Text before...~'hello[$firstname:'upper]~Text after...");
+		populateProperty("hello", "Bonjour {0} !");
+		populateModel("firstname", "John");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		assertParsingEquals(text("Text before..."), message("'hello", func("'upper", "$firstname")), text("Text after...")); 
+		assertWriteEquals("Text before...Bonjour JOHN !Text after...");
+	}
+	
+	
+	@Test
 	public void testParseVarMessage() throws IOException, TemplateException {
 		parse("Text before...~$msg[]~Text after...");
 		populateProperty("helloworld", "Bonjour le monde !");
@@ -317,6 +344,8 @@ public class RpnStackTest {
 		assertParsingEquals(text("Text before..."), message("$msg"), text("Text after...")); 
 		assertWriteEquals("Text before...Bonjour le monde !Text after...");
 	}
+	
+	
 
 	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
@@ -406,8 +435,8 @@ public class RpnStackTest {
 			shouldBe += expected;
 		}
 		shouldBe += "\\]";
-		System.out.println(interpreter.toString());
-		System.out.println(shouldBe);
+		System.out.println("result=" + interpreter.toString());
+		System.out.println("must match=" + shouldBe);
 		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 

@@ -112,8 +112,8 @@ public class TemplateMessages {
      * @return the formatted message
      * @see java.lang.String#format(String, Object...)
      */
-    public String format(String key, List<? extends Object> parameters) {
-        return (new MessageFormat(getString(key), locale)).format(parameters.toArray(), new StringBuffer(), null).toString();
+    public String format(String key, Object[] parameters) {
+        return (new MessageFormat(getString(key), locale)).format(parameters, new StringBuffer(), null).toString();
     }
 
     private Object readResource(String resourcePath, Locale locale) throws TemplateException, FileNotFoundException, IOException {

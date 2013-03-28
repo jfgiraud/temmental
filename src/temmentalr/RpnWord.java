@@ -25,7 +25,7 @@ public class RpnWord extends RpnElem {
 		return word.matches("'\\w+") || word.matches("\\$\\w+(\\?)?");  
 	}
 
-	private static Object getInModel(Map<String, Object> model, String varname) throws TemplateException {
+	private Object getInModel(Map<String, Object> model, String varname) throws TemplateException {
 		varname = varname.substring(1);
 		boolean optional = ! isRequired(varname);
 		if (optional) {
@@ -37,7 +37,7 @@ public class RpnWord extends RpnElem {
 			}
 		} else {
 			if (! model.containsKey(varname)) {
-				throw new TemplateException("Key '%s' is not present or has null value in the model map.", varname);
+				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, pos);
 			} else {
 				return model.get(varname);
 			}

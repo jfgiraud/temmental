@@ -37,28 +37,10 @@ public class RpnFunc extends RpnElem {
         isArray = typeIn.isArray();
         if (isArray)
             typeIn = typeIn.getComponentType();
-        Object args;
-        args = Array.newInstance(typeIn, parameters.size());
-        for (int i = 0; i < parameters.size(); i++) {
-        	Object parameter = parameters.get(i);
-        	Object afterProcess;
-        	if (parameter == null) {
-        		throw new TemplateException("Unable to apply function: null argument"); //FIXME
-        	}
-        	if (parameter instanceof RpnElem) {
-        		afterProcess = ((RpnElem) parameter).writeObject(functions, model, messages);
-        	} else {
-        		afterProcess = parameter;
-        	}
-        	if (afterProcess == null) {
-        		if (((RpnElem) parameter).isRequired(((RpnElem) parameter).getWord())) {
-        			// FIXME pas top le test
-        			throw new TemplateException("Unable to apply function: null argument"+parameter.getClass().getName()); //FIXME
-        		} else {
-        			return null;
-        		}
-        	}
-        	Array.set(args, i, afterProcess);
+        
+        Object args = create_parameters_after_process(parameters, functions, model, messages, typeIn);
+        if (args == null) {
+        	return null;
         }
         if (parameters.size() == 1) {
         	args = ((Object[]) args)[0];
@@ -70,6 +52,8 @@ public class RpnFunc extends RpnElem {
 			throw new TemplateException(e, "Unable to apply function '" + func.getWord() + "'"); //FIXME 
 		}
 	}
+
+	
 	
 	private Method getApplyMethod(Transform t) {
 		Method[] methods = t.getClass().getMethods();
