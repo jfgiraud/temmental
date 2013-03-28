@@ -1,9 +1,7 @@
 package temmentalr;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,13 +19,9 @@ public class RpnFunc extends RpnElem {
 		return func + parameters.toString();
 	}
 	
-	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException {
-		Object o = func.writeObject(functions, model);
+	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+		Object o = func.writeObject(functions, model, messages);
 		Transform fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
-
-		System.out.println(">>>f>>>>" + func.toString());
-		System.out.println(">>>o>>>>" + o);
-		System.out.println(">>>fp>>>>" + fp);
 
 		if (fp == null && isRequired(func.getWord())) {
 			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", func.getWord(), func.getPos());
@@ -43,15 +37,7 @@ public class RpnFunc extends RpnElem {
         isArray = typeIn.isArray();
         if (isArray)
             typeIn = typeIn.getComponentType();
-        boolean convertToString = typeIn == String.class;
-        
-        
-//        System.out.println(">>>>>>>" + typeIn + " " + isArray);
-        
         Object args;
-//        typeIn = Object.class;
-
-//        System.out.println("typeIn="+typeIn + "   " + func.getWord());
         args = Array.newInstance(typeIn, parameters.size());
         for (int i = 0; i < parameters.size(); i++) {
         	Object parameter = parameters.get(i);
@@ -60,7 +46,7 @@ public class RpnFunc extends RpnElem {
         		throw new TemplateException("Unable to apply function: null argument"); //FIXME
         	}
         	if (parameter instanceof RpnElem) {
-        		afterProcess = ((RpnElem) parameter).writeObject(functions, model);
+        		afterProcess = ((RpnElem) parameter).writeObject(functions, model, messages);
         	} else {
         		afterProcess = parameter;
         	}
@@ -72,27 +58,15 @@ public class RpnFunc extends RpnElem {
         			return null;
         		}
         	}
-//        	if (parameter instanceof RpnWord) {
-//        		System.out.println("apres " + ((RpnWord) parameter).getWord());
-//        	}
         	Array.set(args, i, afterProcess);
         }
         if (parameters.size() == 1) {
-//        	System.out.println("get1 " + fp.getClass().getTypeParameters());
         	args = ((Object[]) args)[0];
         }
 
 		try {
 			return apply.invoke(fp, args);
 		} catch (Exception e) {
-//			System.out.println("func="+ func.getWord());
-//			System.out.println("apply="+apply);
-//			System.out.println("fp="+fp);
-//			System.out.println("size="+((Object[]) args).length);
-//			System.out.println("class="+args.getClass());
-//			for (int i=0; i<((Object[]) args).length; i++) {
-//				System.out.println("p["+i+"]="+((Object[]) args)[i] + " %% " + ((Object[]) args)[i].getClass().getName());
-//			}
 			throw new TemplateException(e, "Unable to apply function '" + func.getWord() + "'"); //FIXME 
 		}
 	}

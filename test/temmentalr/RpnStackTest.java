@@ -1,33 +1,35 @@
 package temmentalr;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static temmentalr.TemplateUtils.createModel;
 
 public class RpnStackTest {
 
 	private RpnStack interpreter;
 	private Map<String,Object> model;
-
+	private Properties properties;
+	
 	@Before
-	public void setUp() {
-		interpreter = new RpnStack();
+	public void setUp() throws FileNotFoundException, TemplateException, IOException {
+		properties = new Properties();
+		interpreter = new RpnStack(new TemplateMessages(Locale.ENGLISH, properties));
 		model = new HashMap<String, Object>();
 	}
 	
@@ -300,6 +302,23 @@ public class RpnStackTest {
 	}
 	
 	@Test
+	public void testParseQuoteMessage() throws IOException, TemplateException {
+		parse("Text before...~'helloworld[]~Text after...");
+		populateProperty("helloworld", "Bonjour le monde !");
+		assertParsingEquals(text("Text before..."), message("'helloworld"), text("Text after...")); 
+		assertWriteEquals("Text before...Bonjour le monde !Text after...");
+	}
+	
+	@Test
+	public void testParseVarMessage() throws IOException, TemplateException {
+		parse("Text before...~$msg[]~Text after...");
+		populateProperty("helloworld", "Bonjour le monde !");
+		populateModel("msg", "helloworld");
+		assertParsingEquals(text("Text before..."), message("$msg"), text("Text after...")); 
+		assertWriteEquals("Text before...Bonjour le monde !Text after...");
+	}
+
+	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
 		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
 		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
@@ -313,6 +332,27 @@ public class RpnStackTest {
 	
 	private String text(String text) {
 		return text;
+	}
+
+	private String message(String name, Object ... parameters) {
+		if (! name.startsWith("eval"))
+			name = eval(name);
+		List<Object> params = new ArrayList<Object>();
+		for (Object o : parameters) {
+			System.out.println(">>" + o + " " + o.getClass().getName());
+			if (o instanceof String) {
+				if (((String) o).startsWith("$")) 
+					params.add(eval((String) o));
+				else if (((String) o).startsWith("'")) 
+					params.add(eval((String) o));	
+				else  
+					params.add(o);	
+
+			} else { 
+				params.add(o);
+			}
+		}
+		return "msg\\("+ name + ","  + params.toString() + "\\)";
 	}
 	
 	private String func(String name, Object ... parameters) {
@@ -340,6 +380,10 @@ public class RpnStackTest {
 		model.put(name, value);
 	}
 
+	private void populateProperty(String name, Object value) throws TemplateException {
+		properties.put(name, value);
+	}
+	
 	private void populateTransform(String name, Method method) throws TemplateException {
 		interpreter.addFunction(name, method);
 	}
@@ -362,8 +406,8 @@ public class RpnStackTest {
 			shouldBe += expected;
 		}
 		shouldBe += "\\]";
-//		System.out.println(interpreter.toString());
-//		System.out.println(shouldBe);
+		System.out.println(interpreter.toString());
+		System.out.println(shouldBe);
 		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 

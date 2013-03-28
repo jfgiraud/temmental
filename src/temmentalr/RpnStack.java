@@ -16,9 +16,11 @@ public class RpnStack extends Stack {
 	private static final boolean debug = true;
 
 	private Map<String, Transform> functions;
-
-	public RpnStack() {
+	private TemplateMessages messages;
+	
+	public RpnStack(TemplateMessages messages) {
 		this(new ArrayList());
+		this.messages = messages;
 	}
 
 	public RpnStack(List<Object> tocopy) {
@@ -56,11 +58,9 @@ public class RpnStack extends Stack {
 							line++;
 							column = 0;
 						} 
-						debug("%c %c => %s", currentChar, '#', buffer.toString());
 					} else {
 						int nextChar = sr.read();
 						if (nextChar == -1) {
-							debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 							outsideAnExpression = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
@@ -71,12 +71,10 @@ public class RpnStack extends Stack {
 						} else {
 							if (nextChar == '~' && currentChar == '~') {
 								buffer.write(currentChar);
-								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 								previousChar = currentChar;
 								currentChar = sr.read();
 								continue;
 							} else {
-								debug("%c %c => %s", currentChar, nextChar, buffer.toString());
 								outsideAnExpression = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
@@ -92,9 +90,7 @@ public class RpnStack extends Stack {
 				} else {
 					if (chars('"').contains(currentChar) || sentence) {
 						buffer.write(currentChar);
-						debug("# %c => %s 3", currentChar, buffer.toString());
 						if (currentChar == '"' && previousChar != '\\') {
-//							sentence = ! sentence;
 							if (sentence) {
 								sentence = false;
 								String word = buffer.toString();
@@ -110,7 +106,6 @@ public class RpnStack extends Stack {
 						currentChar = sr.read(); 
 						continue;
 					} else if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
-						debug("# %c => %s", currentChar, buffer.toString());
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -122,6 +117,11 @@ public class RpnStack extends Stack {
 							push("#<");
 						} else if (currentChar == '>') {
 							push("#>");
+							eval();
+						} else if (currentChar == '[') {
+							push("#[");
+						} else if (currentChar == ']') {
+							push("#]");
 							eval();
 						}
 					} else {
@@ -146,12 +146,6 @@ public class RpnStack extends Stack {
 
 	private void eval() throws TemplateException {
 		if (depth()>1) {
-//			Object avDernier = value(2);
-//			if (avDernier.equals("#func")) {
-//				// var #func 'func
-//				swap();
-//			}
-			
 			Object last = value();
 			if (last.equals("#func")) {
 				// var 'func #func
@@ -161,37 +155,46 @@ public class RpnStack extends Stack {
 				List parameters = (List) pop();
 				push(new RpnFunc(func, parameters));
 			} else if (last.equals("#>")) {
+				// $text #func $funcname #< $p1 $p2 #>
+				create_list("#<", "#>"); // $text #func $funcname [$p1, $p2]
+				List parameters = (List) pop(); // $text #func $funcname 
+				RpnElem func = (RpnElem) pop(); // $text #func 
+				push(new RpnFunc(func, parameters)); // $text #func RpnFunc
+				swap(); // $text RpnFunc #func 
+				eval();
+			} else if (last.equals("#]")) {
+				create_list("#[", "#]");
+				List parameters = (List) pop();  
+				RpnWord word = (RpnWord) pop();  
+				push(new RpnMessage(word, parameters)); // $text #func RpnFunc
+				
+				
 				try {
 					printStack(System.out);
-					drop();
-					int i=1;
-					while (i<=depth() && ! value(i).equals("#<")) {
-						i++;
-					}
-					tolist(i-1);
-					printStack(System.out);
-					List parameters = (List) pop();
-					drop();
-					RpnElem func = (RpnElem) pop();
-
-					push(new RpnFunc(func, parameters));
-
-					swap();
-				eval();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
 			}
 		}
 	}
 
+	private void create_list(String start, String end) {
+		drop();  
+		int i=1;
+		while (i<=depth() && ! value(i).equals(start)) {
+			i++;
+		}
+		tolist(i-1);
+		nip();
+	}
+	
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
 		
 		if (outsideAnExpression) {
 			push(word);
 		} else {
-			System.out.println(String.format("===> %c" , currentChar));
 			if (currentChar != '<' /*&& currentChar != '>'*/ && depth() > 0 && value().equals("#func")) {
 				push_word(word, file, line, column);
 				swap(); // [ word pos #eval ] #func 
@@ -199,13 +202,6 @@ public class RpnStack extends Stack {
 				push_word(word, file, line, column);
 			}
 			eval();
-		}
-		try {
-			System.out.println("==== push word " + word );
-			printStack(System.out);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -217,17 +213,21 @@ public class RpnStack extends Stack {
 		}
 	}
 	
-	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, Object value) throws IOException, TemplateException {
+	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws IOException, TemplateException {
 		
 		if (value instanceof String)
 			return value;
 
 		if (value instanceof RpnWord) {
-			return ((RpnWord) value).writeObject(functions, model);
+			return ((RpnWord) value).writeObject(functions, model, messages);
 		}
 		
 		if (value instanceof RpnFunc) {
-			return ((RpnFunc) value).writeObject(functions, model);
+			return ((RpnFunc) value).writeObject(functions, model, messages);
+		}
+		
+		if (value instanceof RpnMessage) {
+			return ((RpnMessage) value).writeObject(functions, model, messages);
 		}
 		
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
@@ -237,7 +237,7 @@ public class RpnStack extends Stack {
 		printStack(System.out);
 		
 		for (int i=depth(); i>0; i--) {
-			Object o = writeObject(out, functions, model, value(i));
+			Object o = writeObject(out, functions, model, messages, value(i));
 			if (o != null) {
 				out.write(o.toString());
 			}

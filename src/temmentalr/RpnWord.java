@@ -45,7 +45,7 @@ public class RpnWord extends RpnElem {
 	}
 	
 	@Override
-	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException {
+	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		if (word.startsWith("'")) {
 			return word.substring(1);
 		} else if (word.startsWith("$")) {

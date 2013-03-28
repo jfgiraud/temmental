@@ -4,7 +4,7 @@ import java.util.Map;
 
 public abstract class RpnElem {
 
-	abstract Object writeObject(Map<String, Transform> functions, Map<String, Object> model) throws TemplateException;
+	abstract Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException;
 	
 	abstract String getWord();
 
