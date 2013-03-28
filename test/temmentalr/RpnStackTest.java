@@ -88,7 +88,10 @@ public class RpnStackTest {
 	public void testVariableWithTextBeforeAndAfter() throws IOException, TemplateException {
 	    parse("The city of ~$city~, with a population of ~$population~ inhabitants, is the ~$rank~th largest city in ~$state~.");
 	    assertParsingEquals(text("The city of "), eval("$city"), text(", with a population of "), eval("$population"), text(" inhabitants, is the "), eval("$rank"), text("th largest city in "), eval("$state"), text("."));
-	    populateModel("city", "Bordeaux", "population", 242945, "rank", 9, "state", "France");
+	    populateModel("city", "Bordeaux");
+	    populateModel("population", 242945);
+	    populateModel("rank", 9);
+	    populateModel("state", "France");
 	    assertWriteEquals("The city of Bordeaux, with a population of 242945 inhabitants, is the 9th largest city in France.");
 	}
 	
@@ -96,7 +99,6 @@ public class RpnStackTest {
 	public void testVariableRequiredButNotFound() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
 	    assertParsingEquals(eval("$text_to_replace"));
-	    populateModel();
 	    assertWriteThrowsException("Key 'text_to_replace' is not present or has null value in the model map.");
 	}
 	
@@ -259,12 +261,14 @@ public class RpnStackTest {
 
 	@Test
 	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		parse("~$variable:'function<$p1,$p2:'function2>~");
-		assertParsingEquals(func(func("'function", "$p1", func("'function2", "$p2")), "$variable"));
-		populateTransform("function", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
-		populateTransform("function2", String.class.getDeclaredMethod("toUpperCase"));
-		populateModel("variable", "toto", "p1", "o", "p2", "a");
-		assertWriteEquals("tAtA");
+		parse("~$text:'replace<$what,$with:'upper>~");
+		assertParsingEquals(func(func("'replace", "$what", func("'upper", "$with")), "$text"));
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateModel("text", "this is string example....wow!!! this is really string");
+		populateModel("what", "is");
+		populateModel("with", "was");
+		assertWriteEquals("thWAS WAS string example....wow!!! thWAS WAS really string");
 	}
 	
 	@Test
@@ -297,34 +301,18 @@ public class RpnStackTest {
 	
 	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
-//		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
-//		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
+		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
+		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
 		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c29'.", "~$variable?:'function1<$p1>:function2~");
 		assertParseThrowsException("Invalid identifier syntax for 'function3' at '-:l1:c28'.", "~$variable?:'function1<$p1:function3>:'function2~");
 	}
 	
-	/*
-
-	    def test_parse_simple_quote_function_with_init_on_var(self):
-	        self.parse('~$variable:\'function<$p1>')
-	        self.assertParsingEquals(func(func('\'function', '$p1'), '$variabl'))
-*/
-	
-	private List<Object> list(Object ... objects) {
-		List<Object> list = new ArrayList<Object>();
-		for (Object o : objects) {
-			list.add(o);
-		}
-		return list;
-	}
-	
 	private String eval(String text) {
-		//return list(text, "[-:l\\d+:c\\d+, #pos]", "#eval").toString();
 		return "eval\\(" + text + "\\)";
 	}
 	
 	private String text(String text) {
-		return text;//list(text, "#text").toString();
+		return text;
 	}
 	
 	private String func(String name, Object ... parameters) {
@@ -348,19 +336,16 @@ public class RpnStackTest {
 		return name + params.toString();
 	}
 
-	private void populateModel(Object ... map) throws TemplateException {
-		model.putAll(createModel(map));
+	private void populateModel(String name, Object value) throws TemplateException {
+		model.put(name, value);
 	}
 
-	private void populateTransform(Object ... map) throws TemplateException {
-        if (map.length %2 != 0)
-            throw new TemplateException("Invalid number of elements (key/value list implies an even size).");
-        for (int i=0; i<map.length/2; i++) {
-        	if (map[2*i+1] instanceof Transform)
-        		interpreter.addFunction((String) map[2*i], (Transform) map[2*i+1]);
-        	else 
-        		interpreter.addFunction((String) map[2*i], (Method) map[2*i+1]);
-        }
+	private void populateTransform(String name, Method method) throws TemplateException {
+		interpreter.addFunction(name, method);
+	}
+
+	private void populateTransform(String name, Transform transform) throws TemplateException {
+		interpreter.addFunction(name, transform);
 	}
 	
 	@Test
@@ -377,8 +362,8 @@ public class RpnStackTest {
 			shouldBe += expected;
 		}
 		shouldBe += "\\]";
-		System.out.println(interpreter.toString());
-		System.out.println(shouldBe);
+//		System.out.println(interpreter.toString());
+//		System.out.println(shouldBe);
 		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 
@@ -414,6 +399,5 @@ public class RpnStackTest {
 			assertEquals(expectedMessage, e.getMessage());
 		}
 	}
-
 
 }
