@@ -1,30 +1,29 @@
 package temmentalr;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-public class RpnFunc extends RpnElem {
+class Function extends Element {
 
-	private RpnElem func;
+	private Element element; // can reference an identifier or a function
 	private List parameters;
 
-	public RpnFunc(RpnElem func, List parameters) {
-		this.func = func;
+	Function(Element element, List parameters) {
+		this.element = element;
 		this.parameters = parameters;
 	}
 	
 	public String toString() {
-		return func + parameters.toString();
+		return element + parameters.toString();
 	}
 	
-	public Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		Object o = func.writeObject(functions, model, messages);
+	Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+		Object o = element.writeObject(functions, model, messages);
 		Transform fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
 
-		if (fp == null && isRequired(func.getWord())) {
-			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", func.getWord(), func.getPos());
+		if (fp == null && isRequired(element.getIdentifier())) {
+			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", element.getIdentifier(), element.getPosition());
 		} else if (fp == null) {
 			return null;
 		}
@@ -49,28 +48,25 @@ public class RpnFunc extends RpnElem {
 		try {
 			return apply.invoke(fp, args);
 		} catch (Exception e) {
-			throw new TemplateException(e, "Unable to apply function '" + func.getWord() + "'"); //FIXME 
+			throw new TemplateException(e, "Unable to apply function '" + element.getIdentifier() + "'"); //FIXME 
 		}
 	}
-
-	
 	
 	private Method getApplyMethod(Transform t) {
 		Method[] methods = t.getClass().getMethods();
         for (Method method : methods) {
-//        	System.out.println("method=" + method);
             if (method.getName().equals("apply"))
                 return method;
         }
         return null;
 	}
 	
-	public String getWord() {
-		return func.getWord();
+	String getIdentifier() {
+		return element.getIdentifier();
 	}
 
-	public String getPos() {
-		return func.getPos();
+	String getPosition() {
+		return element.getPosition();
 	}
 
 }

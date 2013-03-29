@@ -3,19 +3,19 @@ package temmentalr;
 import java.util.List;
 import java.util.Map;
 
-public class RpnMessage extends RpnElem {
+public class Message extends Element {
 
-	private RpnWord word;
+	private Identifier identifier;
 	private List parameters;
 
-	public RpnMessage(RpnWord func, List parameters) {
-		this.word = func;
+	Message(Identifier identifier, List parameters) {
+		this.identifier = identifier;
 		this.parameters = parameters;
 	}
 	
 	@Override
 	Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		String key = (String) word.writeObject(functions, model, messages);
+		String key = (String) identifier.writeObject(functions, model, messages);
 
 		Object args = create_parameters_after_process(parameters, functions, model, messages, Object.class);
 		if (args == null) {
@@ -24,15 +24,15 @@ public class RpnMessage extends RpnElem {
 		return messages.format(key, (Object[]) args);
 	}
 
-	public String getWord() {
-		return word.getWord();
+	String getIdentifier() {
+		return identifier.getIdentifier();
 	}
 
-	public String getPos() {
-		return word.getPos();
+	String getPosition() {
+		return identifier.getPosition();
 	}
 	
 	public String toString() {
-		return "msg(" + word + "," + parameters.toString() + ")";
+		return "msg(" + identifier + "," + parameters.toString() + ")";
 	}
 }

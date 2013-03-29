@@ -11,19 +11,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RpnStack extends Stack {
+public class Template extends Stack {
 	
 	private static final boolean debug = true;
 
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
 	
-	public RpnStack(TemplateMessages messages) {
+	public Template(TemplateMessages messages) {
 		this(new ArrayList());
 		this.messages = messages;
 	}
 
-	public RpnStack(List<Object> tocopy) {
+	public Template(List<Object> tocopy) {
 		super(tocopy);
 		functions = new HashMap<String, Transform>();
 	}
@@ -150,23 +150,23 @@ public class RpnStack extends Stack {
 			if (last.equals("#func")) {
 				// var 'func #func
 				drop(); // var 'func 
-				RpnElem func = (RpnElem) pop(); // var 
+				Element func = (Element) pop(); // var 
 				tolist(1); // [ var ]
 				List parameters = (List) pop();
-				push(new RpnFunc(func, parameters));
+				push(new Function(func, parameters));
 			} else if (last.equals("#>")) {
 				// $text #func $funcname #< $p1 $p2 #>
 				create_list("#<", "#>"); // $text #func $funcname [$p1, $p2]
 				List parameters = (List) pop(); // $text #func $funcname 
-				RpnElem func = (RpnElem) pop(); // $text #func 
-				push(new RpnFunc(func, parameters)); // $text #func RpnFunc
+				Element func = (Element) pop(); // $text #func 
+				push(new Function(func, parameters)); // $text #func RpnFunc
 				swap(); // $text RpnFunc #func 
 				eval();
 			} else if (last.equals("#]")) {
 				create_list("#[", "#]");
 				List parameters = (List) pop();  
-				RpnWord word = (RpnWord) pop();  
-				push(new RpnMessage(word, parameters)); // $text #func RpnFunc
+				Identifier word = (Identifier) pop();  
+				push(new Message(word, parameters)); // $text #func RpnFunc
 				
 				
 				try {
@@ -209,7 +209,7 @@ public class RpnStack extends Stack {
 		if (word.startsWith("\"") && word.endsWith("\"")) {
 			push(word.substring(1, word.length()-1));
 		} else {
-			push(new RpnWord(word, file, line, column-word.length()-1));
+			push(new Identifier(word, file, line, column-word.length()-1));
 		}
 	}
 	
@@ -218,16 +218,16 @@ public class RpnStack extends Stack {
 		if (value instanceof String)
 			return value;
 
-		if (value instanceof RpnWord) {
-			return ((RpnWord) value).writeObject(functions, model, messages);
+		if (value instanceof Identifier) {
+			return ((Identifier) value).writeObject(functions, model, messages);
 		}
 		
-		if (value instanceof RpnFunc) {
-			return ((RpnFunc) value).writeObject(functions, model, messages);
+		if (value instanceof Function) {
+			return ((Function) value).writeObject(functions, model, messages);
 		}
 		
-		if (value instanceof RpnMessage) {
-			return ((RpnMessage) value).writeObject(functions, model, messages);
+		if (value instanceof Message) {
+			return ((Message) value).writeObject(functions, model, messages);
 		}
 		
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());

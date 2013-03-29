@@ -7,7 +7,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Stack {
+class Stack {
 	
 	private List<Object> elements;
 	
@@ -208,8 +208,6 @@ public class Stack {
 		}
 		push(n);
 	}
-	
-
 	
 	private void insert(int i, Object e) {
 		this.elements.add(depth()-i+1, e);

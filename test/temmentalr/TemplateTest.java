@@ -20,27 +20,17 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RpnStackTest {
+public class TemplateTest {
 
-	private RpnStack interpreter;
+	private Template interpreter;
 	private Map<String,Object> model;
 	private Properties properties;
 	
 	@Before
 	public void setUp() throws FileNotFoundException, TemplateException, IOException {
 		properties = new Properties();
-		interpreter = new RpnStack(new TemplateMessages(Locale.ENGLISH, properties));
+		interpreter = new Template(new TemplateMessages(Locale.ENGLISH, properties));
 		model = new HashMap<String, Object>();
-	}
-	
-	@Test
-	public void testValidIdentifiers() {
-		assertTrue(RpnWord.isValidIdentifier("'foo"));
-		assertFalse(RpnWord.isValidIdentifier("foo"));
-		assertTrue(RpnWord.isValidIdentifier("$foo"));
-		assertTrue(RpnWord.isValidIdentifier("$foo?"));
-		assertFalse(RpnWord.isValidIdentifier("'foo?"));
-		assertTrue(RpnWord.isValidIdentifier("'foo"));
 	}
 	
 	@Test
