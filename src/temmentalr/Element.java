@@ -42,4 +42,25 @@ abstract class Element {
         }
 		return args;
 	}
+	
+	Object getInModel(Map<String, Object> model) throws TemplateException {
+		String varname = getIdentifier(); 
+		varname = varname.substring(1);
+		boolean optional = ! isRequired(varname);
+		if (optional) {
+			varname = varname.substring(0, varname.length()-1);
+			if (model.containsKey(varname)) {
+				return model.get(varname);
+			} else {
+				return null;
+			}
+		} else {
+			if (! model.containsKey(varname)) {
+				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, getPosition());
+			} else {
+				return model.get(varname);
+			}
+		}
+	}
+	
 }

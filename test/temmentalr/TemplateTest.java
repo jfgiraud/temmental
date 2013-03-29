@@ -34,42 +34,42 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testParseText() throws IOException, TemplateException {
+	public void testText() throws IOException, TemplateException {
 		parse("Some text data...");
 		assertParsingEquals(text("Some text data..."));
 		assertWriteEquals("Some text data...");
 	}
 
 	@Test
-	public void testParseTextWithQuote() throws IOException, TemplateException { 
+	public void testTextContainingQuoteCharacter() throws IOException, TemplateException { 
 	    parse("Some text data... with 'b");
 	    assertParsingEquals(text("Some text data... with 'b"));
 	    assertWriteEquals("Some text data... with 'b");
 	}
 	
 	@Test
-	public void testParseTextWithDollar() throws IOException, TemplateException { 
+	public void testTextContainingDollarCharacter() throws IOException, TemplateException { 
 	    parse("Some text data... with $b");
 	    assertParsingEquals(text("Some text data... with $b"));
 	    assertWriteEquals("Some text data... with $b");
 	}
 	
 	@Test
-	public void testParseTextWithTilde() throws IOException, TemplateException {
+	public void testTextContainingTildeCharacter() throws IOException, TemplateException {
 	    parse("Some text data... with ~~");
 	    assertParsingEquals(text("Some text data... with ~"));
 	    assertWriteEquals("Some text data... with ~");
 	}
 
 	@Test
-	public void testAccents() throws IOException, TemplateException {
+	public void testTextContainingAccents() throws IOException, TemplateException {
 	    parse("Text with accents: ÍntèrnáTîönàlïzâÇïôn");
 	    assertParsingEquals(text("Text with accents: ÍntèrnáTîönàlïzâÇïôn"));
 	    assertWriteEquals("Text with accents: ÍntèrnáTîönàlïzâÇïôn");
 	}
 
 	@Test
-	public void testParseVariableRequired() throws IOException, TemplateException {
+	public void testVariableReplacement() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
 	    assertParsingEquals(eval("$text_to_replace"));
 	    populateModel("text_to_replace", "Some text data...");
@@ -77,7 +77,7 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testVariableWithTextBeforeAndAfter() throws IOException, TemplateException {
+	public void testVariablesCanBeInTheMiddleOfTheText() throws IOException, TemplateException {
 	    parse("The city of ~$city~, with a population of ~$population~ inhabitants, is the ~$rank~th largest city in ~$state~.");
 	    assertParsingEquals(text("The city of "), eval("$city"), text(", with a population of "), eval("$population"), text(" inhabitants, is the "), eval("$rank"), text("th largest city in "), eval("$state"), text("."));
 	    populateModel("city", "Bordeaux");
@@ -88,21 +88,21 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testVariableRequiredButNotFound() throws IOException, TemplateException {
+	public void testWhenAVariableIsRequiredButNotFoundAnExceptionIsRaised() throws IOException, TemplateException {
 	    parse("~$text_to_replace~");
 	    assertParsingEquals(eval("$text_to_replace"));
 	    assertWriteThrowsException("Key 'text_to_replace' is not present or has null value in the model map at position '-:l1:c2'.");
 	}
 	
 	@Test
-	public void testVariableIsOptionalAndNotFound() throws IOException, TemplateException {
+	public void testWhenAVariableIsOptionalAndNotFoundAnEmptyTextIsDisplayed() throws IOException, TemplateException {
 	    parse("~$text_to_replace?~");
 	    assertParsingEquals(eval("$text_to_replace?"));
 	    assertWriteEquals("");
 	}
 
 	@Test
-	public void testVariableIsOptionalAndFound() throws IOException, TemplateException {
+	public void testWhenAVariableIsOptionalAndFoundTheVariableReplacementIsWellDone() throws IOException, TemplateException {
 	    parse("~$text_to_replace?~");
 	    assertParsingEquals(eval("$text_to_replace?"));
 	    populateModel("text_to_replace", "Some text data...");
@@ -110,7 +110,7 @@ public class TemplateTest {
 	}
 
 	@Test
-	public void testQuoteFunction() throws IOException, TemplateException {
+	public void testAFunctionCanBeAppliedOnTheResultOfTheReplacement_TransformCase() throws IOException, TemplateException {
 		parse("The uppercase of '~$text~' is '~$text:'upper~'");
 		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
 		populateModel("text", "Eleanor of Aquitaine");
@@ -124,28 +124,16 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testQuoteFunctionWithFunction() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+	public void testAFunctionCanBeAppliedOnTheResultOfTheReplacement_MethodCase() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
 		parse("The uppercase of '~$text~' is '~$text:'upper~'");
 		assertParsingEquals(text("The uppercase of '"), eval("$text"), text("' is '"), func("'upper", "$text"), text("'"));
 		populateModel("text", "Eleanor of Aquitaine");
-//		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase", null));
-		final Method method = String.class.getDeclaredMethod("toUpperCase", null);
-		populateTransform("upper", new Transform<Object, Object>() {
-			@Override
-			public Object apply(Object value) {
-				try {
-					return method.invoke(value);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return value;
-			}
-		});
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase", null));
 		assertWriteEquals("The uppercase of 'Eleanor of Aquitaine' is 'ELEANOR OF AQUITAINE'");
 	}
 	
 	@Test
-	public void testQuoteFunctionNotKnown() throws IOException, TemplateException {
+	public void testWhenARequiredFunctionIsNotFoundAnExceptionIsRaised() throws IOException, TemplateException {
 		parse("The required function 'upper is not known for rendering '~$text:'upper~'. An exception will be raised.");
 		assertParsingEquals(text("The required function 'upper is not known for rendering '"), func("'upper", "$text"), text("'. An exception will be raised."));
 		populateModel("text", "Eleanor of Aquitaine");
@@ -153,7 +141,7 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testQuoteFunctionChain() throws IOException, TemplateException {
+	public void testAChainOfFunctionCanBeApplied() throws IOException, TemplateException {
 		parse("Apply a chain of functions ~$text:'bold:'italic~");
 		assertParsingEquals(text("Apply a chain of functions "), 
 				func("'italic", func("'bold", "$text")));
@@ -172,22 +160,18 @@ public class TemplateTest {
 		});
 		assertWriteEquals("Apply a chain of functions <i><b>Eleanor of Aquitaine</b></i>");
 	}
-	
 
 	@Test
-	public void testString() throws IOException, TemplateException {
+	public void testStringCanBeUsedBetweenTildeCharacters() throws IOException, TemplateException {
 		parse("Something before...~\"A text with double quotes, tilde ~, brackets >< ...\"~Something after...");
 		assertParsingEquals(text("Something before..."), text("A text with double quotes, tilde ~, brackets >< ..."), text("Something after..."));
 		assertWriteEquals("Something before...A text with double quotes, tilde ~, brackets >< ...Something after...");
 	}
 	
 	
-	// -- 
 	
 	@Test
-	public void testQuoteFunctionWithInitializerOneParam() throws IOException, TemplateException {
-		parse("Apply a parameterized function ~$text:'encapsulate<\"b\">~");
-		assertParsingEquals(text("Apply a parameterized function "), func(func("'encapsulate", "b"), "$text"));
+	public void testAFunctionWithInitializerCanBeCreatedForReusePurpose() throws IOException, TemplateException {
 		populateModel("text", "Eleanor of Aquitaine");
 		populateTransform("encapsulate", new Transform<String, Transform>() {
 			@Override
@@ -200,20 +184,27 @@ public class TemplateTest {
 				};
 			}
 		});
+		
+		parse("Apply a parameterized function ~$text:'encapsulate<\"b\">~");
+		assertParsingEquals(text("Apply a parameterized function "), func(func("'encapsulate", "b"), "$text"));
 		assertWriteEquals("Apply a parameterized function <b>Eleanor of Aquitaine</b>");
+		
+		parse("Apply a parameterized function ~$text:'encapsulate<\"i\">~");
+		assertParsingEquals(text("Apply a parameterized function "), func(func("'encapsulate", "i"), "$text"));
+		assertWriteEquals("Apply a parameterized function <i>Eleanor of Aquitaine</i>");
 	}
-	
+
 	@Test
-	public void testQuoteFunctionWithInitializer() throws IOException, TemplateException {
+	public void testAFunctionCanHaveAnInitializerWithSeveralParameters() throws IOException, TemplateException {
 		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\",\"i\">~");
 		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b", "i"), "$text"));
 		populateModel("text", "Eleanor of Aquitaine");
 		populateTransform("encapsulate", new Transform<String[], Transform>() {
 			@Override
-			public Transform apply(final String tags[]) {
+			public Transform apply(final String tags[]) { // b, i
 				return new Transform<String, String>() {
 					@Override
-					public String apply(String value) {
+					public String apply(String value) { // $text
 						String s = "";
 						for (int i=0; i<tags.length; i++) {
 							s += "<" + tags[i] + ">";
@@ -230,26 +221,43 @@ public class TemplateTest {
 		assertWriteEquals("Applying bold and italic functions gives <b><i>Eleanor of Aquitaine</i></b>");
 	}
 	
+	// -- 
 	
 	@Test
-	public void testParameterizedQuoteFunctionChain() throws IOException, TemplateException {
-		parse("~$variable:'add<$toAdd1>:'add<$toAdd2>~");
-		populateTransform("add", new Transform<Integer, Transform>() {
-			@Override
-			public Transform apply(final Integer toAdd) {
-				return new Transform<Integer, Integer>() {
-					@Override
-					public Integer apply(Integer value) {
-						return value.intValue() + toAdd.intValue();
-					}
-				};
-			}
-		});
-		populateModel("variable", 5);
-		populateModel("toAdd1", 3);
-		populateModel("toAdd2", 2);
+	public void testParameterizedQuoteFunctionChain() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+//		parse("~$variable:'add<$toAdd1>:'add<$toAdd2>~");
+//		populateTransform("add", new Transform<Integer, Transform>() {
+//			@Override
+//			public Transform apply(final Integer toAdd) {
+//				return new Transform<Integer, Integer>() {
+//					@Override
+//					public Integer apply(Integer value) {
+//						return value.intValue() + toAdd.intValue();
+//					}
+//				};
+//			}
+//		});
+//		populateModel("variable", 5);
+//		populateModel("toAdd1", 3);
+//		populateModel("toAdd2", 2);
+//		assertWriteEquals("10");
+		
+		parse("~$text:'concat<$char1>~");
+		populateTransform("concat", String.class.getDeclaredMethod("concat", String.class));
+		populateModel("text", "hello world");
+		populateModel("char1", "!");
+		populateModel("char2", "!");
 		assertWriteEquals("10");
+
 	}
+	
+	@Test
+	public void testFoo() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		Method method = String.class.getDeclaredMethod("concat", String.class);
+		assertEquals(1, method.getParameterTypes().length);
+		assertEquals("hello world!", method.invoke("hello world", "!"));
+	}
+	
 
 	@Test
 	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {

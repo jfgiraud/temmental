@@ -24,31 +24,12 @@ class Identifier extends Element {
 		return word.matches("'\\w+") || word.matches("\\$\\w+(\\?)?");  
 	}
 
-	private Object getInModel(Map<String, Object> model, String varname) throws TemplateException {
-		varname = varname.substring(1);
-		boolean optional = ! isRequired(varname);
-		if (optional) {
-			varname = varname.substring(0, varname.length()-1);
-			if (model.containsKey(varname)) {
-				return model.get(varname);
-			} else {
-				return null;
-			}
-		} else {
-			if (! model.containsKey(varname)) {
-				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, position);
-			} else {
-				return model.get(varname);
-			}
-		}
-	}
-	
 	@Override
 	Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		if (identifier.startsWith("'")) {
 			return identifier.substring(1);
 		} else if (identifier.startsWith("$")) {
-			return getInModel(model, identifier);
+			return getInModel(model);
 		} else {
 			throw new TemplateException("Unsupported case #eval for '%s'", identifier);
 		}

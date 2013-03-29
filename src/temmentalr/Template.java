@@ -247,19 +247,9 @@ public class Template extends Stack {
 	public void addFunction(String name, Transform function) {
 		functions.put(name, function);		
 	}
-//	populateTransform("function", new Transform<String[], Transform>() {
-//		@Override
-//		public Transform apply(final String[] value) {
-//			return new Transform<String, String>() {
-//				@Override
-//				public String apply(String text) {
-//					return text.replaceAll(value[0], value[1]);
-//				}
-//			};
-//		}
-//	});
+
 	public void addFunction(final String name, final Method method) {
-		if (method.getParameterTypes().length>0) {
+		if (method.getParameterTypes().length>1) {
 			addFunction(name, new Transform<Object[], Transform>() {
 				@Override
 				public Transform apply(final Object[] value) {
