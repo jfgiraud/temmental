@@ -43,24 +43,31 @@ abstract class Element {
 		return args;
 	}
 	
-	Object getInModel(Map<String, Object> model) throws TemplateException {
+	Object getInMap(Map map, boolean forModel) throws TemplateException {
 		String varname = getIdentifier(); 
 		varname = varname.substring(1);
 		boolean optional = ! isRequired(varname);
 		if (optional) {
 			varname = varname.substring(0, varname.length()-1);
-			if (model.containsKey(varname)) {
-				return model.get(varname);
+			if (map.containsKey(varname)) {
+				return map.get(varname);
 			} else {
 				return null;
 			}
 		} else {
-			if (! model.containsKey(varname)) {
-				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, getPosition());
+			if (! map.containsKey(varname)) {
+				if (forModel)
+					throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, getPosition());
+				else
+					return null;
 			} else {
-				return model.get(varname);
+				return map.get(varname);
 			}
 		}
+	}
+	
+	Object getInModel(Map<String, Object> model) throws TemplateException {
+		return getInMap(model, true);
 	}
 	
 }

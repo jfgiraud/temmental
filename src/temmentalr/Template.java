@@ -249,6 +249,7 @@ public class Template extends Stack {
 	}
 
 	public void addFunction(final String name, final Method method) {
+		System.out.println("length="+method.getParameterTypes().length);
 		if (method.getParameterTypes().length>1) {
 			addFunction(name, new Transform<Object[], Transform>() {
 				@Override
@@ -266,7 +267,7 @@ public class Template extends Stack {
 					};
 				}
 			});
-		} else {
+		} else if (method.getParameterTypes().length == 0) {
 			addFunction(name, new Transform<Object, Object>() {
 				@Override
 				public Object apply(Object value) {
@@ -278,6 +279,24 @@ public class Template extends Stack {
 					return value;
 				}
 			});
+		} else {
+			addFunction(name, new Transform<Object, Transform>() {
+				@Override
+				public Transform apply(final Object value) {
+					return new Transform<Object, Object>() {
+						@Override
+						public Object apply(Object text) {
+							try {
+								return method.invoke(text, value);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							return text;
+						}
+					};
+				}
+			});
+			
 		}
 	}
 

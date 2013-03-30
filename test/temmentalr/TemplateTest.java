@@ -225,29 +225,12 @@ public class TemplateTest {
 	
 	@Test
 	public void testParameterizedQuoteFunctionChain() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-//		parse("~$variable:'add<$toAdd1>:'add<$toAdd2>~");
-//		populateTransform("add", new Transform<Integer, Transform>() {
-//			@Override
-//			public Transform apply(final Integer toAdd) {
-//				return new Transform<Integer, Integer>() {
-//					@Override
-//					public Integer apply(Integer value) {
-//						return value.intValue() + toAdd.intValue();
-//					}
-//				};
-//			}
-//		});
-//		populateModel("variable", 5);
-//		populateModel("toAdd1", 3);
-//		populateModel("toAdd2", 2);
-//		assertWriteEquals("10");
-		
-		parse("~$text:'concat<$char1>~");
+		parse("~$text:'concat<$suffix>~");
+		assertParsingEquals(func(func("'concat", "$suffix"), "$text"));
 		populateTransform("concat", String.class.getDeclaredMethod("concat", String.class));
 		populateModel("text", "hello world");
-		populateModel("char1", "!");
-		populateModel("char2", "!");
-		assertWriteEquals("10");
+		populateModel("suffix", "!");
+		assertWriteEquals("hello world!");
 
 	}
 	

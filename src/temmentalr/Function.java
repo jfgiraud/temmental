@@ -19,39 +19,27 @@ class Function extends Element {
 	}
 	
 	Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		
-//		Transform fp = null;
-//		if (element instanceof Identifier) {
-//			fp = functions.get(element.writeObject(functions, model, messages));
-//		} else if (element instanceof Function) {
-//			System.out.println("Function:" + element);
-//			System.out.println("SubFunction:" + ((Function) element).getIdentifier());
-//			Object after = element.writeObject(functions, model, messages);
-//			System.out.println("After:" + after);
-//			if (after instanceof Transform)
-//				fp = (Transform) after;
-//			else
-//				fp = null;
-//		}
-		
-		
-		System.out.println("ici:"+element + " " + element.getClass().getName());
+		System.out.println("ici:"+element);
 		
 		Transform fp = null;
 		
-		if (element instanceof Function) {
-			String identifier = getIdentifier();
-			if (identifier.startsWith("'")) {
-				fp = functions.get(identifier);
-			}
-			System.out.println("identifier <" + getIdentifier());
-			System.out.println("fp=" + fp);
-		}
-		
-		if (true)
-			return null;
+//		if (element instanceof Identifier) {
+//			System.out.println("#Identifier##" + element);
+//			if (getIdentifier().startsWith("$")) {
+//				fp = functions.get(getInMap(model, false));
+//			} else {
+//				fp = (Transform) getInMap(functions, false);
+//			}
+//			System.out.println("#Identifier## rc=" + element + " ## " + fp);
+//		} else if (element instanceof Function){
+//			System.out.println("#Function##" + element);
+//			Object o = element.writeObject(functions, model, messages);
+//			fp = (Transform) o;
+//			System.out.println("#Function## rc=" + element + " ## " + fp);
+//		} 
 		
 		Object o = element.writeObject(functions, model, messages);
+		System.out.println("#2## " + o);
 		 fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
 
 		if (fp == null && isRequired(element.getIdentifier())) {
