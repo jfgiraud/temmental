@@ -105,7 +105,7 @@ public class Template extends Stack {
 						previousChar = currentChar;
 						currentChar = sr.read(); 
 						continue;
-					} else if (chars('<', '>', '[', ']', ',', ':', '~').contains(currentChar)) {
+					} else if (chars('<', '>', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -122,6 +122,11 @@ public class Template extends Stack {
 							push("#[");
 						} else if (currentChar == ']') {
 							push("#]");
+							eval();
+						}  else if (currentChar == '(') {
+							push("#(");
+						} else if (currentChar == ')') {
+							push("#)");
 							eval();
 						}
 					} else {
@@ -167,15 +172,11 @@ public class Template extends Stack {
 				List parameters = (List) pop();  
 				Identifier word = (Identifier) pop();  
 				push(new Message(word, parameters)); // $text #func RpnFunc
-				
-				
-				try {
-					printStack(System.out);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
+			} else if (last.equals("#)")) {
+				create_list("#(", "#)");
+//				List parameters = (List) pop();  
+//				Identifier word = (Identifier) pop();  
+//				push(new Message(word, parameters)); // $text #func RpnFunc
 			}
 		}
 	}

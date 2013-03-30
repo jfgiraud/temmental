@@ -38,6 +38,7 @@ abstract class Element {
         			return null;
         		}
         	}
+        	System.out.println(afterProcess.getClass().getName());
         	Array.set(args, i, afterProcess);
         }
 		return args;

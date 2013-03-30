@@ -352,7 +352,7 @@ public class TemplateTest {
 	
 	@Test
 	public void testParseArrays() throws IOException, TemplateException {
-		parse("($p1,$p2):'add");
+		parse("~($p1,$p2):'add~");
 		populateModel("p1", 5);
 		populateModel("p2", 3);
 		populateTransform("add", new Transform<Integer[], Integer>() {
@@ -365,7 +365,7 @@ public class TemplateTest {
 				return sum;
 			}
 		});
-		assertParsingEquals(func("'add", array("$1", "$2"))); 
+		assertParsingEquals(func("'add", array("$p1", "$p2"))); 
 		assertWriteEquals("8");
 	}
 
@@ -400,7 +400,7 @@ public class TemplateTest {
 				params.add(o);
 			}
 		}
-		return "array\\(" + params.toString() + "\\)";
+		return params.toString();
 	}
 	
 	private String message(String name, Object ... parameters) {
@@ -476,6 +476,7 @@ public class TemplateTest {
 		shouldBe += "\\]";
 		System.out.println("result=" + interpreter.toString());
 		System.out.println("must match=" + shouldBe);
+		interpreter.printStack(System.out);
 		assertTrue(interpreter.toString().matches(shouldBe));
 	}
 
