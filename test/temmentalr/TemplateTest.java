@@ -235,15 +235,7 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testFoo() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		Method method = String.class.getDeclaredMethod("concat", String.class);
-		assertEquals(1, method.getParameterTypes().length);
-		assertEquals("hello world!", method.invoke("hello world", "!"));
-	}
-	
-
-	@Test
-	public void testParseSimpleQuoteOnVarWithInits2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testParameterizedQuoteFunctionAcceptsFunctionApplicationOnItsInitializers() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("~$text:'replace<$what,$with:'upper>~");
 		assertParsingEquals(func(func("'replace", "$what", func("'upper", "$with")), "$text"));
 		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
@@ -255,40 +247,72 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInits3() throws IOException, TemplateException {
-		parse("~$variable:'function<$p1:'function2:'function3,$p2>~");
-		assertParsingEquals(func(func("'function", func("'function3", func("'function2", "$p1")), "$p2"), "$variable"));
+	public void testParameterizedQuoteFunctionAcceptsFunctionApplicationOnTheResult() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$text:'replace<$what:'lower,$with>:'upper~");
+		assertParsingEquals(func("'upper", func(func("'replace", func("'lower", "$what"), "$with"), "$text")));
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateTransform("lower", String.class.getDeclaredMethod("toLowerCase"));
+		populateModel("text", "this is string example....wow!!! this is really string");
+		populateModel("what", "Is");
+		populateModel("with", "was");
+		assertWriteEquals("THWAS WAS STRING EXAMPLE....WOW!!! THWAS WAS REALLY STRING");
 	}
 	
 	@Test
-	public void testParseSimpleQuoteOnVarWithInitsAndAnother() throws IOException, TemplateException {
-		parse("~$variable:'function1<$p1,$p2>:'function2~");
-		assertParsingEquals(func("'function2", func(func("'function1", "$p1", "$p2"), "$variable")));
+	public void testADynamicFunctionCanBeAppliedOnTheResultOfTheReplacement() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$text:$f~");
+		populateModel("text", "It is an example!");
+		populateModel("f", "upper");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		assertParsingEquals(func("$f", "$text"));
+		assertWriteEquals("IT IS AN EXAMPLE!");
 	}
 	
 	@Test
-	public void testParseTwoVarFilterOnVar() throws IOException, TemplateException {
-		parse("~$variable:$function1?:$function2~");
-		populateTransform("addOne", new Transform<Integer, Integer>() {
-			@Override
-			public Integer apply(Integer value) {
-				return value.intValue() + 1;
-			}
-		});
-		populateModel("variable", 5);
-		populateModel("function2", "addOne");
-//		populateModel("function1", "addOne");
-		assertParsingEquals(func("$function2", func("$function1?", "$variable")));
+	public void testADynamicFunctionCanBeOptional_CaseKnown() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$text:$f?~");
+		populateModel("text", "It is an example!");
+		populateModel("f", "upper");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		assertParsingEquals(func("$f?", "$text"));
+		assertWriteEquals("IT IS AN EXAMPLE!");
+	}
+	
+	@Test
+	public void testADynamicFunctionCanBeOptional_CaseUnknown() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$text:$f?~");
+		populateModel("text", "It is an example!");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		assertParsingEquals(func("$f?", "$text"));
 		assertWriteEquals("");
 	}
 	
 	@Test
-	public void testParseQuoteMessage() throws IOException, TemplateException {
+	public void testWhenARequiredDynamicFunctionIsNotFoundAnExceptionIsRaised() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$text:$f~");
+		populateModel("text", "It is an example!");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		assertParsingEquals(func("$f", "$text"));
+		assertWriteThrowsException("Key 'f' is not present or has null value in the model map at position '-:l1:c8'.");
+	}
+
+	
+	@Test
+	public void testQuoteMessageIsReplacedWithTextDefinedInProperties() throws IOException, TemplateException {
 		parse("Text before...~'helloworld[]~Text after...");
 		populateProperty("helloworld", "Bonjour le monde !");
 		assertParsingEquals(text("Text before..."), message("'helloworld"), text("Text after...")); 
 		assertWriteEquals("Text before...Bonjour le monde !Text after...");
 	}
+	
+	@Test
+	public void testQuoteMessageThrowsAnExceptionIfTheKeyIsNotFoundInProperties() throws IOException, TemplateException {
+		parse("Text before...~'helloworld[]~Text after...");
+		assertParsingEquals(text("Text before..."), message("'helloworld"), text("Text after..."));
+		assertWriteThrowsException("Key 'helloworld' is not present in the property map to render message (-:l1:c16)");
+	}
+	
 	
 	@Test
 	public void testParseQuoteMessageWithOptionalParameterNotSet() throws IOException, TemplateException {
@@ -326,7 +350,24 @@ public class TemplateTest {
 		assertWriteEquals("Text before...Bonjour le monde !Text after...");
 	}
 	
-	
+	@Test
+	public void testParseArrays() throws IOException, TemplateException {
+		parse("($p1,$p2):'add");
+		populateModel("p1", 5);
+		populateModel("p2", 3);
+		populateTransform("add", new Transform<Integer[], Integer>() {
+			@Override
+			public Integer apply(Integer[] values) {
+				int sum = 0;
+				for (Integer value : values) {
+					sum += value.intValue();
+				}
+				return sum;
+			}
+		});
+		assertParsingEquals(func("'add", array("$1", "$2"))); 
+		assertWriteEquals("8");
+	}
 
 	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
@@ -344,12 +385,29 @@ public class TemplateTest {
 		return text;
 	}
 
+	private String array(Object ... parameters) {
+		List<Object> params = new ArrayList<Object>();
+		for (Object o : parameters) {
+			if (o instanceof String) {
+				if (((String) o).startsWith("$")) 
+					params.add(eval((String) o));
+				else if (((String) o).startsWith("'")) 
+					params.add(eval((String) o));	
+				else  
+					params.add(o);	
+
+			} else { 
+				params.add(o);
+			}
+		}
+		return "array\\(" + params.toString() + "\\)";
+	}
+	
 	private String message(String name, Object ... parameters) {
 		if (! name.startsWith("eval"))
 			name = eval(name);
 		List<Object> params = new ArrayList<Object>();
 		for (Object o : parameters) {
-			System.out.println(">>" + o + " " + o.getClass().getName());
 			if (o instanceof String) {
 				if (((String) o).startsWith("$")) 
 					params.add(eval((String) o));

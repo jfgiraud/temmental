@@ -21,6 +21,11 @@ public class Message extends Element {
 		if (args == null) {
 			return null;
 		}
+		
+		if (isRequired(key) && ! messages.containsKey(key)) {
+			throw new TemplateException("Key '%s' is not present in the property map to render message (%s)", key, getPosition());
+		}
+		
 		return messages.format(key, (Object[]) args);
 	}
 
