@@ -140,6 +140,23 @@ public class TemplateTest {
 		populateModel("text", "Eleanor of Aquitaine");
 		assertWriteThrowsException("No transform function named ''upper' is associated with the template for rendering at position '-:l1:c65'.");
 	}
+	@Test
+	public void testWhenARequiredFunctionIsFoundButArgumentTypeDiffersAnExceptionIsRaised() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$text:'upper~");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase", null));
+		
+//		populateTransform("upper", new Transform<String, String>() {
+//			@Override
+//			public String apply(String value) {
+//				return value.toUpperCase();
+//			}
+//		});
+		
+		assertParsingEquals(func("'upper", "$text"));
+		populateModel("text", 5);
+		assertWriteThrowsException("Unable to apply function ''upper' at position '-:l1:c8'. This function expects java.lang.String. It receives java.lang.Integer.");
+	}
+	
 	
 	@Test
 	public void testAChainOfFunctionCanBeApplied() throws IOException, TemplateException {
@@ -195,47 +212,11 @@ public class TemplateTest {
 		assertWriteEquals("Apply a parameterized function <i>Eleanor of Aquitaine</i>");
 	}
 
-	private Method getApplyMethod(Transform t) {
-		Method[] methods = t.getClass().getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals("apply"))
-                return method;
-        }
-        return null;
-	}
-	
 	@Test
 	public void testAFunctionCanHaveAnInitializerWithSeveralParameters() throws IOException, TemplateException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\",\"i\">~");
 		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b", "i"), "$text"));
 		populateModel("text", "Eleanor of Aquitaine");
-//		Transform<String[], Transform> f = new Transform<String[], Transform>() {
-//			@Override
-//			public Transform apply(final String tags[]) { // b, i
-//				return new Transform<String, String>() {
-//					@Override
-//					public String apply(String value) { // $text
-//						String s = "";
-//						for (int i=0; i<tags.length; i++) {
-//							s += "<" + tags[i] + ">";
-//						}
-//						s += value;
-//						for (int i=tags.length-1; i>=0; i--) {
-//							s += "</" + tags[i] + ">";
-//						}
-//						return s;
-//					}
-//				};
-//			}
-//		};
-//		Method apply = getApplyMethod(f);
-//		assertNotNull(apply);
-////		assertNotNull(f.apply(new String[] { "a", "b" }));
-//		List l = new ArrayList<>(); l.add("a"); l.add("b");
-//		assertEquals(new String[] { "a", "b" }, l.toArray());
-//		assertNotNull(apply.invoke(f, new Object[] { l.toArray(new String[0]) }));
-//		
-		
 		populateTransform("encapsulate", new Transform<String[], Transform>() {
 			@Override
 			public Transform apply(final String tags[]) { // b, i
@@ -336,7 +317,7 @@ public class TemplateTest {
 
 	
 	@Test
-	public void testQuoteMessageIsReplacedWithTextDefinedInProperties() throws IOException, TemplateException {
+	public void testAMessageCanBeDefinedStaticallyInProperties() throws IOException, TemplateException {
 		parse("Text before...~'helloworld[]~Text after...");
 		populateProperty("helloworld", "Bonjour le monde !");
 		assertParsingEquals(text("Text before..."), message("'helloworld"), text("Text after...")); 
@@ -344,7 +325,7 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testQuoteMessageThrowsAnExceptionIfTheKeyIsNotFoundInProperties() throws IOException, TemplateException {
+	public void testIfMessageDefinedStaticallyIsNotFoundInPropertiesAnExceptionIsRaised() throws IOException, TemplateException {
 		parse("Text before...~'helloworld[]~Text after...");
 		assertParsingEquals(text("Text before..."), message("'helloworld"), text("Text after..."));
 		assertWriteThrowsException("Key 'helloworld' is not present in the property map to render message (-:l1:c16)");
@@ -352,7 +333,7 @@ public class TemplateTest {
 	
 	
 	@Test
-	public void testParseQuoteMessageWithOptionalParameterNotSet() throws IOException, TemplateException {
+	public void testAMessageCanUseParametersToBeDisplayed_CaseOptionalParameterNotSet() throws IOException, TemplateException {
 		parse("Text before...~'hello[$firstname?]~Text after...");
 		populateProperty("hello", "Bonjour {0} !");
 		assertParsingEquals(text("Text before..."), message("'hello", "$firstname?"), text("Text after...")); 
@@ -360,7 +341,7 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testParseQuoteMessageWithRequiredParameterNotSet() throws IOException, TemplateException {
+	public void testAMessageRaiseAnExceptionIfARequiredParameterIsNotSet() throws IOException, TemplateException {
 		parse("Text before...~'hello[$firstname]~Text after...");
 		populateProperty("hello", "Bonjour {0} !");
 		assertParsingEquals(text("Text before..."), message("'hello", "$firstname"), text("Text after...")); 
@@ -379,7 +360,7 @@ public class TemplateTest {
 	
 	
 	@Test
-	public void testParseVarMessage() throws IOException, TemplateException {
+	public void testParseAMessageCanBeDefinedDynamicallyInProperties() throws IOException, TemplateException {
 		parse("Text before...~$msg[]~Text after...");
 		populateProperty("helloworld", "Bonjour le monde !");
 		populateModel("msg", "helloworld");
@@ -407,18 +388,22 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testParseArraysBad() throws IOException, TemplateException {
+	public void testParseArraysBadType() throws IOException, TemplateException {
 		parse("~($p1,$p2):'add~");
-		populateModel("p1", 5);
-		populateModel("p2", 3);
-		populateTransform("add", new Transform<String[], Integer>() {
+		populateModel("p1", "5");
+		populateModel("p2", "3");
+		populateTransform("add", new Transform<Integer[], Integer>() {
 			@Override
-			public Integer apply(String[] values) {
-				return 0;
+			public Integer apply(Integer[] values) {
+				int sum = 0;
+				for (Integer value : values) {
+					sum += value.intValue();
+				}
+				return sum;
 			}
 		});
 		assertParsingEquals(func("'add", array("$p1", "$p2"))); 
-		assertWriteThrowsException("Unable to apply function ''add' at position '-:l1:c12'. This function expects java.lang.String[]. It receives java.lang.Integer[].");
+		assertWriteThrowsException("Unable to apply function ''add' at position '-:l1:c12'. This function expects java.lang.Integer[]. It receives java.lang.String[].");
 	}
 
 	@Test
@@ -547,6 +532,7 @@ public class TemplateTest {
 		StringWriter out = new StringWriter();
 		try {
 			interpreter.write(out, model);
+//			System.out.println(out);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			assertEquals(expectedMessage, e.getMessage());

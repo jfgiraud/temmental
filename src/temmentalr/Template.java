@@ -254,13 +254,12 @@ public class Template extends Stack {
 				public Transform apply(final Object[] value) {
 					return new Transform<Object, Object>() {
 						@Override
-						public Object apply(Object text) {
+						public Object apply(Object text) throws TemplateException {
 							try {
 								return method.invoke(text, value);
 							} catch (Exception e) {
-								e.printStackTrace(); // FIXME
+								throw new TemplateException(e, "Unable to apply function."); // FIXME
 							}
-							return text;
 						}
 					};
 				}
@@ -268,13 +267,12 @@ public class Template extends Stack {
 		} else if (method.getParameterTypes().length == 0) {
 			addFunction(name, new Transform<Object, Object>() {
 				@Override
-				public Object apply(Object value) {
+				public Object apply(Object value) throws TemplateException {
 					try {
 						return method.invoke(value);
 					} catch (Exception e) {
-						e.printStackTrace(); // FIXME
+						throw new TemplateException(e, "Unable to apply function."); // FIXME
 					}
-					return value;
 				}
 			});
 		} else {
@@ -283,13 +281,12 @@ public class Template extends Stack {
 				public Transform apply(final Object value) {
 					return new Transform<Object, Object>() {
 						@Override
-						public Object apply(Object text) {
+						public Object apply(Object text) throws TemplateException {
 							try {
 								return method.invoke(text, value);
 							} catch (Exception e) {
-								e.printStackTrace(); // FIXME
+								throw new TemplateException(e, "Unable to apply function."); // FIXME
 							}
-							return text;
 						}
 					};
 				}
