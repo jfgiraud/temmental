@@ -22,66 +22,39 @@ class Function extends Element {
 	}
 	
 	Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		System.out.println("ici:"+element);
-		
-		Transform fp = null;
-		
-//		if (element instanceof Identifier) {
-//			System.out.println("#Identifier##" + element);
-//			if (getIdentifier().startsWith("$")) {
-//				fp = functions.get(getInMap(model, false));
-//			} else {
-//				fp = (Transform) getInMap(functions, false);
-//			}
-//			System.out.println("#Identifier## rc=" + element + " ## " + fp);
-//		} else if (element instanceof Function){
-//			System.out.println("#Function##" + element);
-//			Object o = element.writeObject(functions, model, messages);
-//			fp = (Transform) o;
-//			System.out.println("#Function## rc=" + element + " ## " + fp);
-//		} 
-		
 		Object o = element.writeObject(functions, model, messages);
-		System.out.println("#2## " + o);
-		 fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
+		Transform fp = (Transform) ((o instanceof String) ? functions.get((String) o) : o);
 
 		if (fp == null && isRequired(element.getIdentifier())) {
 			throw new TemplateException("No transform function named '%s' is associated with the template for rendering at position '%s'.", element.getIdentifier(), element.getPosition());
 		} else if (fp == null) {
 			return null;
 		}
-
 		Method apply = getApplyMethod(fp);
-		
 		Class typeIn = Object.class; 
         boolean isArray = false;
         typeIn = apply.getParameterTypes()[0]; 
         isArray = typeIn.isArray();
         if (isArray)
             typeIn = typeIn.getComponentType();
-        
         List args = create_parameters_after_process(parameters, functions, model, messages);
         if (args == null) {
         	return null;
         }
-
-		try {
-			System.out.println(">"+element.getIdentifier() +">" + args.toArray());
-			System.out.println(">args="+args.get(0).getClass().getName());
-			System.out.println(">p.length "+apply.getParameterTypes().length);
-			System.out.println(">p.type "+typeIn);
-			System.out.println(">p.array "+isArray);
-			System.out.println(">list.size="+args.size());
-			System.out.println(">parameters.size="+parameters.size());
-			
+        
+        try {
 			if (args.size() == 1) {
-				return apply.invoke(fp, args.get(0));
+				o = args.get(0);
 			} else {
-				return apply.invoke(fp, asArray(args, typeIn));
+				o = asArray(args, typeIn);
 			}
+			return apply.invoke(fp, o);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new TemplateException(e, "Unable to apply function '" + element.getIdentifier() + "'"); //FIXME 
+			throw new TemplateException(e, "Unable to apply function '%s' at position '%s'. This function expects %s. It receives %s.", 
+					element.getIdentifier(), 
+					element.getPosition(), 
+					apply.getParameterTypes()[0].getCanonicalName(),  
+					o.getClass().getCanonicalName());  
 		}
 	}
 	

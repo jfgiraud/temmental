@@ -405,6 +405,21 @@ public class TemplateTest {
 		assertParsingEquals(func("'add", array("$p1", "$p2"))); 
 		assertWriteEquals("8");
 	}
+	
+	@Test
+	public void testParseArraysBad() throws IOException, TemplateException {
+		parse("~($p1,$p2):'add~");
+		populateModel("p1", 5);
+		populateModel("p2", 3);
+		populateTransform("add", new Transform<String[], Integer>() {
+			@Override
+			public Integer apply(String[] values) {
+				return 0;
+			}
+		});
+		assertParsingEquals(func("'add", array("$p1", "$p2"))); 
+		assertWriteThrowsException("Unable to apply function ''add' at position '-:l1:c12'. This function expects java.lang.String[]. It receives java.lang.Integer[].");
+	}
 
 	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
