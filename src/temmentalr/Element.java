@@ -20,6 +20,9 @@ abstract class Element {
 	}
 
 	static Object asArray(Collection parameters, Class typeIn) {
+		if (typeIn == null) {
+			typeIn = determineType(parameters);
+		}
 		Object args = (Object) Array.newInstance(typeIn, parameters.size());
 		int i = 0;
 		for (Iterator it = parameters.iterator(); it.hasNext(); i++) {
@@ -27,6 +30,22 @@ abstract class Element {
 			Array.set(args, i, parameter);
 		}
 		return args;
+	}
+
+	private static Class determineType(Collection parameters) {
+		Class typeIn;
+		typeIn = Object.class;
+		int i = 0;
+		for (Object p : parameters) {
+			Class clazz = p.getClass();
+			if (i == 0)
+				typeIn = clazz;
+			if (! clazz.equals(typeIn)) {
+				typeIn = Object.class;
+				break;
+			}
+		}
+		return typeIn;
 	}
 	
 	List create_parameters_after_process(List parameters, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
