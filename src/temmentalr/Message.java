@@ -17,7 +17,7 @@ public class Message extends Element {
 	Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		String key = (String) identifier.writeObject(functions, model, messages);
 
-		Object args = create_parameters_after_process(parameters, functions, model, messages, Object.class);
+		List args = create_parameters_after_process(parameters, functions, model, messages);
 		if (args == null) {
 			return null;
 		}
@@ -26,7 +26,7 @@ public class Message extends Element {
 			throw new TemplateException("Key '%s' is not present in the property map to render message (%s)", key, getPosition());
 		}
 		
-		return messages.format(key, (Object[]) args);
+		return messages.format(key, args.toArray());
 	}
 
 	String getIdentifier() {

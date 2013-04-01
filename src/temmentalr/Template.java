@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -174,13 +175,23 @@ public class Template extends Stack {
 				push(new Message(word, parameters)); // $text #func RpnFunc
 			} else if (last.equals("#)")) {
 				create_list("#(", "#)");
-//				List parameters = (List) pop();  
+				List parameters = (List) pop();
+				push(new temmentalr.Array(parameters));
 //				Identifier word = (Identifier) pop();  
 //				push(new Message(word, parameters)); // $text #func RpnFunc
 			}
 		}
 	}
 
+	private static Object asArray(List parameters, Class typeIn) {
+		Object args = (Object) Array.newInstance(typeIn, parameters.size());
+		for (int i = 0; i < parameters.size(); i++) {
+            Object parameter = parameters.get(i);
+            Array.set(args, i, parameter);
+		}
+		return args;
+	}
+	
 	private void create_list(String start, String end) {
 		drop();  
 		int i=1;

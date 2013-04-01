@@ -1,5 +1,6 @@
 package temmentalr;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -194,11 +195,47 @@ public class TemplateTest {
 		assertWriteEquals("Apply a parameterized function <i>Eleanor of Aquitaine</i>");
 	}
 
+	private Method getApplyMethod(Transform t) {
+		Method[] methods = t.getClass().getMethods();
+        for (Method method : methods) {
+            if (method.getName().equals("apply"))
+                return method;
+        }
+        return null;
+	}
+	
 	@Test
-	public void testAFunctionCanHaveAnInitializerWithSeveralParameters() throws IOException, TemplateException {
+	public void testAFunctionCanHaveAnInitializerWithSeveralParameters() throws IOException, TemplateException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("Applying bold and italic functions gives ~$text:'encapsulate<\"b\",\"i\">~");
 		assertParsingEquals(text("Applying bold and italic functions gives "), func(func("'encapsulate", "b", "i"), "$text"));
 		populateModel("text", "Eleanor of Aquitaine");
+//		Transform<String[], Transform> f = new Transform<String[], Transform>() {
+//			@Override
+//			public Transform apply(final String tags[]) { // b, i
+//				return new Transform<String, String>() {
+//					@Override
+//					public String apply(String value) { // $text
+//						String s = "";
+//						for (int i=0; i<tags.length; i++) {
+//							s += "<" + tags[i] + ">";
+//						}
+//						s += value;
+//						for (int i=tags.length-1; i>=0; i--) {
+//							s += "</" + tags[i] + ">";
+//						}
+//						return s;
+//					}
+//				};
+//			}
+//		};
+//		Method apply = getApplyMethod(f);
+//		assertNotNull(apply);
+////		assertNotNull(f.apply(new String[] { "a", "b" }));
+//		List l = new ArrayList<>(); l.add("a"); l.add("b");
+//		assertEquals(new String[] { "a", "b" }, l.toArray());
+//		assertNotNull(apply.invoke(f, new Object[] { l.toArray(new String[0]) }));
+//		
+		
 		populateTransform("encapsulate", new Transform<String[], Transform>() {
 			@Override
 			public Transform apply(final String tags[]) { // b, i

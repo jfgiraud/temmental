@@ -1,6 +1,9 @@
 package temmentalr;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,12 +16,21 @@ abstract class Element {
 	abstract String getPosition();
 	
 	static boolean isRequired(String varname) {
-		return varname != null && varname.startsWith("'") || ! varname.endsWith("?");
+		return varname != null && (varname.startsWith("'") || ! varname.endsWith("?"));
+	}
+
+	static Object asArray(Collection parameters, Class typeIn) {
+		Object args = (Object) Array.newInstance(typeIn, parameters.size());
+		int i = 0;
+		for (Iterator it = parameters.iterator(); it.hasNext(); i++) {
+			Object parameter = it.next();
+			Array.set(args, i, parameter);
+		}
+		return args;
 	}
 	
-	Object create_parameters_after_process(List parameters, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Class typeIn) throws TemplateException {
-		Object args;
-		args = Array.newInstance(typeIn, parameters.size());
+	List create_parameters_after_process(List parameters, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+		List args = new ArrayList();
         for (int i = 0; i < parameters.size(); i++) {
         	Object parameter = parameters.get(i);
         	Object afterProcess;
@@ -28,6 +40,7 @@ abstract class Element {
         	if (parameter instanceof Element) {
         		afterProcess = ((Element) parameter).writeObject(functions, model, messages);
         	} else {
+        		System.out.println("parameter="+parameter);
         		afterProcess = parameter;
         	}
         	if (afterProcess == null) {
@@ -39,7 +52,7 @@ abstract class Element {
         		}
         	}
         	System.out.println(afterProcess.getClass().getName());
-        	Array.set(args, i, afterProcess);
+        	args.add(afterProcess);
         }
 		return args;
 	}

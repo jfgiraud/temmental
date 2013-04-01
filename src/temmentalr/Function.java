@@ -1,6 +1,9 @@
 package temmentalr;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,21 +60,31 @@ class Function extends Element {
         if (isArray)
             typeIn = typeIn.getComponentType();
         
-        Object args = create_parameters_after_process(parameters, functions, model, messages, typeIn);
+        List args = create_parameters_after_process(parameters, functions, model, messages);
         if (args == null) {
         	return null;
         }
-        if (parameters.size() == 1) {
-        	args = ((Object[]) args)[0];
-        }
 
 		try {
-			System.out.println(">"+element.getIdentifier() +">" + args);
-			return apply.invoke(fp, args);
+			System.out.println(">"+element.getIdentifier() +">" + args.toArray());
+			System.out.println(">args="+args.get(0).getClass().getName());
+			System.out.println(">p.length "+apply.getParameterTypes().length);
+			System.out.println(">p.type "+typeIn);
+			System.out.println(">p.array "+isArray);
+			System.out.println(">list.size="+args.size());
+			System.out.println(">parameters.size="+parameters.size());
+			
+			if (args.size() == 1) {
+				return apply.invoke(fp, args.get(0));
+			} else {
+				return apply.invoke(fp, asArray(args, typeIn));
+			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new TemplateException(e, "Unable to apply function '" + element.getIdentifier() + "'"); //FIXME 
 		}
 	}
+	
 	
 	private Method getApplyMethod(Transform t) {
 		Method[] methods = t.getClass().getMethods();
