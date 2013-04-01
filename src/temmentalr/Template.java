@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -176,22 +174,11 @@ public class Template extends Stack {
 			} else if (last.equals("#)")) {
 				create_list("#(", "#)");
 				List parameters = (List) pop();
-				push(new temmentalr.Array(parameters));
-//				Identifier word = (Identifier) pop();  
-//				push(new Message(word, parameters)); // $text #func RpnFunc
+				push(new Array(parameters));
 			}
 		}
 	}
 
-	private static Object asArray(List parameters, Class typeIn) {
-		Object args = (Object) Array.newInstance(typeIn, parameters.size());
-		for (int i = 0; i < parameters.size(); i++) {
-            Object parameter = parameters.get(i);
-            Array.set(args, i, parameter);
-		}
-		return args;
-	}
-	
 	private void create_list(String start, String end) {
 		drop();  
 		int i=1;
@@ -261,7 +248,6 @@ public class Template extends Stack {
 	}
 
 	public void addFunction(final String name, final Method method) {
-		System.out.println("length="+method.getParameterTypes().length);
 		if (method.getParameterTypes().length>1) {
 			addFunction(name, new Transform<Object[], Transform>() {
 				@Override
@@ -272,7 +258,7 @@ public class Template extends Stack {
 							try {
 								return method.invoke(text, value);
 							} catch (Exception e) {
-								e.printStackTrace();
+								e.printStackTrace(); // FIXME
 							}
 							return text;
 						}
@@ -286,7 +272,7 @@ public class Template extends Stack {
 					try {
 						return method.invoke(value);
 					} catch (Exception e) {
-						e.printStackTrace();
+						e.printStackTrace(); // FIXME
 					}
 					return value;
 				}
@@ -301,14 +287,13 @@ public class Template extends Stack {
 							try {
 								return method.invoke(text, value);
 							} catch (Exception e) {
-								e.printStackTrace();
+								e.printStackTrace(); // FIXME
 							}
 							return text;
 						}
 					};
 				}
 			});
-			
 		}
 	}
 
