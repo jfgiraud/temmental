@@ -265,16 +265,111 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testExceptionMessageOnTransform() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		parse("~$text:'replace<$what,$with:'upper>~");
-		assertParsingEquals(func(func("'replace", "$what", func("'upper", "$with")), "$text"));
-		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
-		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
-		populateModel("text", "this is string example....wow!!! this is really string");
-		populateModel("what", 5);
-		populateModel("with", "was");
-		assertWriteThrowsException("xthWAS WAS string example....wow!!! thWAS WAS really string");
+	public void testExceptionMessageOnTransformWith1Param_CaseOk() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'charat<$index>~");
+		assertParsingEquals(func(func("'charat", "$index"), "$text"));
+		Method toto = String.class.getDeclaredMethod("charAt", int.class);
+		populateTransform("charat", toto);
+		populateModel("text", "lorem ipsum");
+		populateModel("index", 2);
+		assertWriteEquals("r");
 	}
+	
+	@Test
+	public void testExceptionMessageOnTransformWith1Param_CaseKo1() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'charat<$index,$index>~");
+		Method toto = String.class.getDeclaredMethod("charAt", int.class);
+		populateTransform("charat", toto);
+		populateModel("text", "lorem ipsum");
+		populateModel("index", 2);
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects only one parameter. It receives 2 parameters.");
+	}
+	
+	@Test
+	public void testExceptionMessageOnTransformWith1Param_CaseKo4() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'charat<>~");
+		Method toto = String.class.getDeclaredMethod("charAt", int.class);
+		populateTransform("charat", toto);
+		populateModel("text", "lorem ipsum");
+		populateModel("index", 2);
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects one parameter. It receives no parameter.");
+	}
+
+	@Test
+	public void testExceptionMessageOnTransformWith1Param_CaseKo5() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'charat~");
+		Method toto = String.class.getDeclaredMethod("charAt", int.class);
+		populateTransform("charat", toto);
+		populateModel("text", "lorem ipsum");
+		populateModel("index", 2);
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects only one parameter. It receives no parameter.");
+	}
+	
+	@Test
+	public void testExceptionMessageOnTransformWith1Param_CaseKo2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'charat<$index>~");
+		assertParsingEquals(func(func("'charat", "$index"), "$text"));
+		Method toto = String.class.getDeclaredMethod("charAt", int.class);
+		populateTransform("charat", toto);
+		populateModel("text", "lorem ipsum");
+		populateModel("index", "2");
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects int for parameter #1. It receives java.lang.String.");
+	}
+
+	@Test
+	public void testExceptionMessageOnTransformWith1Param_CaseKo3() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'charat<$index>~");
+		assertParsingEquals(func(func("'charat", "$index"), "$text"));
+		Method toto = String.class.getDeclaredMethod("charAt", int.class);
+		populateTransform("charat", toto);
+		populateModel("text", 12345);
+		populateModel("index", 2);
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects java.lang.String. It receives java.lang.Integer.");
+	}
+	
+	@Test
+	public void testExceptionMessageOnTransformWith2Params_CaseOk() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with>~");
+		assertParsingEquals(func(func("'replace", "$what", "$with"), "$text"));
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", "elit");
+		assertWriteEquals("lorem elit dolor sit amet");
+	}
+	
+	@Test
+	public void testExceptionMessageOnTransformWith2Params_CaseKo1() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with,$with>~");
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", "elit");
+		assertWriteThrowsException("Unable to apply function ''replace' at position '-:l1:c8'. This function expects 2 parameters. It receives 3 parameters.");
+	}
+	
+	@Test
+	public void testExceptionMessageOnTransformWith2Params_CaseKo2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with>~");
+		assertParsingEquals(func(func("'replace", "$what", "$with"), "$text"));
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", 5);
+		populateModel("with", "elit");
+		assertWriteThrowsException("Unable to apply function ''replace' at position '-:l1:c8'. This function expects java.lang.String for parameter #1. It receives java.lang.Integer.");
+	}
+
+	@Test
+	public void testExceptionMessageOnTransformWith2Params_CaseKo3() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with>~");
+		assertParsingEquals(func(func("'replace", "$what", "$with"), "$text"));
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", 5);
+		assertWriteThrowsException("Unable to apply function ''replace' at position '-:l1:c8'. This function expects java.lang.String for parameter #2. It receives java.lang.Integer.");
+	}
+
 	
 	@Test
 	public void testParameterizedQuoteFunctionAcceptsFunctionApplicationOnTheResult() throws IOException, TemplateException, NoSuchMethodException, SecurityException {

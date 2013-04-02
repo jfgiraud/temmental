@@ -251,16 +251,34 @@ public class Template extends Stack {
 		if (method.getParameterTypes().length>1) {
 			addFunction(name, new Transform<Object[], Transform>() {
 				@Override
-				public Transform apply(final Object[] value) {
+				public Transform apply(final Object[] values) {
 					return new Transform<Object, Object>() {
 						@Override
 						public Object apply(Object text) throws TemplateException {
 							try {
-								return method.invoke(text, value);
+								return method.invoke(text, values);
 							} catch (Exception e) {
-								throw new TemplateException(e, "This function expects %s. It receives %s.", 
-										method.getDeclaringClass().getCanonicalName(),  
-										value.getClass().getCanonicalName()); 
+								if (! ((Class<?>)method.getDeclaringClass()).isAssignableFrom(((Class<?>)text.getClass()))) {
+									throw new TemplateException(e, "This function expects %s. It receives %s.", 
+											method.getDeclaringClass().getCanonicalName(),  
+											text.getClass().getCanonicalName()); 
+								} else {
+									if (values.length != method.getParameterTypes().length) {
+										throw new TemplateException(e, "This function expects %d parameters. It receives %d parameters.", 
+												method.getParameterTypes().length,  
+												values.length);
+									} else {
+										for (int i=0; i<values.length; i++) {
+											if (! ((Class<?>)method.getParameterTypes()[i]).isAssignableFrom(((Class<?>)values[i].getClass()))) {
+												throw new TemplateException(e, "This function expects %s for parameter #%d. It receives %s.", 
+														method.getParameterTypes()[i].getCanonicalName(),  
+														i+1, 
+														values[i].getClass().getCanonicalName()); 
+											}			
+										}
+										throw new TemplateException("Unable to determine reason.");
+									}
+								}
 							}
 						}
 					};
@@ -279,7 +297,7 @@ public class Template extends Stack {
 					}
 				}
 			});
-		} else {
+		} else { // = 1
 			addFunction(name, new Transform<Object, Transform>() {
 				@Override
 				public Transform apply(final Object value) {
@@ -289,7 +307,23 @@ public class Template extends Stack {
 							try {
 								return method.invoke(text, value);
 							} catch (Exception e) {
-								throw new TemplateException(e, "Unable to apply function."); // FIXME
+								if (! ((Class<?>)method.getDeclaringClass()).isAssignableFrom(((Class<?>)text.getClass()))) {
+									throw new TemplateException(e, "This function expects %s. It receives %s.", 
+											method.getDeclaringClass().getCanonicalName(),  
+											text.getClass().getCanonicalName()); 
+								} else {
+									if (  value.getClass().isArray() ) {
+										int n = ((Object[])value).length;
+										if (n > 0)
+											throw new TemplateException(e, "This function expects only one parameter. It receives %d parameters.", n);
+										else 
+											throw new TemplateException(e, "This function expects one parameter. It receives no parameter.");
+									} else {
+										throw new TemplateException(e, "This function expects %s for parameter #1. It receives %s.", 
+												method.getParameterTypes()[0].getCanonicalName(),  
+												value.getClass().getCanonicalName());
+									}
+								}
 							}
 						}
 					};
