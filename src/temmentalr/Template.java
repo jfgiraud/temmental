@@ -258,7 +258,9 @@ public class Template extends Stack {
 							try {
 								return method.invoke(text, value);
 							} catch (Exception e) {
-								throw new TemplateException(e, "Unable to apply function."); // FIXME
+								throw new TemplateException(e, "This function expects %s. It receives %s.", 
+										method.getDeclaringClass().getCanonicalName(),  
+										value.getClass().getCanonicalName()); 
 							}
 						}
 					};
@@ -269,10 +271,11 @@ public class Template extends Stack {
 				@Override
 				public Object apply(Object value) throws TemplateException {
 					try {
-						System.out.println(value.getClass().getName());
 						return method.invoke(value);
 					} catch (Exception e) {
-						throw new TemplateException(e, "Unable to apply function."); // FIXME
+						throw new TemplateException(e, "This function expects %s. It receives %s.", 
+								method.getDeclaringClass().getCanonicalName(),  
+								value.getClass().getCanonicalName());  
 					}
 				}
 			});

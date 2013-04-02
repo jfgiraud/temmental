@@ -265,6 +265,18 @@ public class TemplateTest {
 	}
 	
 	@Test
+	public void testExceptionMessageOnTransform() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with:'upper>~");
+		assertParsingEquals(func(func("'replace", "$what", func("'upper", "$with")), "$text"));
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateModel("text", "this is string example....wow!!! this is really string");
+		populateModel("what", 5);
+		populateModel("with", "was");
+		assertWriteThrowsException("xthWAS WAS string example....wow!!! thWAS WAS really string");
+	}
+	
+	@Test
 	public void testParameterizedQuoteFunctionAcceptsFunctionApplicationOnTheResult() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
 		parse("~$text:'replace<$what:'lower,$with>:'upper~");
 		assertParsingEquals(func("'upper", func(func("'replace", func("'lower", "$what"), "$with"), "$text")));
