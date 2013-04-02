@@ -269,6 +269,7 @@ public class Template extends Stack {
 				@Override
 				public Object apply(Object value) throws TemplateException {
 					try {
+						System.out.println(value.getClass().getName());
 						return method.invoke(value);
 					} catch (Exception e) {
 						throw new TemplateException(e, "Unable to apply function."); // FIXME

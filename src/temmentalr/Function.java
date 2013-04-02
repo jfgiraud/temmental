@@ -30,13 +30,11 @@ class Function extends Element {
 		} else if (fp == null) {
 			return null;
 		}
+		
 		Method apply = getApplyMethod(fp);
-		Class typeIn = Object.class; 
-        boolean isArray = false;
-        typeIn = apply.getParameterTypes()[0]; 
-        isArray = typeIn.isArray();
-        if (isArray)
-            typeIn = typeIn.getComponentType();
+        
+		Class nextIn = apply.getParameterTypes()[0]; 
+
         List args = create_parameters_after_process(parameters, functions, model, messages);
         if (args == null) {
         	return null;
@@ -46,10 +44,30 @@ class Function extends Element {
 			if (args.size() == 1) {
 				o = args.get(0);
 			} else {
-				o = asArray(args, typeIn);
+				o = asArray(args, nextIn.isArray() ? nextIn.getComponentType() : nextIn);
 			}
+			
+			Class firstOut = o.getClass();
+			boolean firstOutArray = firstOut.isArray();
+            boolean nextInArray = nextIn.isArray();
+            System.out.println("firstOutArray="+firstOutArray);
+            System.out.println("nextInArray="+nextInArray);
+            System.out.println("!^="+!(firstOutArray ^ nextInArray));
+            System.out.println("isAssignableFrom="+((Class<?>)nextIn).isAssignableFrom(((Class<?>)firstOut)));
+        	System.out.println("outClass="+((Class<?>)firstOut).getCanonicalName());
+        	System.out.println("inClass="+((Class<?>)nextIn).getCanonicalName());
+            boolean ok = !(firstOutArray ^ nextInArray) && ((Class<?>)nextIn).isAssignableFrom(((Class<?>)firstOut));
+            System.out.println("ok=" + ok);
+            if (! ok/* && nextIn != String.class && nextIn != Object.class*/) {
+            	String outClass = ((Class<?>)firstOut).getCanonicalName();
+            	String inClass = ((Class<?>)nextIn).getCanonicalName();
+            	System.out.println("throw exception");
+            	throw new TemplateException("aaa");
+            }
+
 			return apply.invoke(fp, o);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new TemplateException(e, "Unable to apply function '%s' at position '%s'. This function expects %s. It receives %s.", 
 					element.getIdentifier(), 
 					element.getPosition(), 
