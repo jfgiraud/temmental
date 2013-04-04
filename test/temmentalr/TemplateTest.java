@@ -40,6 +40,11 @@ public class TemplateTest {
 		assertParsingEquals(text("Some text data..."));
 		assertWriteEquals("Some text data...");
 	}
+	
+	@Test
+	public void testNumber() throws IOException, TemplateException {
+		fail("~123~");
+	}
 
 	@Test
 	public void testTextContainingQuoteCharacter() throws IOException, TemplateException { 
@@ -268,8 +273,7 @@ public class TemplateTest {
 	public void testExceptionMessageOnTransformWith1Param_CaseOk() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("~$text:'charat<$index>~");
 		assertParsingEquals(func(func("'charat", "$index"), "$text"));
-		Method toto = String.class.getDeclaredMethod("charAt", int.class);
-		populateTransform("charat", toto);
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
 		populateModel("text", "lorem ipsum");
 		populateModel("index", 2);
 		assertWriteEquals("r");
@@ -278,8 +282,7 @@ public class TemplateTest {
 	@Test
 	public void testExceptionMessageOnTransformWith1Param_CaseKo1() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("~$text:'charat<$index,$index>~");
-		Method toto = String.class.getDeclaredMethod("charAt", int.class);
-		populateTransform("charat", toto);
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
 		populateModel("text", "lorem ipsum");
 		populateModel("index", 2);
 		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects only one parameter. It receives 2 parameters.");
@@ -288,21 +291,19 @@ public class TemplateTest {
 	@Test
 	public void testExceptionMessageOnTransformWith1Param_CaseKo4() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("~$text:'charat<>~");
-		Method toto = String.class.getDeclaredMethod("charAt", int.class);
-		populateTransform("charat", toto);
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
 		populateModel("text", "lorem ipsum");
 		populateModel("index", 2);
 		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects one parameter. It receives no parameter.");
 	}
 
 	@Test
-	public void testExceptionMessageOnTransformWith1Param_CaseKo5() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testExceptionMessageOnTransformWithoutParam() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("~$text:'charat~");
-		Method toto = String.class.getDeclaredMethod("charAt", int.class);
-		populateTransform("charat", toto);
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
 		populateModel("text", "lorem ipsum");
 		populateModel("index", 2);
-		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects only one parameter. It receives no parameter.");
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c8'. This function expects one or more parameters. It receives no parameter.");
 	}
 	
 	@Test
@@ -520,6 +521,34 @@ public class TemplateTest {
 		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c29'.", "~$variable?:'function1<$p1>:function2~");
 		assertParseThrowsException("Invalid identifier syntax for 'function3' at '-:l1:c28'.", "~$variable?:'function1<$p1:function3>:'function2~");
 	}
+	
+	@Test
+	public void testIfThenElse() {
+		fail("testIfThenElse");
+	}
+	
+	@Test
+	public void testIterate() {
+		fail("testIterate");
+	}
+	
+	@Test
+	public void testChainErrorDetectedWhileParsing() {
+		fail("testChainErrorDetectedWhileParsing");
+	}
+	
+	@Test
+	public void testBracketMismatch() {
+		fail("testBracketMismatch");
+	}
+	
+	@Test
+	public void testModelOverride() {
+		fail("testModelOverride");
+	}
+	
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	
 	
 	private String eval(String text) {
 		return "eval\\(" + text + "\\)";

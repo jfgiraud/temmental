@@ -222,7 +222,12 @@ public class Template extends Stack {
 		}
 		
 		if (value instanceof Function) {
-			return ((Function) value).writeObject(functions, model, messages);
+			Function function = ((Function) value); 
+			Object result = function.writeObject(functions, model, messages);
+			if (result != null && result instanceof Transform) {
+				throw new TemplateException("Unable to apply function '%s' at position '-:l1:c8'. This function expects one or more parameters. It receives no parameter.",	function.getIdentifier(), function.getPosition());
+			} 
+			return result;
 		}
 		
 		if (value instanceof Message) {
@@ -238,7 +243,7 @@ public class Template extends Stack {
 		for (int i=depth(); i>0; i--) {
 			Object o = writeObject(out, functions, model, messages, value(i));
 			if (o != null) {
-				out.write(o.toString());
+					out.write(o.toString());
 			}
 		}
 	}
