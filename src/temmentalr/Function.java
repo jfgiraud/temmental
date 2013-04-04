@@ -32,14 +32,19 @@ class Function extends Element {
 		}
 		
 		Method apply = getApplyMethod(fp);
-        
 
         List args = create_parameters_after_process(parameters, functions, model, messages);
         if (args == null) {
         	return null;
+        } else {
+        	for (int i=0; i<args.size(); i++) {
+        		Object tmp = args.get(i);
+        		if (tmp != null && tmp instanceof Transform) {
+    				throw new TemplateException("Unable to apply function '%s' at position '%s'. This function expects one or more parameters. It receives no parameter.",	((Element) parameters.get(i)).getIdentifier(), ((Element) parameters.get(i)).getPosition());
+    			} 
+        	}
         }
         
-        System.out.println("aaa " + args.size());
         try {
 			if (args.size() == 1) {
 				o = args.get(0);
@@ -47,8 +52,6 @@ class Function extends Element {
 				Class nextIn = apply.getParameterTypes()[0]; 
 				o = asArray(args, nextIn.isArray() ? nextIn.getComponentType() : nextIn);
 			}
-			System.out.println("aaa " + o);
-			
 			return apply.invoke(fp, o);
 		} catch (Exception e) {
 //			e.printStackTrace();

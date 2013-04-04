@@ -59,7 +59,6 @@ abstract class Element {
         	if (parameter instanceof Element) {
         		afterProcess = ((Element) parameter).writeObject(functions, model, messages);
         	} else {
-        		System.out.println("parameter="+parameter);//FIXME
         		afterProcess = parameter;
         	}
         	if (afterProcess == null) {
@@ -70,7 +69,6 @@ abstract class Element {
         			return null;
         		}
         	}
-        	System.out.println(afterProcess.getClass().getName());//FIXME
         	args.add(afterProcess);
         }
 		return args;

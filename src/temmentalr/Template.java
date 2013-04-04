@@ -243,7 +243,7 @@ public class Template extends Stack {
 		for (int i=depth(); i>0; i--) {
 			Object o = writeObject(out, functions, model, messages, value(i));
 			if (o != null) {
-					out.write(o.toString());
+				out.write(o.toString());
 			}
 		}
 	}

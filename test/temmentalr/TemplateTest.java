@@ -307,6 +307,56 @@ public class TemplateTest {
 	}
 	
 	@Test
+	public void testExceptionMessageInsideNoParameter() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with:'upper:'charat>~");
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", "elit");
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c36'. This function expects one or more parameters. It receives no parameter.");
+	}
+
+	@Test
+	public void testExceptionMessageInsideBadParameter() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with:'upper:'charat<$index>>~");
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", "elit");
+		populateModel("index", "2");
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c36'. This function expects int for parameter #1. It receives java.lang.String.");
+	}
+	
+	@Test
+	public void testExceptionMessageInsideEmptyParameterList() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with:'upper:'charat<>>~");
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", "elit");
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c36'. This function expects one parameter. It receives no parameter.");
+	}
+	
+	@Test
+	public void testExceptionMessageInsideWrongNumberOfParameters() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		parse("~$text:'replace<$what,$with:'upper:'charat<$index,$index>>~");
+		populateTransform("replace", String.class.getDeclaredMethod("replaceAll",String.class, String.class));
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
+		populateModel("text", "lorem ipsum dolor sit amet");
+		populateModel("what", "ipsum");
+		populateModel("with", "elit");
+		populateModel("index", 2);
+		assertWriteThrowsException("Unable to apply function ''charat' at position '-:l1:c36'. This function expects only one parameter. It receives 2 parameters.");
+	}
+	
+	@Test
 	public void testExceptionMessageOnTransformWith1Param_CaseKo2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		parse("~$text:'charat<$index>~");
 		assertParsingEquals(func(func("'charat", "$index"), "$text"));
