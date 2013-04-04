@@ -589,7 +589,17 @@ public class TemplateTest {
 	
 	@Test
 	public void testBracketMismatch() {
-		fail("testBracketMismatch");
+		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$text:'replace<$old,$new]~");
+	}
+	
+	@Test
+	public void testBracketNotClosed() {
+		fail();
+	}
+	
+	@Test
+	public void testBracketNotOpened() {
+		fail();
 	}
 	
 	@Test
