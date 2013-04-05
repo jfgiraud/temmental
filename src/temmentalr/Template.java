@@ -15,8 +15,7 @@ import java.util.Map;
 public class Template extends Stack {
 	
 	private static final boolean debug = true;
-	private Stack bracketPositions = new Stack(); 
-			
+
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
 	
@@ -116,19 +115,19 @@ public class Template extends Stack {
 						if (currentChar == ':') {
 							push("#func");
 						} else if (currentChar == '<') {
-							push_bracket('<', file, line, column); 
+							push(new Bracket('<', file, line, column));
 						} else if (currentChar == '>') {
-							push_bracket('>', file, line, column);
+							push(new Bracket('>', file, line, column));
 							eval();
 						} else if (currentChar == '[') {
-							push_bracket('[', file, line, column);
+							push(new Bracket('[', file, line, column));
 						} else if (currentChar == ']') {
-							push_bracket(']', file, line, column);
+							push(new Bracket(']', file, line, column));
 							eval();
 						}  else if (currentChar == '(') {
-							push_bracket('(', file, line, column);
+							push(new Bracket('(', file, line, column));
 						} else if (currentChar == ')') {
-							push_bracket(')', file, line, column);
+							push(new Bracket(')', file, line, column));
 							eval();
 						}
 					} else {
@@ -151,6 +150,7 @@ public class Template extends Stack {
 		}
 	}
 
+<<<<<<< HEAD
 	private void push_bracket(char c, String file, int line, int column) {
 		push("#" + c);
 		bracketPositions.push(c);
@@ -158,6 +158,8 @@ public class Template extends Stack {
 		bracketPositions.tolist(2);
 	}
 
+=======
+>>>>>>> parent of 7ee21c2... brackets
 	private void eval() throws TemplateException {
 		if (depth()>1) {
 			Object last = value();
@@ -168,27 +170,31 @@ public class Template extends Stack {
 				tolist(1); // [ var ]
 				List parameters = (List) pop();
 				push(new Function(func, parameters));
-			} else if (last.equals("#>")) {
-				// $text #func $funcname #< $p1 $p2 #>
-				create_list("#<", "#>"); // $text #func $funcname [$p1, $p2]
-				List parameters = (List) pop(); // $text #func $funcname 
-				Element func = (Element) pop(); // $text #func 
-				push(new Function(func, parameters)); // $text #func RpnFunc
-				swap(); // $text RpnFunc #func 
-				eval();
-			} else if (last.equals("#]")) {
-				create_list("#[", "#]");
-				List parameters = (List) pop();  
-				Identifier word = (Identifier) pop();  
-				push(new Message(word, parameters)); // $text #func RpnFunc
-			} else if (last.equals("#)")) {
-				create_list("#(", "#)");
-				List parameters = (List) pop();
-				push(new Array(parameters));
+			} else if (last instanceof Bracket) {
+				Bracket bracket = (Bracket) value();
+				if (bracket.bracket == '>') {
+					// $text #func $funcname #< $p1 $p2 #>
+					create_list('<', '>'); // $text #func $funcname [$p1, $p2]
+					List parameters = (List) pop(); // $text #func $funcname 
+					Element func = (Element) pop(); // $text #func 
+					push(new Function(func, parameters)); // $text #func RpnFunc
+					swap(); // $text RpnFunc #func 
+					eval();
+				} else if (bracket.bracket == ']') {
+					create_list('[', ']');
+					List parameters = (List) pop();  
+					Identifier word = (Identifier) pop();  
+					push(new Message(word, parameters)); // $text #func RpnFunc
+				} else if (bracket.bracket == ')') {
+					create_list('(', ')');
+					List parameters = (List) pop();
+					push(new Array(parameters));
+				}
 			}
 		}
 	}
 
+<<<<<<< HEAD
 	/*
 	 * http://www.donghuna.com/247
 	 */
@@ -199,9 +205,21 @@ public class Template extends Stack {
 		int i=1;
 		while (i<=depth() && ! value(i).equals(start)) {
 			i++;
+=======
+	private void create_list(char start, char end) throws TemplateException {
+		try {
+			Bracket closeBracket = (Bracket) pop();  
+			int i=1;
+			while (i<=depth() && ! (value(i) instanceof Bracket && ((Bracket)value(i)).bracket == start)) {
+				i++;
+			}
+			Bracket openBracket = (Bracket)value(i);
+			tolist(i-1);
+			nip();
+		} catch (StackException e) {
+			throw new TemplateException(e, "Bracket mismatch.");
+>>>>>>> parent of 7ee21c2... brackets
 		}
-		tolist(i-1);
-		nip();
 	}
 	
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
