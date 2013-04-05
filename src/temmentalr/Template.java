@@ -150,16 +150,6 @@ public class Template extends Stack {
 		}
 	}
 
-<<<<<<< HEAD
-	private void push_bracket(char c, String file, int line, int column) {
-		push("#" + c);
-		bracketPositions.push(c);
-		bracketPositions.push(String.format("%s:l%d:c%d", file, line, column));
-		bracketPositions.tolist(2);
-	}
-
-=======
->>>>>>> parent of 7ee21c2... brackets
 	private void eval() throws TemplateException {
 		if (depth()>1) {
 			Object last = value();
@@ -194,18 +184,10 @@ public class Template extends Stack {
 		}
 	}
 
-<<<<<<< HEAD
 	/*
 	 * http://www.donghuna.com/247
 	 */
 	
-	private void create_list(String start, String end) {
-		System.out.println(bracketPositions);
-		drop();  
-		int i=1;
-		while (i<=depth() && ! value(i).equals(start)) {
-			i++;
-=======
 	private void create_list(char start, char end) throws TemplateException {
 		try {
 			Bracket closeBracket = (Bracket) pop();  
@@ -218,7 +200,6 @@ public class Template extends Stack {
 			nip();
 		} catch (StackException e) {
 			throw new TemplateException(e, "Bracket mismatch.");
->>>>>>> parent of 7ee21c2... brackets
 		}
 	}
 	
