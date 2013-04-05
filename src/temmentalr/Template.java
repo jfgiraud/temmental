@@ -155,12 +155,16 @@ public class Template extends Stack {
 	private void check_stack() throws TemplateException {
 		if (depth()>1) {
 			for (int i=1; i<=depth(); i++) {
-				if (value(i) instanceof Bracket) {
-					Bracket b = (Bracket) value(i);
+				Object o = value(i);
+				if (o instanceof Bracket) {
+					Bracket b = (Bracket) o;
 					if (b.isClosed())
-						throw new TemplateException("Bracket not opened ('%c' at position '%s')", b.getBracket(), b.getPosition());
+						throw new TemplateException("Bracket not opened ('%c' at position '%s').", b.getBracket(), b.getPosition());
 					else 
-						throw new TemplateException("Bracket not closed ('%c' at position '%s')", b.getBracket(), b.getPosition());
+						throw new TemplateException("Bracket not closed ('%c' at position '%s').", b.getBracket(), b.getPosition());
+				} else if (o instanceof Array) {
+					Array a = (Array) o;
+					throw new TemplateException("Invalid syntax at position '%s'.", a.getPosition());
 				}
 			}
 		}
@@ -190,14 +194,14 @@ public class Template extends Stack {
 					create_list('[', ']');
 					List parameters = (List) pop();  
 					if (! (value() instanceof Identifier)) {
-						throw new TemplateException("Bad bracket type. Should be <> but is [] at position '%s'", bracket.getPosition());
+						throw new TemplateException("Wrong bracket type. Should be <> but is [] at position '%s'.", bracket.getPosition());
 					}
 					Identifier word = (Identifier) pop();  
 					push(new Message(word, parameters)); // $text #func RpnFunc
 				} else if (bracket.getBracket() == ')') {
-					create_list('(', ')');
+					Bracket startAt = (Bracket) create_list('(', ')');
 					List parameters = (List) pop();
-					push(new Array(parameters));
+					push(new Array(startAt, parameters));
 				}
 			}
 		}
@@ -207,14 +211,14 @@ public class Template extends Stack {
 	 * http://www.donghuna.com/247
 	 */
 	
-	private void create_list(char start, char end) throws TemplateException {
+	private Object create_list(char start, char end) throws TemplateException {
 		Bracket closeBracket = (Bracket) pop();
 		int i;
 		for (i=1; i<=depth(); i++) {
 			if (value(i) instanceof Bracket) {
 				Bracket bracket = (Bracket)value(i);
 				if (bracket.isOpened() && bracket.getBracket() != closeBracket.other()) {
-					throw new TemplateException("Bracket mismatch ('%c' at position '%s' vs '%c' at position '%s')", 
+					throw new TemplateException("Bracket mismatch ('%c' at position '%s' vs '%c' at position '%s').", 
 							bracket.getBracket(), bracket.getPosition(), closeBracket.getBracket(), closeBracket.getPosition());
 				}
 				break;
@@ -222,9 +226,12 @@ public class Template extends Stack {
 		}
 		try {
 			tolist(i-1);
+			over();
+			Object o = pop();
 			nip();
+			return o;
 		} catch (StackException e) {
-			throw new TemplateException(e, "Bracket '%c' not opened for the closing bracket '%c' '%s')", 
+			throw new TemplateException(e, "Bracket '%c' not opened for the closing bracket '%c' '%s').", 
 					closeBracket.other(), closeBracket.getBracket(), closeBracket.getPosition());
 		}
 			
@@ -271,6 +278,8 @@ public class Template extends Stack {
 	private void push_word(String word, String file, int line, int column) throws TemplateException {
 		if (word.startsWith("\"") && word.endsWith("\"")) {
 			push(word.substring(1, word.length()-1));
+		} else if (word.matches("\\d+")) {
+			push(Integer.parseInt(word));
 		} else {
 			push(new Identifier(word, file, line, column-word.length()-1));
 		}
@@ -278,7 +287,7 @@ public class Template extends Stack {
 	
 	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws IOException, TemplateException {
 		
-		if (value instanceof String)
+		if (value instanceof String || value instanceof Number)
 			return value;
 
 		if (value instanceof Identifier) {

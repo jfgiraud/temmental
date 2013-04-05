@@ -7,7 +7,7 @@ public class Bracket {
 
 	public Bracket(char bracket, String file, int line, int column) {
 		this.bracket = bracket;
-		this.position = String.format("%s:l%d:c%d", file, line, column);
+		this.position = String.format("%s:l%d:c%d", file, line, column-1);
 	}
 	
 	public char other() {

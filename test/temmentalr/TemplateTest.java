@@ -42,8 +42,15 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testNumber() throws IOException, TemplateException {
-		fail("~123~");
+	public void testNumber() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~123~");
+		assertParsingEquals(number(123));
+		assertWriteEquals("123");
+		
+		parse("~$text:'charat<2>~");
+		populateTransform("charat", String.class.getDeclaredMethod("charAt", int.class));
+		populateModel("text", "lorem ipsum");
+		assertWriteEquals("r");
 	}
 
 	@Test
@@ -583,34 +590,39 @@ public class TemplateTest {
 	}
 	
 	@Test
+	public void testCalc() {
+		fail("~{$i+1}~");
+	}
+	
+	@Test
 	public void testChainErrorDetectedWhileParsing() {
 		fail("testChainErrorDetectedWhileParsing");
 	}
 	
 	@Test
 	public void testBracketMismatch() {
-		assertParseThrowsException("Bracket mismatch ('<' at position '-:l1:c17' vs ']' at position '-:l1:c27')", "~$text:'replace<$old,$new]~");
-		assertParseThrowsException("Bracket mismatch ('(' at position '-:l1:c17' vs '>' at position '-:l1:c27')", "~$text:'replace($old,$new>~");
-		assertParseThrowsException("Bracket mismatch ('[' at position '-:l1:c31' vs '>' at position '-:l1:c37')", "~$text:'replace<$old:'replace[$a,$b>,$new>~");
+		assertParseThrowsException("Bracket mismatch ('<' at position '-:l1:c16' vs ']' at position '-:l1:c26').", "~$text:'replace<$old,$new]~");
+		assertParseThrowsException("Bracket mismatch ('(' at position '-:l1:c16' vs '>' at position '-:l1:c26').", "~$text:'replace($old,$new>~");
+		assertParseThrowsException("Bracket mismatch ('[' at position '-:l1:c30' vs '>' at position '-:l1:c36').", "~$text:'replace<$old:'replace[$a,$b>,$new>~");
 	}
 	
 	@Test
 	public void testInvalidBracket() {
-		assertParseThrowsException("Bad bracket type. Should be <> but is [] at position '-:l1:c27'", "~$text:'replace[$old,$new]~");
-		assertParseThrowsException("Bracket mismatch ('(' at position '-:l1:c17' vs '>' at position '-:l1:c27')", "~$text:'replace($old,$new)~");
+		assertParseThrowsException("Wrong bracket type. Should be <> but is [] at position '-:l1:c26'.", "~$text:'replace[$old,$new]~");
+		assertParseThrowsException("Invalid syntax at position '-:l1:c16'.", "~$text:'replace($old,$new)~");
 	}
 	
 	@Test
 	public void testBracketNotClosed() {
-		assertParseThrowsException("Bracket not closed ('<' at position '-:l1:c17')", "~$text:'replace<$old,$new~");
-		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c17')", "~$text:'replace[$old,$new~");
-		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c3')", "~[$old~");
-		assertParseThrowsException("Bracket not closed ('(' at position '-:l1:c3')", "~($old~");
+		assertParseThrowsException("Bracket not closed ('<' at position '-:l1:c16').", "~$text:'replace<$old,$new~");
+		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c16').", "~$text:'replace[$old,$new~");
+		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c2').", "~[$old~");
+		assertParseThrowsException("Bracket not closed ('(' at position '-:l1:c2').", "~($old~");
 	}
 	
 	@Test
 	public void testBracketNotOpened() {
-		assertParseThrowsException("Bracket '<' not opened for the closing bracket '>' '-:l1:c20')", "~$text:'replaceold>~");
+		assertParseThrowsException("Bracket '<' not opened for the closing bracket '>' '-:l1:c19').", "~$text:'replaceold>~");
 	}
 	
 	@Test
@@ -627,6 +639,10 @@ public class TemplateTest {
 	
 	private String text(String text) {
 		return text;
+	}
+	
+	private String number(Number number) {
+		return number.toString();
 	}
 
 	private String array(Object ... parameters) {

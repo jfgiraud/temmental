@@ -6,9 +6,11 @@ import java.util.Map;
 public class Array extends Element {
 
 	private List parameters;
+	private Bracket bracket;
 
-	Array(List parameters) {
+	Array(Bracket b, List parameters) {
 		this.parameters = parameters;
+		this.bracket = b;
 	}
 	
 	@Override
@@ -24,7 +26,7 @@ public class Array extends Element {
 
 	@Override
 	String getPosition() {
-		return null;
+		return bracket.getPosition();
 	}
 
 	public String toString() {
