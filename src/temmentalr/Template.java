@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO mettre un stack.empty() ??
+
 public class Template extends Stack {
 	
 	private static final boolean debug = true;
@@ -154,7 +156,6 @@ public class Template extends Stack {
 		bracketPositions.push(c);
 		bracketPositions.push(String.format("%s:l%d:c%d", file, line, column));
 		bracketPositions.tolist(2);
-		System.out.println(bracketPositions);
 	}
 
 	private void eval() throws TemplateException {
@@ -188,7 +189,12 @@ public class Template extends Stack {
 		}
 	}
 
+	/*
+	 * http://www.donghuna.com/247
+	 */
+	
 	private void create_list(String start, String end) {
+		System.out.println(bracketPositions);
 		drop();  
 		int i=1;
 		while (i<=depth() && ! value(i).equals(start)) {
