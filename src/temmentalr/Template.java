@@ -148,6 +148,22 @@ public class Template extends Stack {
 		} finally {
 			sr.close();
 		}
+		
+		check_stack();
+	}
+
+	private void check_stack() throws TemplateException {
+		if (depth()>1) {
+			for (int i=1; i<=depth(); i++) {
+				if (value(i) instanceof Bracket) {
+					Bracket b = (Bracket) value(i);
+					if (b.isClosed())
+						throw new TemplateException("Bracket not opened ('%c' at position '%s')", b.getBracket(), b.getPosition());
+					else 
+						throw new TemplateException("Bracket not closed ('%c' at position '%s')", b.getBracket(), b.getPosition());
+				}
+			}
+		}
 	}
 
 	private void eval() throws TemplateException {
@@ -162,7 +178,7 @@ public class Template extends Stack {
 				push(new Function(func, parameters));
 			} else if (last instanceof Bracket) {
 				Bracket bracket = (Bracket) value();
-				if (bracket.bracket == '>') {
+				if (bracket.getBracket() == '>') {
 					// $text #func $funcname #< $p1 $p2 #>
 					create_list('<', '>'); // $text #func $funcname [$p1, $p2]
 					List parameters = (List) pop(); // $text #func $funcname 
@@ -170,12 +186,15 @@ public class Template extends Stack {
 					push(new Function(func, parameters)); // $text #func RpnFunc
 					swap(); // $text RpnFunc #func 
 					eval();
-				} else if (bracket.bracket == ']') {
+				} else if (bracket.getBracket() == ']') {
 					create_list('[', ']');
 					List parameters = (List) pop();  
+					if (! (value() instanceof Identifier)) {
+						throw new TemplateException("Bad bracket type. Should be <> but is [] at position '%s'", bracket.getPosition());
+					}
 					Identifier word = (Identifier) pop();  
 					push(new Message(word, parameters)); // $text #func RpnFunc
-				} else if (bracket.bracket == ')') {
+				} else if (bracket.getBracket() == ')') {
 					create_list('(', ')');
 					List parameters = (List) pop();
 					push(new Array(parameters));
@@ -189,18 +208,49 @@ public class Template extends Stack {
 	 */
 	
 	private void create_list(char start, char end) throws TemplateException {
-		try {
-			Bracket closeBracket = (Bracket) pop();  
-			int i=1;
-			while (i<=depth() && ! (value(i) instanceof Bracket && ((Bracket)value(i)).bracket == start)) {
-				i++;
+		Bracket closeBracket = (Bracket) pop();
+		int i;
+		for (i=1; i<=depth(); i++) {
+			if (value(i) instanceof Bracket) {
+				Bracket bracket = (Bracket)value(i);
+				if (bracket.isOpened() && bracket.getBracket() != closeBracket.other()) {
+					throw new TemplateException("Bracket mismatch ('%c' at position '%s' vs '%c' at position '%s')", 
+							bracket.getBracket(), bracket.getPosition(), closeBracket.getBracket(), closeBracket.getPosition());
+				}
+				break;
 			}
-			Bracket openBracket = (Bracket)value(i);
+		}
+		try {
 			tolist(i-1);
 			nip();
 		} catch (StackException e) {
-			throw new TemplateException(e, "Bracket mismatch.");
+			throw new TemplateException(e, "Bracket '%c' not opened for the closing bracket '%c' '%s')", 
+					closeBracket.other(), closeBracket.getBracket(), closeBracket.getPosition());
 		}
+			
+//		try {
+//			int i=1;
+//			while (i<=depth() && ! (value(i) instanceof Bracket && ((Bracket)value(i)).getBracket() == start)) {
+//				i++;
+//			}
+//			Bracket openBracket = (Bracket)value(i);
+//			tolist(i-1);
+//			nip();
+//		} catch (StackException e) {
+//			throw new TemplateException(e, "Bracket '%c' not opened at position '%s'.", closeBracket.other(), closeBracket.getPosition());
+//		}
+//		Bracket closeBracket = (Bracket) pop();  
+//		try {
+//			int i=1;
+//			while (i<=depth() && ! (value(i) instanceof Bracket && ((Bracket)value(i)).getBracket() == start)) {
+//				i++;
+//			}
+//			Bracket openBracket = (Bracket)value(i);
+//			tolist(i-1);
+//			nip();
+//		} catch (StackException e) {
+//			throw new TemplateException(e, "Bracket '%c' not opened at position '%s'.", closeBracket.other(), closeBracket.getPosition());
+//		}
 	}
 	
 	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {

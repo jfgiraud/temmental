@@ -589,17 +589,28 @@ public class TemplateTest {
 	
 	@Test
 	public void testBracketMismatch() {
-		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$text:'replace<$old,$new]~");
+		assertParseThrowsException("Bracket mismatch ('<' at position '-:l1:c17' vs ']' at position '-:l1:c27')", "~$text:'replace<$old,$new]~");
+		assertParseThrowsException("Bracket mismatch ('(' at position '-:l1:c17' vs '>' at position '-:l1:c27')", "~$text:'replace($old,$new>~");
+		assertParseThrowsException("Bracket mismatch ('[' at position '-:l1:c31' vs '>' at position '-:l1:c37')", "~$text:'replace<$old:'replace[$a,$b>,$new>~");
+	}
+	
+	@Test
+	public void testInvalidBracket() {
+		assertParseThrowsException("Bad bracket type. Should be <> but is [] at position '-:l1:c27'", "~$text:'replace[$old,$new]~");
+		assertParseThrowsException("Bracket mismatch ('(' at position '-:l1:c17' vs '>' at position '-:l1:c27')", "~$text:'replace($old,$new)~");
 	}
 	
 	@Test
 	public void testBracketNotClosed() {
-		fail();
+		assertParseThrowsException("Bracket not closed ('<' at position '-:l1:c17')", "~$text:'replace<$old,$new~");
+		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c17')", "~$text:'replace[$old,$new~");
+		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c3')", "~[$old~");
+		assertParseThrowsException("Bracket not closed ('(' at position '-:l1:c3')", "~($old~");
 	}
 	
 	@Test
 	public void testBracketNotOpened() {
-		fail();
+		assertParseThrowsException("Bracket '<' not opened for the closing bracket '>' '-:l1:c20')", "~$text:'replaceold>~");
 	}
 	
 	@Test
