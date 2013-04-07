@@ -57,7 +57,7 @@ public class Template extends Stack {
 						buffer.write(currentChar);
 						if (currentChar == '\n') {
 							line++;
-							column = 0;
+							column = 1;
 						} 
 					} else {
 						int nextChar = sr.read();
@@ -125,6 +125,9 @@ public class Template extends Stack {
 							push(new Bracket(']', file, line, column));
 							eval();
 						}  else if (currentChar == '(') {
+							if (! empty() && ! (value() instanceof String)) {
+								throw new TemplateException("Invalid bracket type '(' at position '%s'.", String.format("%s:l%d:c%d", file, line, column));
+							}
 							push(new Bracket('(', file, line, column));
 						} else if (currentChar == ')') {
 							push(new Bracket(')', file, line, column));
@@ -162,10 +165,11 @@ public class Template extends Stack {
 						throw new TemplateException("Bracket not opened ('%c' at position '%s').", b.getBracket(), b.getPosition());
 					else 
 						throw new TemplateException("Bracket not closed ('%c' at position '%s').", b.getBracket(), b.getPosition());
-				} else if (o instanceof Array) {
-					Array a = (Array) o;
-					throw new TemplateException("Invalid syntax at position '%s'.", a.getPosition());
-				}
+				} 
+//				else if (o instanceof Array) {
+//					Array a = (Array) o;
+//					throw new TemplateException("Invalid syntax at position '%s'.", a.getPosition());
+//				}
 			}
 		}
 	}
@@ -191,16 +195,20 @@ public class Template extends Stack {
 					swap(); // $text RpnFunc #func 
 					eval();
 				} else if (bracket.getBracket() == ']') {
-					create_list('[', ']');
-					List parameters = (List) pop();  
+					// $text #[ $p1 $p2 #]					
+					create_list('[', ']'); // $text [$p1, $p2]
+					List parameters = (List) pop();  // $text 
 					if (! (value() instanceof Identifier)) {
 						throw new TemplateException("Wrong bracket type. Should be <> but is [] at position '%s'.", bracket.getPosition());
 					}
 					Identifier word = (Identifier) pop();  
-					push(new Message(word, parameters)); // $text #func RpnFunc
+					push(new Message(word, parameters)); // Message($text, [$p1, $p2])
 				} else if (bracket.getBracket() == ')') {
 					Bracket startAt = (Bracket) create_list('(', ')');
 					List parameters = (List) pop();
+//					if (! empty() && ! (value() instanceof String)) {
+//						throw new TemplateException("Wrong bracket type. Should be <> but is [] at position '%s'.", bracket.getPosition());
+//					}
 					push(new Array(startAt, parameters));
 				}
 			}
@@ -281,7 +289,7 @@ public class Template extends Stack {
 		} else if (word.matches("\\d+")) {
 			push(Integer.parseInt(word));
 		} else {
-			push(new Identifier(word, file, line, column-word.length()-1));
+			push(new Identifier(word, file, line, column-word.length()));
 		}
 	}
 	

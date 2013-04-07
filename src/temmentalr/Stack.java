@@ -222,6 +222,10 @@ class Stack {
 		return this.elements.size();
 	}
 	
+	public boolean empty() {
+		return depth() == 0;
+	}
+	
 	public String toString() {
 		return this.elements.toString();
 	}
