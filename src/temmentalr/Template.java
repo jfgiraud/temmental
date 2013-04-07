@@ -89,9 +89,10 @@ public class Template extends Stack {
 						}
 					}
 				} else {
-					System.out.println("" + currentChar + " " + buffer.toString());
+					System.out.println("" + currentChar + "\t" + buffer.toString() + "<");
 					if (chars('"').contains(currentChar) || sentence) {
 						if (currentChar == '\\') {
+							System.out.println("ici");
 							previousChar = currentChar;
 							currentChar = sr.read();
 							if (currentChar == '"') {
@@ -99,6 +100,8 @@ public class Template extends Stack {
 								previousChar = currentChar;
 								currentChar = sr.read();
 								continue;
+							} else {
+								buffer.write(previousChar);
 							}
 						}
 						buffer.write(currentChar);

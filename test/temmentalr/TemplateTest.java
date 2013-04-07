@@ -201,9 +201,9 @@ public class TemplateTest {
 	
 	@Test
 	public void testStringCanBeUsedBetweenTildeCharactersBis() throws IOException, TemplateException {
-		parse("Something before...~\"A text with double quotes\\, tilde ~, brackets >< ...\"~Something after...");
-		assertParsingEquals(text("Something before..."), text("A text with double quotes\\, tilde ~, brackets >< ..."), text("Something after..."));
-		assertWriteEquals("Something before...A text with double quotes\\, tilde ~, brackets >< ...Something after...");
+		parse("Something before...~\"A text with antislash\\, tilde ~, brackets >< ...\"~Something after...");
+		assertParsingEquals(text("Something before..."), text("A text with antislash\\, tilde ~, brackets >< ..."), text("Something after..."));
+		assertWriteEquals("Something before...A text with antislash\\, tilde ~, brackets >< ...Something after...");
 	}
 	
 	@Test
@@ -647,11 +647,11 @@ public class TemplateTest {
 	
 	
 	private String eval(String text) {
-		return "eval\\(" + text + "\\)";
+		return "eval(" + text + ")";
 	}
 	
 	private String text(String text) {
-		return text/*.replace("\\\\", "\\")*/;
+		return text;
 	}
 	
 	private String number(Number number) {
@@ -693,7 +693,7 @@ public class TemplateTest {
 				params.add(o);
 			}
 		}
-		return "msg\\("+ name + ","  + params.toString() + "\\)";
+		return "msg("+ name + ","  + params.toString() + ")";
 	}
 	
 	private String func(String name, Object ... parameters) {
@@ -739,18 +739,14 @@ public class TemplateTest {
 	}
 
 	private void assertParsingEquals(String ... expectedStack) throws IOException {
-		String shouldBe = "\\[";
+		String shouldBe = "[";
 		for (String expected : expectedStack) {
-			if (! shouldBe.equals("\\["))
+			if (! shouldBe.equals("["))
 				shouldBe += ", ";
-			expected = expected.replace("$", "\\$").replace("[", "\\[").replace("]", "\\]").replace("?", "\\?");
 			shouldBe += expected;
 		}
-		shouldBe += "\\]";
-		System.out.println("result=" + interpreter.toString());
-		System.out.println("must match=" + shouldBe);
-		interpreter.printStack(System.out);
-		assertTrue(interpreter.toString().matches(shouldBe));
+		shouldBe += "]";
+		assertEquals(shouldBe, interpreter.toString());
 	}
 
 	private void parse(String s) throws IOException, TemplateException {
@@ -768,7 +764,6 @@ public class TemplateTest {
 		StringWriter out = new StringWriter();
 		try {
 			interpreter.write(out, model);
-//			System.out.println(out);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			assertEquals(expectedMessage, e.getMessage());
