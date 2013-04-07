@@ -89,14 +89,25 @@ public class Template extends Stack {
 						}
 					}
 				} else {
+					System.out.println("" + currentChar + " " + buffer.toString());
 					if (chars('"').contains(currentChar) || sentence) {
+						if (currentChar == '\\') {
+							previousChar = currentChar;
+							currentChar = sr.read();
+							if (currentChar == '"') {
+								buffer.write(currentChar);
+								previousChar = currentChar;
+								currentChar = sr.read();
+								continue;
+							}
+						}
 						buffer.write(currentChar);
 						if (currentChar == '"' && previousChar != '\\') {
 							if (sentence) {
 								sentence = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
-									change_word(word, file, line, column, currentChar, outsideAnExpression);
+									push_word(word, file, line, column);
 								}
 								buffer = new StringWriter();
 							} else {
@@ -106,7 +117,7 @@ public class Template extends Stack {
 						previousChar = currentChar;
 						currentChar = sr.read(); 
 						continue;
-					} else if (chars('<', '>', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
+					} else if (chars('<', '>', '{', '}', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -119,6 +130,10 @@ public class Template extends Stack {
 						} else if (currentChar == '>') {
 							push(new Bracket('>', file, line, column));
 							eval();
+						} else if (currentChar == '{') {
+							push(new Bracket('}', file, line, column));
+						} else if (currentChar == '}') {
+							push(new Bracket('}', file, line, column));
 						} else if (currentChar == '[') {
 							push(new Bracket('[', file, line, column));
 						} else if (currentChar == ']') {

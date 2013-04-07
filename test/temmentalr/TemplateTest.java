@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -193,12 +194,17 @@ public class TemplateTest {
 
 	@Test
 	public void testStringCanBeUsedBetweenTildeCharacters() throws IOException, TemplateException {
-		parse("Something before...~\"A text with double quotes, tilde ~, brackets >< ...\"~Something after...");
-		assertParsingEquals(text("Something before..."), text("A text with double quotes, tilde ~, brackets >< ..."), text("Something after..."));
-		assertWriteEquals("Something before...A text with double quotes, tilde ~, brackets >< ...Something after...");
+		parse("Something before...~\"A text with double quotes\\\", tilde ~, brackets >< ...\"~Something after...");
+		assertParsingEquals(text("Something before..."), text("A text with double quotes\", tilde ~, brackets >< ..."), text("Something after..."));
+		assertWriteEquals("Something before...A text with double quotes\", tilde ~, brackets >< ...Something after...");
 	}
 	
-	
+	@Test
+	public void testStringCanBeUsedBetweenTildeCharactersBis() throws IOException, TemplateException {
+		parse("Something before...~\"A text with double quotes\\, tilde ~, brackets >< ...\"~Something after...");
+		assertParsingEquals(text("Something before..."), text("A text with double quotes\\, tilde ~, brackets >< ..."), text("Something after..."));
+		assertWriteEquals("Something before...A text with double quotes\\, tilde ~, brackets >< ...Something after...");
+	}
 	
 	@Test
 	public void testAFunctionWithInitializerCanBeCreatedForReusePurpose() throws IOException, TemplateException {
@@ -590,10 +596,15 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testCalc() {
-		fail("~if {$s 0 2 substr 'ero' .compareTo 0 ==}~");
+	public void testCalc() throws IOException, TemplateException {
+		parse("~{$s $t:'toint 2 +}~");
+		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 	}
 	
+	private String calc(String ... stack) {
+		return "calc(" + Arrays.asList(stack) + ")";
+	}
+
 	@Test
 	public void testChainErrorDetectedWhileParsing() {
 		fail("testChainErrorDetectedWhileParsing");
@@ -640,7 +651,7 @@ public class TemplateTest {
 	}
 	
 	private String text(String text) {
-		return text;
+		return text/*.replace("\\\\", "\\")*/;
 	}
 	
 	private String number(Number number) {
