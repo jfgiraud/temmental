@@ -597,7 +597,8 @@ public class TemplateTest {
 	
 	@Test
 	public void testCalc() throws IOException, TemplateException {
-		parse("~{$s $t:'toint 2 +}~");
+//		parse("~{$s $t:'toint 2 +}~");
+		parse("~{$s 2 +}~");
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 	}
 	
@@ -614,12 +615,12 @@ public class TemplateTest {
 	public void testBracketMismatch() {
 		assertParseThrowsException("Bracket mismatch ('<' at position '-:l1:c16' vs ']' at position '-:l1:c26').", "~$text:'replace<$old,$new]~");
 
-		assertParseThrowsException("Bracket mismatch ('[' at position '-:l1:c30' vs '>' at position '-:l1:c36').", "~$text:'replace<$old:'replace[$a,$b>,$new>~");
+		assertParseThrowsException("Invalid bracket type '[' at position '-:l1:c30'.", "~$text:'replace<$old:'replace[$a,$b>,$new>~");
 	}
 	
 	@Test
 	public void testInvalidBracket() {
-		assertParseThrowsException("Wrong bracket type. Should be <> but is [] at position '-:l1:c26'.", "~$text:'replace[$old,$new]~");
+		assertParseThrowsException("Invalid bracket type '[' at position '-:l1:c16'.", "~$text:'replace[$old,$new]~");
 		assertParseThrowsException("Invalid bracket type '(' at position '-:l1:c16'.", "~$text:'replace($old,$new)~");
 		assertParseThrowsException("Invalid bracket type '(' at position '-:l1:c30'.", "~$text:'replace<$old,'replace($old,$new)>~");
 	}
@@ -627,7 +628,7 @@ public class TemplateTest {
 	@Test
 	public void testBracketNotClosed() {
 		assertParseThrowsException("Bracket not closed ('<' at position '-:l1:c16').", "~$text:'replace<$old,$new~");
-		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c16').", "~$text:'replace[$old,$new~");
+		assertParseThrowsException("Invalid bracket type '[' at position '-:l1:c16'.", "~$text:'replace[$old,$new~");
 		assertParseThrowsException("Bracket not closed ('[' at position '-:l1:c2').", "~[$old~");
 		assertParseThrowsException("Bracket not closed ('(' at position '-:l1:c2').", "~($old~");
 	}

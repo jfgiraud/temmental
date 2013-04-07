@@ -47,6 +47,7 @@ public class Template extends Stack {
 		StringWriter buffer = new StringWriter();
 		boolean outsideAnExpression = true;
 		boolean sentence = false;
+		boolean calc = false;
 		try {
 			int previousChar = 0;
 			int currentChar = sr.read(); 
@@ -89,10 +90,8 @@ public class Template extends Stack {
 						}
 					}
 				} else {
-					System.out.println("" + currentChar + "\t" + buffer.toString() + "<");
-					if (chars('"').contains(currentChar) || sentence) {
+					if (currentChar == '"' || sentence) {
 						if (currentChar == '\\') {
-							System.out.println("ici");
 							previousChar = currentChar;
 							currentChar = sr.read();
 							if (currentChar == '"') {
@@ -105,7 +104,7 @@ public class Template extends Stack {
 							}
 						}
 						buffer.write(currentChar);
-						if (currentChar == '"' && previousChar != '\\') {
+						if (currentChar == '"') {
 							if (sentence) {
 								sentence = false;
 								String word = buffer.toString();
@@ -120,7 +119,31 @@ public class Template extends Stack {
 						previousChar = currentChar;
 						currentChar = sr.read(); 
 						continue;
-					} else if (chars('<', '>', '{', '}', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
+					} else if (chars('{', '}').contains(currentChar) || calc) {
+						if (currentChar == '{') {
+							calc = true;
+							push(new Bracket('{', file, line, column));
+						} else if (currentChar == '}') {
+							calc = false;
+							String word = buffer.toString();
+							if (! "".equals(word)) {
+								push(word);
+//								change_word(word, file, line, column, currentChar, outsideAnExpression);
+							}
+							buffer = new StringWriter();
+							push(new Bracket('}', file, line, column));
+							eval();
+						} else if (currentChar == ' ') {
+							String word = buffer.toString();
+							if (! "".equals(word)) {
+								push(word);
+//								change_word(word, file, line, column, currentChar, outsideAnExpression);
+							}
+							buffer = new StringWriter();
+						} else {
+							buffer.write(currentChar);
+						}
+					} else if (chars('<', '>', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(word, file, line, column, currentChar, outsideAnExpression);
@@ -133,11 +156,10 @@ public class Template extends Stack {
 						} else if (currentChar == '>') {
 							push(new Bracket('>', file, line, column));
 							eval();
-						} else if (currentChar == '{') {
-							push(new Bracket('}', file, line, column));
-						} else if (currentChar == '}') {
-							push(new Bracket('}', file, line, column));
 						} else if (currentChar == '[') {
+							if (! empty() && ! (value() instanceof Identifier)) {
+								throw new TemplateException("Invalid bracket type '[' at position '%s'.", String.format("%s:l%d:c%d", file, line, column));
+							}
 							push(new Bracket('[', file, line, column));
 						} else if (currentChar == ']') {
 							push(new Bracket(']', file, line, column));
@@ -162,7 +184,9 @@ public class Template extends Stack {
 				currentChar = sr.read(); 
 			}
 			String word = buffer.toString();
-			if (! "".equals(word)) {
+			if (calc) {
+				System.out.println("ici");
+			} else if (! "".equals(word)) {
 				change_word(word, file, line, column, currentChar, outsideAnExpression);
 				buffer = new StringWriter();
 			}
@@ -216,18 +240,19 @@ public class Template extends Stack {
 					// $text #[ $p1 $p2 #]					
 					create_list('[', ']'); // $text [$p1, $p2]
 					List parameters = (List) pop();  // $text 
-					if (! (value() instanceof Identifier)) {
-						throw new TemplateException("Wrong bracket type. Should be <> but is [] at position '%s'.", bracket.getPosition());
-					}
+//					if (! (value() instanceof Identifier)) {
+//						throw new TemplateException("Invalid bracket type '[' at position '%s'.", bracket.getPosition());
+//					}
 					Identifier word = (Identifier) pop();  
 					push(new Message(word, parameters)); // Message($text, [$p1, $p2])
 				} else if (bracket.getBracket() == ')') {
 					Bracket startAt = (Bracket) create_list('(', ')');
 					List parameters = (List) pop();
-//					if (! empty() && ! (value() instanceof String)) {
-//						throw new TemplateException("Wrong bracket type. Should be <> but is [] at position '%s'.", bracket.getPosition());
-//					}
 					push(new Array(startAt, parameters));
+				} else if (bracket.getBracket() == '}') {
+					Bracket startAt = (Bracket) create_list('{', '}');
+					List parameters = (List) pop();
+					push(new Calc(startAt, parameters));
 				}
 			}
 		}
