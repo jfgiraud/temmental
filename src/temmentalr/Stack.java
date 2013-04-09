@@ -15,11 +15,6 @@ class Stack {
 		elements = new ArrayList<Object>();
 	}
 	
-	public Stack(List<Object> tocopy) {
-		this();
-		elements.addAll(tocopy);
-	}
-	
 	// with return value
 	
 	public Object value() {

@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -597,8 +598,8 @@ public class TemplateTest {
 	
 	@Test
 	public void testCalc() throws IOException, TemplateException {
-//		parse("~{$s $t:'toint 2 +}~");
-		parse("~{$s 2 +}~");
+		parse("~{$s $t:'toint[] 2 +}~");
+//		parse("~{$s 2 +}~");
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 	}
 	

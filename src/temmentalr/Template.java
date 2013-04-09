@@ -1,6 +1,7 @@
 package temmentalr;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -12,24 +13,21 @@ import java.util.Map;
 
 // TODO mettre un stack.empty() ??
 
-public class Template extends Stack {
+public class Template {
 	
 	private static final boolean debug = true;
 
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
+	private Stack stack;
 	
 	public Template(TemplateMessages messages) {
-		this(new ArrayList());
+		this.stack = new Stack();
 		this.messages = messages;
+		this.functions = new HashMap<String, Transform>();
 	}
 
-	public Template(List<Object> tocopy) {
-		super(tocopy);
-		functions = new HashMap<String, Transform>();
-	}
-
-	private List<Integer> chars(int ... chars) {
+	private static final List<Integer> chars(int ... chars) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		for (int c : chars) {
 			result.add(c);
@@ -37,12 +35,11 @@ public class Template extends Stack {
 		return result;
 	}
 	
-	private void debug(String format, Object ... parameters) {
-		if (debug)
-			System.err.println(String.format(format, parameters));
+	void parse(String expression, String file, int line, int column) throws IOException, TemplateException {
+		parse(stack, expression, file, line, column);
 	}
 	
-	public void parse(String expression, String file, int line, int column) throws IOException, TemplateException {
+	private static void parse(Stack stack, String expression, String file, int line, int column) throws IOException, TemplateException {
 		StringReader sr = new StringReader(expression);
 		StringWriter buffer = new StringWriter();
 		boolean outsideAnExpression = true;
@@ -66,7 +63,7 @@ public class Template extends Stack {
 							outsideAnExpression = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								change_word(word, file, line, column, currentChar, true);
+								change_word(stack, word, file, line, column, currentChar, true);
 							}
 							buffer = new StringWriter();
 							break;
@@ -80,7 +77,7 @@ public class Template extends Stack {
 								outsideAnExpression = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
-									change_word(word, file, line, column, currentChar, true);
+									change_word(stack, word, file, line, column, currentChar, true);
 								}
 								buffer = new StringWriter();
 								previousChar = currentChar;
@@ -109,7 +106,7 @@ public class Template extends Stack {
 								sentence = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
-									push_word(word, file, line, column);
+									push_word(stack, word, file, line, column);
 								}
 								buffer = new StringWriter();
 							} else {
@@ -122,22 +119,20 @@ public class Template extends Stack {
 					} else if (chars('{', '}').contains(currentChar) || calc) {
 						if (currentChar == '{') {
 							calc = true;
-							push(new Bracket('{', file, line, column));
+							stack.push(new Bracket('{', file, line, column));
 						} else if (currentChar == '}') {
 							calc = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								push(word);
-//								change_word(word, file, line, column, currentChar, outsideAnExpression);
+								stack.push(word);
 							}
 							buffer = new StringWriter();
-							push(new Bracket('}', file, line, column));
-							eval();
+							stack.push(new Bracket('}', file, line, column));
+							eval(stack);
 						} else if (currentChar == ' ') {
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								push(word);
-//								change_word(word, file, line, column, currentChar, outsideAnExpression);
+								stack.push(word);
 							}
 							buffer = new StringWriter();
 						} else {
@@ -146,32 +141,32 @@ public class Template extends Stack {
 					} else if (chars('<', '>', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
 						String word = buffer.toString();
 						if (! "".equals(word)) {
-							change_word(word, file, line, column, currentChar, outsideAnExpression);
+							change_word(stack, word, file, line, column, currentChar, outsideAnExpression);
 						}
 						buffer = new StringWriter();
 						if (currentChar == ':') {
-							push("#func");
+							stack.push("#func");
 						} else if (currentChar == '<') {
-							push(new Bracket('<', file, line, column));
+							stack.push(new Bracket('<', file, line, column));
 						} else if (currentChar == '>') {
-							push(new Bracket('>', file, line, column));
-							eval();
+							stack.push(new Bracket('>', file, line, column));
+							eval(stack);
 						} else if (currentChar == '[') {
-							if (! empty() && ! (value() instanceof Identifier)) {
+							if (! stack.empty() && ! (stack.value() instanceof Identifier)) {
 								throw new TemplateException("Invalid bracket type '[' at position '%s'.", String.format("%s:l%d:c%d", file, line, column));
 							}
-							push(new Bracket('[', file, line, column));
+							stack.push(new Bracket('[', file, line, column));
 						} else if (currentChar == ']') {
-							push(new Bracket(']', file, line, column));
-							eval();
+							stack.push(new Bracket(']', file, line, column));
+							eval(stack);
 						}  else if (currentChar == '(') {
-							if (! empty() && ! (value() instanceof String)) {
+							if (! stack.empty() && ! (stack.value() instanceof String)) {
 								throw new TemplateException("Invalid bracket type '(' at position '%s'.", String.format("%s:l%d:c%d", file, line, column));
 							}
-							push(new Bracket('(', file, line, column));
+							stack.push(new Bracket('(', file, line, column));
 						} else if (currentChar == ')') {
-							push(new Bracket(')', file, line, column));
-							eval();
+							stack.push(new Bracket(')', file, line, column));
+							eval(stack);
 						}
 					} else {
 						buffer.write(currentChar);
@@ -187,20 +182,25 @@ public class Template extends Stack {
 			if (calc) {
 				System.out.println("ici");
 			} else if (! "".equals(word)) {
-				change_word(word, file, line, column, currentChar, outsideAnExpression);
+				change_word(stack, word, file, line, column, currentChar, outsideAnExpression);
 				buffer = new StringWriter();
 			}
 		} finally {
 			sr.close();
 		}
 		
-		check_stack();
+		check_stack(stack);
 	}
 
-	private void check_stack() throws TemplateException {
-		if (depth()>1) {
-			for (int i=1; i<=depth(); i++) {
-				Object o = value(i);
+	@Override
+	public String toString() {
+		return stack.toString();
+	}
+	
+	private static void check_stack(Stack stack) throws TemplateException {
+		if (stack.depth()>1) {
+			for (int i=1; i<=stack.depth(); i++) {
+				Object o = stack.value(i);
 				if (o instanceof Bracket) {
 					Bracket b = (Bracket) o;
 					if (b.isClosed())
@@ -208,66 +208,67 @@ public class Template extends Stack {
 					else 
 						throw new TemplateException("Bracket not closed ('%c' at position '%s').", b.getBracket(), b.getPosition());
 				} 
-//				else if (o instanceof Array) {
-//					Array a = (Array) o;
-//					throw new TemplateException("Invalid syntax at position '%s'.", a.getPosition());
-//				}
 			}
 		}
 	}
 
-	private void eval() throws TemplateException {
-		if (depth()>1) {
-			Object last = value();
+	private static void eval(Stack stack) throws TemplateException {
+		if (stack.depth()>1) {
+			Object last = stack.value();
 			if (last.equals("#func")) {
 				// var 'func #func
-				drop(); // var 'func 
-				Element func = (Element) pop(); // var 
-				tolist(1); // [ var ]
-				List parameters = (List) pop();
-				push(new Function(func, parameters));
+				stack.drop(); // var 'func 
+				Element func = (Element) stack.pop(); // var 
+				stack.tolist(1); // [ var ]
+				List parameters = (List) stack.pop();
+				stack.push(new Function(func, parameters));
 			} else if (last instanceof Bracket) {
-				Bracket bracket = (Bracket) value();
+				Bracket bracket = (Bracket) stack.value();
 				if (bracket.getBracket() == '>') {
 					// $text #func $funcname #< $p1 $p2 #>
-					create_list('<', '>'); // $text #func $funcname [$p1, $p2]
-					List parameters = (List) pop(); // $text #func $funcname 
-					Element func = (Element) pop(); // $text #func 
-					push(new Function(func, parameters)); // $text #func RpnFunc
-					swap(); // $text RpnFunc #func 
-					eval();
+					create_list(stack, '<', '>'); // $text #func $funcname [$p1, $p2]
+					List parameters = (List) stack.pop(); // $text #func $funcname 
+					Element func = (Element) stack.pop(); // $text #func 
+					stack.push(new Function(func, parameters)); // $text #func RpnFunc
+					stack.swap(); // $text RpnFunc #func 
+					eval(stack);
 				} else if (bracket.getBracket() == ']') {
 					// $text #[ $p1 $p2 #]					
-					create_list('[', ']'); // $text [$p1, $p2]
-					List parameters = (List) pop();  // $text 
+					create_list(stack, '[', ']'); // $text [$p1, $p2]
+					List parameters = (List) stack.pop();  // $text 
 //					if (! (value() instanceof Identifier)) {
 //						throw new TemplateException("Invalid bracket type '[' at position '%s'.", bracket.getPosition());
 //					}
-					Identifier word = (Identifier) pop();  
-					push(new Message(word, parameters)); // Message($text, [$p1, $p2])
+					Identifier word = (Identifier) stack.pop();  
+					stack.push(new Message(word, parameters)); // Message($text, [$p1, $p2])
 				} else if (bracket.getBracket() == ')') {
-					Bracket startAt = (Bracket) create_list('(', ')');
-					List parameters = (List) pop();
-					push(new Array(startAt, parameters));
+					Bracket startAt = (Bracket) create_list(stack, '(', ')');
+					List parameters = (List) stack.pop();
+					stack.push(new Array(startAt, parameters));
 				} else if (bracket.getBracket() == '}') {
-					Bracket startAt = (Bracket) create_list('{', '}');
-					List parameters = (List) pop();
-					push(new Calc(startAt, parameters));
+					Bracket startAt = (Bracket) create_list(stack, '{', '}');
+					List parameters = (List) stack.pop();
+					stack.push(new Calc(startAt, parameters));
 				}
 			}
 		}
 	}
 
+	
+
+	
+
 	/*
 	 * http://www.donghuna.com/247
 	 */
 	
-	private Object create_list(char start, char end) throws TemplateException {
-		Bracket closeBracket = (Bracket) pop();
+	
+	private static Object create_list(Stack stack, char start, char end) throws TemplateException {
+		Bracket closeBracket = (Bracket) stack.pop();
 		int i;
-		for (i=1; i<=depth(); i++) {
-			if (value(i) instanceof Bracket) {
-				Bracket bracket = (Bracket)value(i);
+		for (i=1; i<=stack.depth(); i++) {
+			if (stack.value(i) instanceof Bracket) {
+				Bracket bracket = (Bracket)stack.value(i);
 				if (bracket.isOpened() && bracket.getBracket() != closeBracket.other()) {
 					throw new TemplateException("Bracket mismatch ('%c' at position '%s' vs '%c' at position '%s').", 
 							bracket.getBracket(), bracket.getPosition(), closeBracket.getBracket(), closeBracket.getPosition());
@@ -276,63 +277,39 @@ public class Template extends Stack {
 			}
 		}
 		try {
-			tolist(i-1);
-			over();
-			Object o = pop();
-			nip();
+			stack.tolist(i-1);
+			stack.over();
+			Object o = stack.pop();
+			stack.nip();
 			return o;
 		} catch (StackException e) {
 			throw new TemplateException(e, "Bracket '%c' not opened for the closing bracket '%c' '%s').", 
 					closeBracket.other(), closeBracket.getBracket(), closeBracket.getPosition());
 		}
-			
-//		try {
-//			int i=1;
-//			while (i<=depth() && ! (value(i) instanceof Bracket && ((Bracket)value(i)).getBracket() == start)) {
-//				i++;
-//			}
-//			Bracket openBracket = (Bracket)value(i);
-//			tolist(i-1);
-//			nip();
-//		} catch (StackException e) {
-//			throw new TemplateException(e, "Bracket '%c' not opened at position '%s'.", closeBracket.other(), closeBracket.getPosition());
-//		}
-//		Bracket closeBracket = (Bracket) pop();  
-//		try {
-//			int i=1;
-//			while (i<=depth() && ! (value(i) instanceof Bracket && ((Bracket)value(i)).getBracket() == start)) {
-//				i++;
-//			}
-//			Bracket openBracket = (Bracket)value(i);
-//			tolist(i-1);
-//			nip();
-//		} catch (StackException e) {
-//			throw new TemplateException(e, "Bracket '%c' not opened at position '%s'.", closeBracket.other(), closeBracket.getPosition());
-//		}
 	}
 	
-	private void change_word(String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
+	private static void change_word(Stack stack, String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
 		
 		if (outsideAnExpression) {
-			push(word);
+			stack.push(word);
 		} else {
-			if (currentChar != '<' /*&& currentChar != '>'*/ && depth() > 0 && value().equals("#func")) {
-				push_word(word, file, line, column);
-				swap(); // [ word pos #eval ] #func 
+			if (currentChar != '<' /*&& currentChar != '>'*/ && stack.depth() > 0 && stack.value().equals("#func")) {
+				push_word(stack, word, file, line, column);
+				stack.swap(); // [ word pos #eval ] #func 
 			} else {
-				push_word(word, file, line, column);
+				push_word(stack, word, file, line, column);
 			}
-			eval();
+			eval(stack);
 		}
 	}
 
-	private void push_word(String word, String file, int line, int column) throws TemplateException {
+	private static void push_word(Stack stack, String word, String file, int line, int column) throws TemplateException {
 		if (word.startsWith("\"") && word.endsWith("\"")) {
-			push(word.substring(1, word.length()-1));
+			stack.push(word.substring(1, word.length()-1));
 		} else if (word.matches("\\d+")) {
-			push(Integer.parseInt(word));
+			stack.push((Object) Integer.parseInt(word));
 		} else {
-			push(new Identifier(word, file, line, column-word.length()));
+			stack.push(new Identifier(word, file, line, column-word.length()));
 		}
 	}
 	
@@ -362,10 +339,8 @@ public class Template extends Stack {
 	}
 	
 	public void write(Writer out, Map<String, Object> model) throws IOException, TemplateException {
-		printStack(System.out);
-		
-		for (int i=depth(); i>0; i--) {
-			Object o = writeObject(out, functions, model, messages, value(i));
+		for (int i=stack.depth(); i>0; i--) {
+			Object o = writeObject(out, functions, model, messages, stack.value(i));
 			if (o != null) {
 				out.write(o.toString());
 			}
@@ -459,6 +434,14 @@ public class Template extends Stack {
 				}
 			});
 		}
+	}
+
+	void clear() {
+		stack.clear();
+	}
+
+	void printStack(PrintStream out) throws IOException {
+		stack.printStack(out);
 	}
 
 }
