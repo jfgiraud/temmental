@@ -579,6 +579,11 @@ public class TemplateTest {
 	}
 
 	@Test
+	public void testParseExceptionOnInvalidIdentifier() throws IOException, TemplateException {
+		assertParseThrowsException("Invalid identifier syntax for 'variable' at '-:l1:c2'.", "~variable~");
+	}
+	
+	@Test
 	public void testParseExceptionForTransformFunction() throws IOException, TemplateException {
 		assertParseThrowsException("Invalid identifier syntax for 'function' at '-:l1:c13'.", "~$variable?:function~");
 		assertParseThrowsException("Invalid identifier syntax for 'function2' at '-:l1:c24'.", "~$variable?:'function1:function2~");
@@ -601,6 +606,16 @@ public class TemplateTest {
 		parse("~{$s $t:'toint[] 2 +}~");
 //		parse("~{$s 2 +}~");
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
+	}
+
+	@Test
+	public void testCalcInvalidSyntax() throws IOException, TemplateException {
+		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c3'.", "~{bar}~");
+		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c10'.", "~{$dummy bar}~");
+		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c10'.", "~{$dummy bar $dummy}~");
+		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c8'.", "~{$foo:bar}~");
+		// TODO mettre le resultat de la pile dans la pile mere
+		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c3'.", "~{$bar {$foo 1 +}}~");
 	}
 	
 	private String calc(String ... stack) {

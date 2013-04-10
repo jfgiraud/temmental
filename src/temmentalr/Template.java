@@ -124,6 +124,9 @@ public class Template {
 							calc = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
+								Stack subStack = new Stack();
+								System.out.println(">"+subStack + " word="+ word + String.format(" %s:l%d:c%d", file, line, column));
+								Template.parse(subStack , "~" + word + "~", file, line, column-word.length()-2);
 								stack.push(word);
 							}
 							buffer = new StringWriter();
@@ -132,6 +135,9 @@ public class Template {
 						} else if (currentChar == ' ') {
 							String word = buffer.toString();
 							if (! "".equals(word)) {
+								Stack subStack = new Stack();
+								System.out.println(">"+subStack + " word="+ word + String.format(" %s:l%d:c%d", file, line, column));
+								Template.parse(subStack , "~" + word + "~", file, line, column-word.length()-2);
 								stack.push(word);
 							}
 							buffer = new StringWriter();
