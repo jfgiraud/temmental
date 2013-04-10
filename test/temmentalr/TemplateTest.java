@@ -603,9 +603,12 @@ public class TemplateTest {
 	
 	@Test
 	public void testCalc() throws IOException, TemplateException {
-		parse("~{$s $t:'toint[] 2 +}~");
-//		parse("~{$s 2 +}~");
+		parse("~{$s 2 +}~");
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
+		parse("~{$a 2 ^ 2 $a $b * * $b dup * + +}~"); // (t+4)*t-1
+		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
+		// if {$s 3 <=}
+		// /if
 	}
 
 	@Test
@@ -615,7 +618,7 @@ public class TemplateTest {
 		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c10'.", "~{$dummy bar $dummy}~");
 		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c8'.", "~{$foo:bar}~");
 		// TODO mettre le resultat de la pile dans la pile mere
-		assertParseThrowsException("Invalid identifier syntax for 'bar' at '-:l1:c3'.", "~{$bar {$foo 1 +}}~");
+		assertParseThrowsException("Invalid identifier syntax for 'foo' at '-:l1:c15'.", "~{$bar {1 4 + foo -}}~");
 	}
 	
 	private String calc(String ... stack) {

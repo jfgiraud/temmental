@@ -88,12 +88,12 @@ public class StackTest {
 		stack.push("3");
 		stack.dupn(3);
 		assertEquals(6, stack.depth());
-		assertEquals("3", stack.value(1));
-		assertEquals("2", stack.value(2));
-		assertEquals("1", stack.value(3));
-		assertEquals("3", stack.value(4));
-		assertEquals("2", stack.value(5));
 		assertEquals("1", stack.value(6));
+		assertEquals("2", stack.value(5));
+		assertEquals("3", stack.value(4));
+		assertEquals("1", stack.value(3));
+		assertEquals("2", stack.value(2));
+		assertEquals("3", stack.value(1));
 	}
 	
 	@Test
@@ -103,13 +103,13 @@ public class StackTest {
 		stack.push("3");
 		stack.ndupn("new", 3);
 		assertEquals(7, stack.depth());
-		assertEquals(3, stack.value(1));
-		assertEquals("new", stack.value(2));
-		assertEquals("new", stack.value(3));
-		assertEquals("new", stack.value(4));
-		assertEquals("3", stack.value(5));
-		assertEquals("2", stack.value(6));
 		assertEquals("1", stack.value(7));
+		assertEquals("2", stack.value(6));
+		assertEquals("3", stack.value(5));
+		assertEquals("new", stack.value(4));
+		assertEquals("new", stack.value(3));
+		assertEquals("new", stack.value(2));
+		assertEquals(3, stack.value(1));
 	}
 	
 	@Test

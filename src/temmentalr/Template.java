@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class Template {
 	
 	private static final boolean debug = true;
 
+	private static final List<String> OPERATORS = Arrays.asList("+", "-");
+	
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
 	private Stack stack;
@@ -124,10 +127,13 @@ public class Template {
 							calc = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								Stack subStack = new Stack();
-								System.out.println(">"+subStack + " word="+ word + String.format(" %s:l%d:c%d", file, line, column));
-								Template.parse(subStack , "~" + word + "~", file, line, column-word.length()-2);
-								stack.push(word);
+								if (OPERATORS.contains(word)) {
+									stack.push(word);
+								} else {
+									Stack subStack = new Stack();
+									Template.parse(subStack , "~" + word + "~", file, line, column-word.length()-2);
+									stack.push(subStack.pop());
+								}
 							}
 							buffer = new StringWriter();
 							stack.push(new Bracket('}', file, line, column));
@@ -135,10 +141,13 @@ public class Template {
 						} else if (currentChar == ' ') {
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								Stack subStack = new Stack();
-								System.out.println(">"+subStack + " word="+ word + String.format(" %s:l%d:c%d", file, line, column));
-								Template.parse(subStack , "~" + word + "~", file, line, column-word.length()-2);
-								stack.push(word);
+								if (OPERATORS.contains(word)) {
+									stack.push(word);
+								} else {
+									Stack subStack = new Stack();
+									Template.parse(subStack , "~" + word + "~", file, line, column-word.length()-2);
+									stack.push(subStack.pop());
+								}
 							}
 							buffer = new StringWriter();
 						} else {
