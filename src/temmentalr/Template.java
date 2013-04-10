@@ -18,8 +18,6 @@ public class Template {
 	
 	private static final boolean debug = true;
 
-	private static final List<String> OPERATORS = Arrays.asList("+", "-");
-	
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
 	private Stack stack;
@@ -127,7 +125,7 @@ public class Template {
 							calc = false;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								if (OPERATORS.contains(word)) {
+								if (Calc.OPERATORS.contains(word)) {
 									stack.push(word);
 								} else {
 									Stack subStack = new Stack();
@@ -141,7 +139,7 @@ public class Template {
 						} else if (currentChar == ' ') {
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								if (OPERATORS.contains(word)) {
+								if (Calc.OPERATORS.contains(word)) {
 									stack.push(word);
 								} else {
 									Stack subStack = new Stack();
@@ -194,9 +192,7 @@ public class Template {
 				currentChar = sr.read(); 
 			}
 			String word = buffer.toString();
-			if (calc) {
-				System.out.println("ici");
-			} else if (! "".equals(word)) {
+			if (! "".equals(word)) {
 				change_word(stack, word, file, line, column, currentChar, outsideAnExpression);
 				buffer = new StringWriter();
 			}
@@ -321,8 +317,8 @@ public class Template {
 	private static void push_word(Stack stack, String word, String file, int line, int column) throws TemplateException {
 		if (word.startsWith("\"") && word.endsWith("\"")) {
 			stack.push(word.substring(1, word.length()-1));
-		} else if (word.matches("\\d+")) {
-			stack.push((Object) Integer.parseInt(word));
+		} else if (word.matches("(-)?\\d+")) {
+			stack.push(Integer.parseInt(word));
 		} else {
 			stack.push(new Identifier(word, file, line, column-word.length()));
 		}
@@ -348,6 +344,10 @@ public class Template {
 		
 		if (value instanceof Message) {
 			return ((Message) value).writeObject(functions, model, messages);
+		}
+		
+		if (value instanceof Calc) {
+			return ((Calc) value).writeObject(functions, model, messages);
 		}
 		
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());

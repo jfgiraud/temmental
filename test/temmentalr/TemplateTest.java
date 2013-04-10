@@ -605,6 +605,8 @@ public class TemplateTest {
 	public void testCalc() throws IOException, TemplateException {
 		parse("~{$s 2 +}~");
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
+		populateModel("s", 5);
+		assertWriteEquals("7");
 		parse("~{$a 2 ^ 2 $a $b * * $b dup * + +}~"); // (t+4)*t-1
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 		// if {$s 3 <=}
@@ -621,6 +623,52 @@ public class TemplateTest {
 		assertParseThrowsException("Invalid identifier syntax for 'foo' at '-:l1:c15'.", "~{$bar {1 4 + foo -}}~");
 	}
 	
+	@Test
+	public void testCalcOperations() throws IOException, TemplateException {
+		parse("~{$s -2 +}~");
+		populateModel("s", 11);
+		populateModel("t", 17);
+		assertParsingEquals(calc(eval("$s"), number(-2), text("+")));
+		assertWriteEquals("9");
+		
+		parse("~{$s 16 -}~");
+		assertWriteEquals("-5");
+		
+		parse("~{$s 4 *}~");
+		assertWriteEquals("44");
+		
+		parse("~{$s 2 %}~");
+		assertWriteEquals("1");
+		
+		parse("~{$s neg}~");
+		assertWriteEquals("-11");
+
+		parse("~{$s odd}~");
+		assertWriteEquals("true");
+
+		parse("~{$s even}~");
+		assertWriteEquals("false");
+
+		parse("~{$s $t <}~");
+		assertWriteEquals("true");
+		
+		fail("neg");
+		fail("sqr");
+		fail("pow");
+		fail("floor");
+		fail("ceil");
+		fail("<");
+		fail("<=");
+		fail(">");
+		fail(">=");
+		fail("!=");
+		fail("==");
+		fail("<<");
+		fail(">>");
+		fail("&&");
+		fail("||");
+	}
+		
 	private String calc(String ... stack) {
 		return "calc(" + Arrays.asList(stack) + ")";
 	}
