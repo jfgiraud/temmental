@@ -623,6 +623,11 @@ public class TemplateTest {
 		assertParseThrowsException("Invalid identifier syntax for 'foo' at '-:l1:c15'.", "~{$bar {1 4 + foo -}}~");
 	}
 	
+	private void assertEvaluation(String expected, String expression) throws IOException, TemplateException {
+		parse(expression);
+		assertWriteEquals(expected);
+	}
+	
 	@Test
 	public void testCalcOperations() throws IOException, TemplateException {
 		populateModel("i", 11);
@@ -632,86 +637,37 @@ public class TemplateTest {
 		
 		parse("~{$i -2 +}~");
 		assertParsingEquals(calc(eval("$i"), number(-2), text("+")));
-		assertWriteEquals("9");
-		
-		parse("~{$i 16 -}~");
-		assertWriteEquals("-5");
-		
-		parse("~{$l 4 *}~");
-		assertWriteEquals("68");
-		
-		parse("~{$f 4 *}~");
-		assertWriteEquals("70.0");
-		
-		parse("~{$l 3 %}~");
-		assertWriteEquals("2");
-		
-		parse("~{$f 3 %}~");
-		assertWriteEquals("2.5");
-		
-		parse("~{$f neg}~");
-		assertWriteEquals("-17.5");
 
-		parse("~{$l odd}~");
-		assertWriteEquals("true");
+		assertEvaluation("9", "~{$i -2 +}~");
+		assertEvaluation("-5", "~{$i 16 -}~");
+		assertEvaluation("68", "~{$l 4 *}~");
+		assertEvaluation("70.0", "~{$f 4 *}~");
+		assertEvaluation("2", "~{$l 3 %}~");
+		
+		assertEvaluation("2.5", "~{$f 3 %}~");
+		assertEvaluation("-17.5", "~{$f neg}~");
+		assertEvaluation("true", "~{$l odd}~");
+		assertEvaluation("false", "~{$l even}~");
+		assertEvaluation("true", "~{$i $l <}~");
+		assertEvaluation("false", "~{$l $i <}~");
+		assertEvaluation("-11", "~{$i neg}~");
+		assertEvaluation("-17.5", "~{$f neg}~");
+		assertEvaluation("false", "~{$i $l >}~");
+		assertEvaluation("false", "~{$i $i >}~");
+		assertEvaluation("true", "~{$l $i >}~");
+		assertEvaluation("false", "~{$i $l >=}~");
+		assertEvaluation("true", "~{$i $i >=}~");
+		assertEvaluation("false", "~{$l $i <=}~");
+		assertEvaluation("true", "~{$i $l <=}~");
+		assertEvaluation("true", "~{$i $i <=}~");
+		assertEvaluation("false", "~{$i 11 !=}~");
+		assertEvaluation("true", "~{$i 17 !=}~");
+		assertEvaluation("true", "~{$i 11 ==}~");
+		assertEvaluation("false", "~{$i 17 ==}~");
+		assertEvaluation("true", "~{$f $d ==}~");
+		assertEvaluation("false", "~{$f $d !=}~");
+		assertEvaluation("false", "~{{$i} {$i} +}~");
 
-		parse("~{$l even}~");
-		assertWriteEquals("false");
-
-		parse("~{$i $l <}~");
-		assertWriteEquals("true");
-
-		parse("~{$l $i <}~");
-		assertWriteEquals("false");
-		
-		parse("~{$i neg}~");
-		assertWriteEquals("-11");
-		
-		parse("~{$f neg}~");
-		assertWriteEquals("-17.5");
-
-		parse("~{$i $l >}~");
-		assertWriteEquals("false");
-
-		parse("~{$i $i >}~");
-		assertWriteEquals("false");
-		
-		parse("~{$l $i >}~");
-		assertWriteEquals("true");
-		
-		parse("~{$i $l >=}~");
-		assertWriteEquals("false");
-		
-		parse("~{$i $i >=}~");
-		assertWriteEquals("true");
-		
-		parse("~{$l $i <=}~");
-		assertWriteEquals("false"); 
-		
-		parse("~{$i $l <=}~");
-		assertWriteEquals("true");
-		
-		parse("~{$i $i <=}~");
-		assertWriteEquals("true");
-		
-		parse("~{$i 11 !=}~");
-		assertWriteEquals("false");
-		
-		parse("~{$i 17 !=}~");
-		assertWriteEquals("true");
-		
-		parse("~{$i 11 ==}~");
-		assertWriteEquals("true");
-		
-		parse("~{$i 17 ==}~");
-		assertWriteEquals("false");
-		
-		parse("~{$f $d ==}~");
-		assertWriteEquals("true");
-		
-		parse("~{$f $d !=}~");
-		assertWriteEquals("false");
-		
 		fail("!=");
 		fail("==");
 		
