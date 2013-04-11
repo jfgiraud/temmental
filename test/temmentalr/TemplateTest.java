@@ -625,44 +625,100 @@ public class TemplateTest {
 	
 	@Test
 	public void testCalcOperations() throws IOException, TemplateException {
-		parse("~{$s -2 +}~");
-		populateModel("s", 11);
-		populateModel("t", 17);
-		assertParsingEquals(calc(eval("$s"), number(-2), text("+")));
+		populateModel("i", 11);
+		populateModel("l", 17L);
+		populateModel("f", 17.5F);
+		populateModel("d", 17.5);
+		
+		parse("~{$i -2 +}~");
+		assertParsingEquals(calc(eval("$i"), number(-2), text("+")));
 		assertWriteEquals("9");
 		
-		parse("~{$s 16 -}~");
+		parse("~{$i 16 -}~");
 		assertWriteEquals("-5");
 		
-		parse("~{$s 4 *}~");
-		assertWriteEquals("44");
+		parse("~{$l 4 *}~");
+		assertWriteEquals("68");
 		
-		parse("~{$s 2 %}~");
-		assertWriteEquals("1");
+		parse("~{$f 4 *}~");
+		assertWriteEquals("70.0");
 		
-		parse("~{$s neg}~");
-		assertWriteEquals("-11");
+		parse("~{$l 3 %}~");
+		assertWriteEquals("2");
+		
+		parse("~{$f 3 %}~");
+		assertWriteEquals("2.5");
+		
+		parse("~{$f neg}~");
+		assertWriteEquals("-17.5");
 
-		parse("~{$s odd}~");
+		parse("~{$l odd}~");
 		assertWriteEquals("true");
 
-		parse("~{$s even}~");
+		parse("~{$l even}~");
 		assertWriteEquals("false");
 
-		parse("~{$s $t <}~");
+		parse("~{$i $l <}~");
+		assertWriteEquals("true");
+
+		parse("~{$l $i <}~");
+		assertWriteEquals("false");
+		
+		parse("~{$i neg}~");
+		assertWriteEquals("-11");
+		
+		parse("~{$f neg}~");
+		assertWriteEquals("-17.5");
+
+		parse("~{$i $l >}~");
+		assertWriteEquals("false");
+
+		parse("~{$i $i >}~");
+		assertWriteEquals("false");
+		
+		parse("~{$l $i >}~");
 		assertWriteEquals("true");
 		
-		fail("neg");
+		parse("~{$i $l >=}~");
+		assertWriteEquals("false");
+		
+		parse("~{$i $i >=}~");
+		assertWriteEquals("true");
+		
+		parse("~{$l $i <=}~");
+		assertWriteEquals("false"); 
+		
+		parse("~{$i $l <=}~");
+		assertWriteEquals("true");
+		
+		parse("~{$i $i <=}~");
+		assertWriteEquals("true");
+		
+		parse("~{$i 11 !=}~");
+		assertWriteEquals("false");
+		
+		parse("~{$i 17 !=}~");
+		assertWriteEquals("true");
+		
+		parse("~{$i 11 ==}~");
+		assertWriteEquals("true");
+		
+		parse("~{$i 17 ==}~");
+		assertWriteEquals("false");
+		
+		parse("~{$f $d ==}~");
+		assertWriteEquals("true");
+		
+		parse("~{$f $d !=}~");
+		assertWriteEquals("false");
+		
+		fail("!=");
+		fail("==");
+		
 		fail("sqr");
 		fail("pow");
 		fail("floor");
 		fail("ceil");
-		fail("<");
-		fail("<=");
-		fail(">");
-		fail(">=");
-		fail("!=");
-		fail("==");
 		fail("<<");
 		fail(">>");
 		fail("&&");

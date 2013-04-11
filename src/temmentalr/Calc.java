@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Calc extends Element {
 
-	static final List<String> OPERATORS = Arrays.asList("+", "-", "*", "%", "neg", "odd", "even");
+	static final List<String> OPERATORS = Arrays.asList("+", "-", "*", "%", "neg", "odd", "even", "<", ">", "<=", ">=", "==", "!=");
 	 
 	private List parameters;
 	private Bracket bracket;
@@ -27,30 +27,39 @@ public class Calc extends Element {
 				if (OPERATORS.contains(e)) {
 					String operation = (String) stack.pop();
 					if ("+".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						Integer b = (Integer) stack.pop();
-						stack.push(a.intValue()+b.intValue());
+						stack.push(Operations.add((Number) stack.pop(), (Number) stack.pop()));
 					} else if ("-".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						Integer b = (Integer) stack.pop();
-						stack.push(b.intValue()-a.intValue());
+						stack.swap();
+						stack.push(Operations.sub((Number) stack.pop(), (Number) stack.pop()));
 					} else if ("*".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						Integer b = (Integer) stack.pop();
-						stack.push(b.intValue()*a.intValue());
+						stack.push(Operations.mul((Number) stack.pop(), (Number) stack.pop()));
 					} else if ("%".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						Integer b = (Integer) stack.pop();
-						stack.push(b.intValue() % a.intValue());
+						stack.swap();
+						stack.push(Operations.mod((Number) stack.pop(), (Number) stack.pop()));
 					} else if ("neg".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						stack.push(-a);
+						stack.push(Operations.neg((Number) stack.pop()));
 					} else if ("odd".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						stack.push(a.intValue() % 2 == 1);
+						stack.push(Operations.odd((Number) stack.pop()));
 					} else if ("even".equals(operation))  {
-						Integer a = (Integer) stack.pop();
-						stack.push(a.intValue() % 2 == 0);
+						stack.push(Operations.even((Number) stack.pop()));
+					} else if ("<".equals(operation))  {
+						stack.swap();
+						stack.push(Operations.lt((Number) stack.pop(), (Number) stack.pop()));
+					} else if (">".equals(operation))  {
+						stack.swap();
+						stack.push(Operations.gt((Number) stack.pop(), (Number) stack.pop()));
+					} else if ("<=".equals(operation))  {
+						stack.swap();
+						stack.push(Operations.le((Number) stack.pop(), (Number) stack.pop()));
+					} else if (">=".equals(operation))  {
+						stack.swap();
+						stack.push(Operations.ge((Number) stack.pop(), (Number) stack.pop()));
+					} else if ("!=".equals(operation))  {
+						stack.swap();
+						stack.push(Operations.ne((Number) stack.pop(), (Number) stack.pop()));
+					} else if ("==".equals(operation))  {
+						stack.swap();
+						stack.push(Operations.eq((Number) stack.pop(), (Number) stack.pop()));
 					} else {
 						throw new TemplateException("Unsupported operation '%s'", operation);
 					}

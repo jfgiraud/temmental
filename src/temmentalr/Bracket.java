@@ -17,6 +17,8 @@ public class Bracket {
 		if (bracket == '>') return '<';
 		if (bracket == '[') return ']';
 		if (bracket == ']') return '[';
+		if (bracket == '{') return '}';
+		if (bracket == '}') return '{';
 		throw new RuntimeException("Invalid bracket '" + bracket + "'");
 	}
 
