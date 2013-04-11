@@ -638,11 +638,18 @@ public class TemplateTest {
 		parse("~{$i -2 +}~");
 		assertParsingEquals(calc(eval("$i"), number(-2), text("+")));
 
+		assertEquals(3.5, Double.parseDouble("3.5d"), 0.001);
+		
+		assertEvaluation("34", "~{23L 11 +}~");
 		assertEvaluation("9", "~{$i -2 +}~");
 		assertEvaluation("-5", "~{$i 16 -}~");
 		assertEvaluation("68", "~{$l 4 *}~");
 		assertEvaluation("70.0", "~{$f 4 *}~");
 		assertEvaluation("2", "~{$l 3 %}~");
+		assertEvaluation("3", "~{7 2 /}~");
+		assertEvaluation("3.5", "~{7 2.0 /}~");
+		assertEvaluation("3.5", "~{7 2d /}~");
+		assertEvaluation("200050.0", "~{.5e+2 2e5 +}~");
 		
 		assertEvaluation("2.5", "~{$f 3 %}~");
 		assertEvaluation("-17.5", "~{$f neg}~");
@@ -666,19 +673,35 @@ public class TemplateTest {
 		assertEvaluation("false", "~{$i 17 ==}~");
 		assertEvaluation("true", "~{$f $d ==}~");
 		assertEvaluation("false", "~{$f $d !=}~");
-		assertEvaluation("false", "~{{$i} {$i} +}~");
+		assertEvaluation("22", "~{{$i} {$i} +}~");
 
-		fail("!=");
-		fail("==");
+		assertEvaluation("144", "~{12 sq}~");
+		assertEvaluation("8.0", "~{2 3 pow}~");
 		
-		fail("sqr");
-		fail("pow");
-		fail("floor");
-		fail("ceil");
+		assertEvaluation("3", "~{2 3 max}~");
+		assertEvaluation("-2", "~{-2 3 min}~");
+		
+		assertEvaluation("2", "~{1.5 ceil}~");
+		assertEvaluation("1", "~{1 ceil}~");
+		assertEvaluation("-1", "~{-1.5 ceil}~");
+
+		assertEvaluation("1", "~{1.5 floor}~");
+		assertEvaluation("1", "~{1 floor}~");
+		assertEvaluation("-2", "~{-1.5 floor}~");
+
+		assertEvaluation("10.5", "~{10.5 abs}~");
+		assertEvaluation("10.5", "~{-10.5 abs}~");
+		assertEvaluation("15", "~{-15 abs}~");
+		
+		fail("qr");
 		fail("<<");
 		fail(">>");
 		fail("&&");
 		fail("||");
+		fail("|");
+		fail("&");
+		fail("^");
+		
 	}
 		
 	private String calc(String ... stack) {

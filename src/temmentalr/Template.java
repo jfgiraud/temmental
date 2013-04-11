@@ -45,7 +45,7 @@ public class Template {
 		StringWriter buffer = new StringWriter();
 		boolean outsideAnExpression = true;
 		boolean sentence = false;
-		boolean calc = false;
+		int calc = 0;
 		try {
 			int previousChar = 0;
 			int currentChar = sr.read(); 
@@ -117,15 +117,15 @@ public class Template {
 						previousChar = currentChar;
 						currentChar = sr.read(); 
 						continue;
-					} else if (chars('{', '}').contains(currentChar) || calc) {
+					} else if (chars('{', '}').contains(currentChar) || (calc >= 1)) {
 						if (currentChar == '{') {
-							calc = true;
+							calc++;
 							stack.push(new Bracket('{', file, line, column));
 						} else if (currentChar == '}') {
-							calc = false;
+							calc--;
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								if (Calc.OPERATORS.contains(word)) {
+								if (CalcStack.OPERATORS.contains(word)) {
 									stack.push(word);
 								} else {
 									Stack subStack = new Stack();
@@ -139,7 +139,7 @@ public class Template {
 						} else if (currentChar == ' ') {
 							String word = buffer.toString();
 							if (! "".equals(word)) {
-								if (Calc.OPERATORS.contains(word)) {
+								if (CalcStack.OPERATORS.contains(word)) {
 									stack.push(word);
 								} else {
 									Stack subStack = new Stack();
@@ -317,8 +317,14 @@ public class Template {
 	private static void push_word(Stack stack, String word, String file, int line, int column) throws TemplateException {
 		if (word.startsWith("\"") && word.endsWith("\"")) {
 			stack.push(word.substring(1, word.length()-1));
+		} else if (word.matches("(-)?\\d+[lL]")) {
+			stack.push(Long.parseLong(word.substring(0, word.length()-1)));
 		} else if (word.matches("(-)?\\d+")) {
 			stack.push(Integer.parseInt(word));
+		} else if (word.matches("(-)?(\\d*.)?\\d+?([eE][+-]?\\d+)?[dD]?")) {
+			stack.push(Double.parseDouble(word));
+		} else if (word.matches("(-)?(\\d*.)?\\d+?([eE][+-]?\\d+)?[fF]")) {
+			stack.push(Float.parseFloat(word));
 		} else {
 			stack.push(new Identifier(word, file, line, column-word.length()));
 		}

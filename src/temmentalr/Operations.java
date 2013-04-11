@@ -50,6 +50,28 @@ public class Operations {
 		throw new RuntimeException("Add case not implemented.");
 	}
 	
+	public static Number div(Number a, Number b) {
+		if (a instanceof Double || b instanceof Double) {
+			return a.doubleValue() / b.doubleValue();
+		}
+		if (a instanceof Float || b instanceof Float) {
+			return a.floatValue() / b.floatValue();
+		}
+		if (a instanceof Long || b instanceof Long) {
+			return a.longValue() / b.longValue();
+		}
+		if (a instanceof Integer || b instanceof Integer) {
+			return a.intValue() / b.intValue();
+		}
+		if (a instanceof Short || b instanceof Short) {
+			return a.shortValue() / b.shortValue();
+		}
+		if (a instanceof Byte || b instanceof Byte) {
+			return a.byteValue() / b.byteValue();
+		}
+		throw new RuntimeException("Add case not implemented.");
+	}
+	
 	public static Number sub(Number a, Number b) {
 		if (a instanceof Double || b instanceof Double) {
 			return a.doubleValue() - b.doubleValue();
@@ -94,8 +116,29 @@ public class Operations {
 		throw new RuntimeException("Add case not implemented.");
 	}
 
+	public static Number pow(Number a, Number b) {
+		return Math.pow(a.doubleValue(), b.doubleValue());
+	}
+
+	
 	public static Number neg(Number a) {
 		return mul(a, -1);
+	}
+	
+	public static Number sq(Number a) {
+		return mul(a, a);
+	}
+	
+	public static Number ceil(Number a) {
+		return (int) Math.ceil(a.doubleValue());
+	}
+
+	public static Number floor(Number a) {
+		return (int) Math.floor(a.doubleValue());
+	}
+	
+	public static Number abs(Number a) {
+		return (a.doubleValue() < 0)  ? neg(a) : a;
 	}
 
 	public static boolean even(Number a) {
@@ -218,6 +261,14 @@ public class Operations {
 	
 	public static boolean ne(Number a, Number b) {
 		return (new NumberComparator()).compare(a, b) != 0;
+	}
+	
+	public static Number min(Number a, Number b) {
+		return ((new NumberComparator()).compare(a, b) < 0) ? a : b;
+	}
+	
+	public static Number max(Number a, Number b) {
+		return ((new NumberComparator()).compare(a, b) > 0) ? a : b;
 	}
 	
 	static class NumberComparator implements Comparator<Number> {
