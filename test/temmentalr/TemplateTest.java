@@ -607,7 +607,7 @@ public class TemplateTest {
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 		populateModel("s", 5);
 		assertWriteEquals("7");
-		parse("~{$a 2 ^ 2 $a $b * * $b dup * + +}~"); // (t+4)*t-1
+		parse("~{$s dup +}~"); // (t+4)*t-1
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 		// if {$s 3 <=}
 		// /if
@@ -693,15 +693,58 @@ public class TemplateTest {
 		assertEvaluation("10.5", "~{-10.5 abs}~");
 		assertEvaluation("15", "~{-15 abs}~");
 		
+		assertEvaluation("7.56", "~{6.55957 2 round 1 +}~");
+		assertEvaluation("0.667", "~{2.0 3 / 3 round}~");
+		assertEvaluation("2", "~{1.9 0 round}~");
+		assertEvaluation("-4", "~{-3.9 0 round}~");
+		assertEvaluation("-3.9", "~{-3.87 1 round}~");
+		
+		assertEvaluation("7.55", "~{6.55957 2 trunc 1 +}~");
+		assertEvaluation("-6.55", "~{-6.55957 2 trunc}~");
+		assertEvaluation("0.666", "~{2.0 3 / 3 trunc}~");
+		assertEvaluation("0.6", "~{2.0 3 / 1 trunc}~");
+		assertEvaluation("3", "~{3 0 trunc}~");
+		assertEvaluation("3", "~{3.9 0 trunc}~");
+		assertEvaluation("-3", "~{-3.9 0 trunc}~");
+		
+		populateModel("T", true);
+		populateModel("F", false);
+		assertEvaluation("false", "~{true $F and}~");
+		assertEvaluation("true", "~{true {$T} and}~");
+		assertEvaluation("false", "~{$F $F and}~");
+		
+		assertEvaluation("false", "~{$F $F or}~");
+		assertEvaluation("true", "~{$F $T or}~");
+		assertEvaluation("true", "~{$T $F or}~");
+
+		assertEvaluation("false", "~{$F $F xor}~");
+		assertEvaluation("true", "~{$F $T xor}~");
+		assertEvaluation("true", "~{$T $F xor}~");
+		assertEvaluation("false", "~{$T $T xor}~");
+
+		assertEvaluation("true", "~{$F not}~");
+		assertEvaluation("false", "~{$T not}~");
+
+		unpopulateModel("F");
+		parse("~{$F not}~");
+		assertWriteThrowsException("Key 'F' is not present or has null value in the model map at position '-:l1:c3'.");
+		assertEvaluation("", "~{$T true not xor $F? or}~");
+		
+		populateModel("F", false);
+		assertEvaluation("true", "~{$T true not xor $F? or}~");
+		
+		
+		parse("~{-15 \"abs\"}~");
+		assertParsingEquals("");
+		
+		int b = 56;
+		double a = b;
+		
 		fail("qr");
 		fail("<<");
 		fail(">>");
-		fail("&&");
-		fail("||");
-		fail("|");
-		fail("&");
-		fail("^");
 		
+		fail("bad arguments type");
 	}
 		
 	private String calc(String ... stack) {
@@ -824,6 +867,10 @@ public class TemplateTest {
 		model.put(name, value);
 	}
 
+	private void unpopulateModel(String name) throws TemplateException {
+		model.remove(name);
+	}
+	
 	private void populateProperty(String name, Object value) throws TemplateException {
 		properties.put(name, value);
 	}

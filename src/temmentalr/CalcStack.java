@@ -5,7 +5,9 @@ import java.util.List;
 
 public class CalcStack extends Stack {
 
-	static final List<String> OPERATORS = Arrays.asList("+", "-", "*", "/", "%", "neg", "odd", "even", "<", ">", "<=", ">=", "==", "!=", "sq", "pow", "ceil", "floor", "min", "max", "abs");
+	static final List<String> OPERATORS = Arrays.asList("+", "-", "*", "/", "%", "neg", "odd", "even", "<", ">", 
+			"<=", ">=", "==", "!=", "sq", "pow", "ceil", "floor", "min", "max", "abs", "round", "trunc",
+			"true", "false", "and", "or", "xor", "not");
 
 	public void enter(Object e) {
 		push(e);
@@ -13,6 +15,18 @@ public class CalcStack extends Stack {
 			String operation = (String) pop();
 			if ("+".equals(operation))  {
 				push(Operations.add((Number) pop(), (Number) pop()));
+			} else if ("true".equals(operation))  {
+				push(true);
+			} else if ("false".equals(operation))  {
+				push(false);
+			} else if ("and".equals(operation))  {
+				push(Operations.and((Boolean) pop(), (Boolean) pop()));
+			} else if ("or".equals(operation))  {
+				push(Operations.or((Boolean) pop(), (Boolean) pop()));
+			} else if ("xor".equals(operation))  {
+				push(Operations.xor((Boolean) pop(), (Boolean) pop()));
+			} else if ("not".equals(operation))  {
+				push(Operations.not((Boolean) pop()));
 			} else if ("-".equals(operation))  {
 				swap();
 				push(Operations.sub((Number) pop(), (Number) pop()));
@@ -25,6 +39,12 @@ public class CalcStack extends Stack {
 			} else if ("/".equals(operation))  {
 				swap();
 				push(Operations.div((Number) pop(), (Number) pop()));
+			} else if ("round".equals(operation))  {
+				swap();
+				push(Operations.round((Number) pop(), (Number) pop()));
+			} else if ("trunc".equals(operation))  {
+				swap();
+				push(Operations.trunc((Number) pop(), (Number) pop()));
 			} else if ("sq".equals(operation))  {
 				push(Operations.sq((Number) pop()));
 			} else if ("pow".equals(operation))  {

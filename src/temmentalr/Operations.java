@@ -72,6 +72,42 @@ public class Operations {
 		throw new RuntimeException("Add case not implemented.");
 	}
 	
+	public static Number round(Number a, Number b) {
+		Number p = pow(10, b);
+		Number r = div(Math.round(mul(a, p).doubleValue()), p);
+		if (ne(b, 0)) {
+			return r;
+		} else {
+			return r.intValue();
+		}
+	}
+
+	public static Number trunc(Number a, Number b) {
+		Number p = pow(10, b);
+		Number r = div(mul(a, p).intValue(), p);
+		if (ne(b, 0)) {
+			return r;
+		} else {
+			return r.intValue();
+		}
+	}
+	
+	public static Boolean not(Boolean a) {
+		return ! a;
+	}
+	
+	public static Boolean and(Boolean a, Boolean b) {
+		return a & b;
+	}
+	
+	public static Boolean or(Boolean a, Boolean b) {
+		return a | b;
+	}
+	
+	public static Boolean xor(Boolean a, Boolean b) {
+		return a ^ b;
+	}
+	
 	public static Number sub(Number a, Number b) {
 		if (a instanceof Double || b instanceof Double) {
 			return a.doubleValue() - b.doubleValue();
