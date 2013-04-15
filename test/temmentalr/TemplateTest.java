@@ -592,7 +592,7 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testIfThenElse() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+	public void testIfThen() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
 		populateModel("b", false);
 		populateModel("a", false);
 		populateModel("name", "jeff");
@@ -601,6 +601,19 @@ public class TemplateTest {
 		assertWriteEquals("hello JEFF");
 		parse("~$a#if~hello ~$name:'upper~~#/if~");
 		assertWriteEquals("hello JEFF");
+	}
+	
+	@Test
+	public void testIfThenOptional() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$test?#if~TRUE~#/if~");
+		assertWriteEquals("");
+	}
+	
+	@Test
+	public void testIfThenNotBoolean() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		populateModel("test", "toto");
+		parse("~$test#if~TRUE~#/if~");
+		assertWriteThrowsException("The 'if' statement requires a boolean value at position '-:l1:c8' (receives 'java.lang.String')");
 	}
 	
 	@Test

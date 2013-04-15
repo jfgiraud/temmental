@@ -286,20 +286,12 @@ public class Template {
 					
 					if (cmd.get().equals("if")) {
 						stack.swap();
-						IfCommand ifCmd = new IfCommand(cmd.getPosition(), (Calc) stack.pop(), (List) stack.pop());
+						IfCommand ifCmd = new IfCommand(cmd.getPosition(), (Element) stack.pop(), (List) stack.pop());
 						stack.push(ifCmd);
 					} else {
 						//TODO
 						throw new TemplateException("Command zzz");
 					}
-					
-					try {
-						stack.printStack(System.out);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-//					return o;
 				} catch (StackException e) {
 					//TODO
 					throw new TemplateException(e, "Command zzz");
@@ -346,10 +338,10 @@ public class Template {
 		if (! stack.empty() && stack.value().equals("#command")) {
 			 if (word.equals("if")) {
 				 stack.pop();
-				 stack.push(new Command("if", file, line, column));
+				 stack.push(new Command("if", file, line, column-word.length()));
 			 } else if (word.equals("/if")) {
 				 stack.pop();
-				 stack.push(new Command("/if", file, line, column));
+				 stack.push(new Command("/if", file, line, column-word.length()));
 				 eval(stack);
 			 } else {
 				 throw new TemplateException("Unknown command '%s' at position '%s'", word, String.format("%s:l%d:c%d", file, line, column));

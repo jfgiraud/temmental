@@ -7,11 +7,11 @@ import java.util.Map;
 
 public class IfCommand extends Element {
 
-	private Calc expr;
+	private Element expr;
 	private List blocks;
 	private String position;
 
-	public IfCommand(String position, Calc expr, List blocks) {
+	public IfCommand(String position, Element expr, List blocks) {
 		this.position = position;
 		this.expr = expr;
 		this.blocks = blocks;
@@ -34,7 +34,7 @@ public class IfCommand extends Element {
 			return null;
 		}
 		if (! (exprEval instanceof Boolean)) {
-			throw new TemplateException("The evaluation of 'if' condition is not a boolean at position '%s'", position);
+			throw new TemplateException("The 'if' statement requires a boolean value at position '%s' (receives '%s')", position, exprEval.getClass().getCanonicalName());
 		}
 		StringWriter result = new StringWriter();
 		for (Object block : blocks) {
@@ -45,7 +45,7 @@ public class IfCommand extends Element {
 					result.append(o.toString());
 				}
 			} catch (IOException e) {
-				throw new TemplateException(e, "Unable to render block for 'if' command at position '%s'", position);
+				throw new TemplateException(e, "Unable to render block for IF command at position '%s'", position);
 			}
 		}
 		return result.toString();
