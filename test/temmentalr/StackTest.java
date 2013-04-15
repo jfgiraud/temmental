@@ -76,9 +76,9 @@ public class StackTest {
 		stack.push("3");
 		stack.rot();
 		assertEquals(3, stack.depth());
-		assertEquals("1", stack.value(1));
-		assertEquals("3", stack.value(2));
 		assertEquals("2", stack.value(3));
+		assertEquals("3", stack.value(2));
+		assertEquals("1", stack.value(1));
 	}
 	
 	@Test
@@ -206,12 +206,12 @@ public class StackTest {
 		stack.push("6");
 		stack.roll(4);
 		assertEquals(6, stack.depth());
-		assertEquals("3", stack.value(1));
-		assertEquals("6", stack.value(2));
-		assertEquals("5", stack.value(3));
-		assertEquals("4", stack.value(4));
-		assertEquals("2", stack.value(5));
 		assertEquals("1", stack.value(6));
+		assertEquals("2", stack.value(5));
+		assertEquals("4", stack.value(4));
+		assertEquals("5", stack.value(3));
+		assertEquals("6", stack.value(2));
+		assertEquals("3", stack.value(1));
 	}
 	
 	@Test

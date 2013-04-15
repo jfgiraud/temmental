@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sun.awt.SunHints.Value;
+
 // TODO mettre un stack.empty() ??
 
 public class Template {
@@ -51,7 +53,7 @@ public class Template {
 			int currentChar = sr.read(); 
 			while (currentChar != -1) {
 				column++;
-				if (outsideAnExpression) {
+				if (outsideAnExpression) { // hors expression
 					if (currentChar != '~') {
 						buffer.write(currentChar);
 						if (currentChar == '\n') {
@@ -87,7 +89,7 @@ public class Template {
 							}
 						}
 					}
-				} else {
+				} else { 
 					if (currentChar == '"' || sentence) {
 						if (currentChar == '\\') {
 							previousChar = currentChar;
@@ -107,7 +109,7 @@ public class Template {
 								sentence = false;
 								String word = buffer.toString();
 								if (! "".equals(word)) {
-									push_word(stack, word, file, line, column);
+									change_word(stack, word, file, line, column, currentChar, outsideAnExpression);
 								}
 								buffer = new StringWriter();
 							} else {
@@ -151,7 +153,7 @@ public class Template {
 						} else {
 							buffer.write(currentChar);
 						}
-					} else if (chars('<', '>', '[', ']', '(', ')', ',', ':', '~').contains(currentChar)) {
+					} else if (chars('<', '>', '[', ']', '(', ')', ',', ':', '~', ' ', '#').contains(currentChar)) {
 						String word = buffer.toString();
 						if (! "".equals(word)) {
 							change_word(stack, word, file, line, column, currentChar, outsideAnExpression);
@@ -180,6 +182,8 @@ public class Template {
 						} else if (currentChar == ')') {
 							stack.push(new Bracket(')', file, line, column));
 							eval(stack);
+						} else if (currentChar == '#') {
+							stack.push("#command");
 						}
 					} else {
 						buffer.write(currentChar);
@@ -261,6 +265,45 @@ public class Template {
 					List parameters = (List) stack.pop();
 					stack.push(new Calc(startAt, parameters));
 				}
+			} else if (last instanceof Command) {
+				int i;
+				Command endCommand  = (Command) stack.pop();
+				for (i=1; i<=stack.depth(); i++) {
+					if (stack.value(i) instanceof Command) {
+						Command command  = (Command) stack.value(i);
+						if (command.isOpened() && ! command.get().equals(endCommand.other())) {
+							throw new TemplateException("Command mismatch ('%s' at position '%s' vs '%s' at position '%s').", 
+									command.get(), command.getPosition(), endCommand.get(), endCommand.getPosition());
+						}
+						break;
+					}
+				}
+				try {
+
+					stack.tolist(i-1);
+					stack.swap();
+					Command cmd = (Command) stack.pop();
+					
+					if (cmd.get().equals("if")) {
+						stack.swap();
+						IfCommand ifCmd = new IfCommand(cmd.getPosition(), (Calc) stack.pop(), (List) stack.pop());
+						stack.push(ifCmd);
+					} else {
+						//TODO
+						throw new TemplateException("Command zzz");
+					}
+					
+					try {
+						stack.printStack(System.out);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+//					return o;
+				} catch (StackException e) {
+					//TODO
+					throw new TemplateException(e, "Command zzz");
+				}
 			}
 		}
 	}
@@ -300,21 +343,33 @@ public class Template {
 	}
 	
 	private static void change_word(Stack stack, String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
-		
+		if (! stack.empty() && stack.value().equals("#command")) {
+			 if (word.equals("if")) {
+				 stack.pop();
+				 stack.push(new Command("if", file, line, column));
+			 } else if (word.equals("/if")) {
+				 stack.pop();
+				 stack.push(new Command("/if", file, line, column));
+				 eval(stack);
+			 } else {
+				 throw new TemplateException("Unknown command '%s' at position '%s'", word, String.format("%s:l%d:c%d", file, line, column));
+			 }
+			 return;
+		} 
 		if (outsideAnExpression) {
 			stack.push(word);
 		} else {
-			if (currentChar != '<' /*&& currentChar != '>'*/ && stack.depth() > 0 && stack.value().equals("#func")) {
-				push_word(stack, word, file, line, column);
+			if (currentChar != '<' && stack.depth() > 0 && stack.value().equals("#func")) {
+				push_word2(stack, word, file, line, column);
 				stack.swap(); // [ word pos #eval ] #func 
 			} else {
-				push_word(stack, word, file, line, column);
+				push_word2(stack, word, file, line, column);
 			}
 			eval(stack);
 		}
 	}
 
-	private static void push_word(Stack stack, String word, String file, int line, int column) throws TemplateException {
+	private static void push_word2(Stack stack, String word, String file, int line, int column) throws TemplateException {
 		if (word.startsWith("\"") && word.endsWith("\"")) {
 			stack.push(word.substring(1, word.length()-1));
 		} else if (word.matches("(-)?\\d+[lL]")) {
@@ -330,7 +385,7 @@ public class Template {
 		}
 	}
 	
-	private static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws IOException, TemplateException {
+	static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws IOException, TemplateException {
 		
 		if (value instanceof String || value instanceof Number)
 			return value;
@@ -354,6 +409,10 @@ public class Template {
 		
 		if (value instanceof Calc) {
 			return ((Calc) value).writeObject(functions, model, messages);
+		}
+		
+		if (value instanceof IfCommand) {
+			return ((IfCommand) value).writeObject(functions, model, messages);
 		}
 		
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());

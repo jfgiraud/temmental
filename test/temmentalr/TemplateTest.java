@@ -592,8 +592,15 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testIfThenElse() {
-		fail("testIfThenElse");
+	public void testIfThenElse() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		populateModel("b", false);
+		populateModel("a", false);
+		populateModel("name", "jeff");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+		parse("~{$b not}#if~hello ~$name:'upper~~#/if~");
+		assertWriteEquals("hello JEFF");
+		parse("~$a#if~hello ~$name:'upper~~#/if~");
+		assertWriteEquals("hello JEFF");
 	}
 	
 	@Test
@@ -734,8 +741,9 @@ public class TemplateTest {
 		assertEvaluation("true", "~{$T true not xor $F? or}~");
 		
 		
-		parse("~{-15 \"abs\"}~");
-		assertParsingEquals("");
+		assertEvaluation("15", "~{-15 abs}~");
+		
+		assertEvaluation("6 5", "~{77 12 /%}~");
 		
 		int b = 56;
 		double a = b;
