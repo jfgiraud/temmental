@@ -605,8 +605,18 @@ public class TemplateTest {
 	@Test
 	public void testABlockIsNotRenderedIfTheConditionIsFalse() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
 		populateModel("aBoolean", false);
-		parse("~$aBoolean#if~Hello~~#/if~");
-		assertWriteEquals("Hello john DOE");
+		parse("~$aBoolean#if~Hello ~$firstname~ ~$lastname:'upper~~#/if~");
+		assertWriteEquals("");
+	}
+	
+	@Test
+	public void testParsingThrowsAnExceptionIfCommandIsNotClosed() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		assertParseThrowsException("Command '/if' not closed to complete statement (reach 'if' at position '-:l1:c13').", "~$aBoolean?#if~Hello ~$firstname~ ~$lastname:'upper~");
+	}
+	
+	@Test
+	public void testParsingThrowsAnExceptionIfCommandIsNotOpened() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		assertParseThrowsException("Command 'if' not opened to complete statement (reach '/if' at position '-:l1:c51').", "~$aBoolean~Hello ~$firstname~ ~$lastname:'upper~~#/if~");
 	}
 	
 	@Test
@@ -644,10 +654,8 @@ public class TemplateTest {
 		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
 		populateModel("s", 5);
 		assertWriteEquals("7");
-		parse("~{$s dup +}~"); // (t+4)*t-1
-		assertParsingEquals(calc(eval("$s"), number(2), text("+")));
-		// if {$s 3 <=}
-		// /if
+		parse("~{$s 2 <=}~"); 
+		assertWriteEquals("false");
 	}
 
 	@Test

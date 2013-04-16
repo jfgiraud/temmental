@@ -213,7 +213,14 @@ public class Template {
 	}
 	
 	private static void check_stack(Stack stack) throws TemplateException {
-		if (stack.depth()>1) {
+		
+		try {
+			stack.printStack(System.out);
+		} catch (IOException e) {
+		}
+		
+
+		if (stack.depth()>=1) {
 			for (int i=1; i<=stack.depth(); i++) {
 				Object o = stack.value(i);
 				if (o instanceof Bracket) {
@@ -222,7 +229,13 @@ public class Template {
 						throw new TemplateException("Bracket not opened ('%c' at position '%s').", b.getBracket(), b.getPosition());
 					else 
 						throw new TemplateException("Bracket not closed ('%c' at position '%s').", b.getBracket(), b.getPosition());
-				} 
+				} else if (o instanceof Command) {
+					Command b = (Command) o;
+					if (b.isClosed())
+						throw new TemplateException("Command '%s' not opened to complete statement (reach '%s' at position '%s').", b.other(), b.get(), b.getPosition());
+					else 
+						throw new TemplateException("Command '%s' not closed to complete statement (reach '%s' at position '%s').", b.other(), b.get(), b.getPosition());
+				}
 			}
 		}
 	}
@@ -279,22 +292,20 @@ public class Template {
 					}
 				}
 				try {
-
 					stack.tolist(i-1);
 					stack.swap();
 					Command cmd = (Command) stack.pop();
-					
 					if (cmd.get().equals("if")) {
 						stack.swap();
 						IfCommand ifCmd = new IfCommand(cmd.getPosition(), (Element) stack.pop(), (List) stack.pop());
 						stack.push(ifCmd);
 					} else {
 						//TODO
-						throw new TemplateException("Command zzz");
+						throw new TemplateException("Command zzz1");
 					}
 				} catch (StackException e) {
 					//TODO
-					throw new TemplateException(e, "Command zzz");
+					throw new TemplateException(e, "Command '%s' not opened to complete statement (reach '%s' at position '%s').", endCommand.other(), endCommand.get(), endCommand.getPosition());
 				}
 			}
 		}

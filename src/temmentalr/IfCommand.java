@@ -36,19 +36,28 @@ public class IfCommand extends Element {
 		if (! (exprEval instanceof Boolean)) {
 			throw new TemplateException("The 'if' statement requires a boolean value at position '%s' (receives '%s')", position, exprEval.getClass().getCanonicalName());
 		}
-		StringWriter result = new StringWriter();
-		for (Object block : blocks) {
-			try {
-				StringWriter sout = new StringWriter();
-				Object o = Template.writeObject(sout, functions, model, messages, block);
-				if (o != null) {
-					result.append(o.toString());
+		if (((Boolean)exprEval).booleanValue()) {
+			StringWriter result = new StringWriter();
+			for (Object block : blocks) {
+				try {
+					StringWriter sout = new StringWriter();
+					Object o = Template.writeObject(sout, functions, model, messages, block);
+					if (o != null) {
+						result.append(o.toString());
+					}
+				} catch (IOException e) {
+					throw new TemplateException(e, "Unable to render block for IF command at position '%s'", position);
 				}
-			} catch (IOException e) {
-				throw new TemplateException(e, "Unable to render block for IF command at position '%s'", position);
 			}
+			return result.toString();
+		} else {
+			return null;
 		}
-		return result.toString();
 	}
 
+	@Override
+	public String toString() {
+		return "if{" + expr + "}" + blocks;
+	}
+	
 }

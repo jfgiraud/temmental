@@ -22,6 +22,11 @@ public class Calc extends Element {
 			for (Object e : tmp) {
 				stack.enter(e);
 			}
+			if (stack.empty()) {
+				throw new TemplateException("Stack evaluation returns an empty result at position '%s'", getPosition());
+			} else if (stack.depth()>1) {
+				throw new TemplateException("Stack evaluation returns more than one value at position '%s'", getPosition());
+			}  
 			return stack.pop();
 		}
 		return null;

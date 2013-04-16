@@ -17,6 +17,10 @@ public class Command {
 	public boolean isOpened() {
 		return ! command.contains("/");
 	}
+	
+	public boolean isClosed() {
+		return ! isOpened();
+	}
 
 	public String get() {
 		return command;
