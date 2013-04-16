@@ -1,9 +1,6 @@
 package temmentalr;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

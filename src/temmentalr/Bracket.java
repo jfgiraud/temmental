@@ -1,6 +1,6 @@
 package temmentalr;
 
-public class Bracket {
+class Bracket {
 
 	private char bracket;
 	private String position;
@@ -31,11 +31,11 @@ public class Bracket {
 	}
 	
 	public boolean isClosed() {
-		return bracket == ')' || bracket == ']' || bracket == '>';
+		return bracket == ')' || bracket == ']' || bracket == '>' || bracket == '}';
 	}
 
 	public boolean isOpened() {
-		return bracket == '(' || bracket == '[' || bracket == '<';
+		return bracket == '(' || bracket == '[' || bracket == '<' || bracket == '{';
 	}
 	
 }

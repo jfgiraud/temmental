@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Comparator;
 
-public class Operations {
+class Operations {
 
 	public static Number add(Number a, Number b) {
 		if (a instanceof Double || b instanceof Double) {

@@ -23,6 +23,8 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
+import static temmentalr.TemplateUtils.*;
+
 public class TemplateTest {
 
 	private Template interpreter;
@@ -644,9 +646,48 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testIterate() {
-		fail("testIterate");
+	public void testIterateOnIterable() throws IOException, TemplateException {
+		parse("~$fruits#for~~$fruit~~#/for~");
+		populateModel("fruits", createList(createModel("fruit", "Orange"), createModel("fruit", "Lemon"), createModel("fruit", "Apple")));
+		assertWriteEquals("OrangeLemonApple");
 	}
+	
+	@Test
+	public void testIterateDoesNotChangeModel() throws IOException, TemplateException {
+		parse("~$fruit~~$fruits#for~~$fruit~~#/for~~$fruit~");
+		populateModel("fruit", "Lemon");
+		populateModel("fruits", createList(createModel("fruit", "Orange"), createModel("fruit", "Lemon"), createModel("fruit", "Apple")));
+		assertWriteEquals("LemonOrangeLemonAppleLemon");
+	}
+	
+	@Test
+	public void test_010d() throws IOException, TemplateException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	    class Fruit {
+	        String name;
+	        public Fruit(String name) {
+	            this.name = name;
+	        }
+	        @Override
+	        public String toString() {
+	            return "Fruit: " + name;
+	        }
+	    }
+	    populateTransform("toModel", new Transform<List<Fruit>, List<Map<String,Object>>>() {
+			@Override
+			public List<Map<String,Object>> apply(List<Fruit> fruits) throws TemplateException {
+                return convert(fruits, new ConvertFunction<Fruit>() {
+                    public void populate(Map<String,Object> model, Fruit f, int index) {
+                        model.put("fruit", f.name);
+                        model.put("index", index);
+                    }
+                });
+			}
+		});
+	    populateModel("fruit", "lemon");
+	    populateModel("fruits", Arrays.asList(new Fruit("orange"), new Fruit("lemon"), new Fruit("apple")));
+	    parse("~$fruit~/~$fruits:'toModel#for~~$index~.~$fruit~/~#/for~~$fruit~");
+	    assertWriteEquals("lemon/0.orange/1.lemon/2.apple/lemon");
+    }
 	
 	@Test
 	public void testCalc() throws IOException, TemplateException {
@@ -780,17 +821,6 @@ public class TemplateTest {
 		
 		
 		assertEvaluation("15", "~{-15 abs}~");
-		
-		assertEvaluation("6 5", "~{77 12 /%}~");
-		
-		int b = 56;
-		double a = b;
-		
-		fail("qr");
-		fail("<<");
-		fail(">>");
-		
-		fail("bad arguments type");
 	}
 		
 	private String calc(String ... stack) {

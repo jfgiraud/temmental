@@ -1,17 +1,16 @@
 package temmentalr;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class Calc extends Element {
+class Calc extends Element {
 
 	private List parameters;
-	private Bracket bracket;
+	private String position;
 
-	Calc(Bracket b, List parameters) {
+	Calc(String position, List parameters) {
 		this.parameters = parameters;
-		this.bracket = b;
+		this.position = position;
 	}
 	
 	@Override
@@ -39,7 +38,7 @@ public class Calc extends Element {
 
 	@Override
 	String getPosition() {
-		return bracket.getPosition();
+		return position;
 	}
 
 	public String toString() {

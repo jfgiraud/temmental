@@ -14,11 +14,11 @@ import java.util.Map;
 
 import sun.awt.SunHints.Value;
 
-// TODO mettre un stack.empty() ??
-
 public class Template {
 	
 	private static final boolean debug = true;
+
+	private static final List<String> COMMAND_TOKENS = Arrays.asList("if", "/if", "for", "/for");
 
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
@@ -229,8 +229,8 @@ public class Template {
 						throw new TemplateException("Bracket not opened ('%c' at position '%s').", b.getBracket(), b.getPosition());
 					else 
 						throw new TemplateException("Bracket not closed ('%c' at position '%s').", b.getBracket(), b.getPosition());
-				} else if (o instanceof Command) {
-					Command b = (Command) o;
+				} else if (o instanceof CommandToken) {
+					CommandToken b = (CommandToken) o;
 					if (b.isClosed())
 						throw new TemplateException("Command '%s' not opened to complete statement (reach '%s' at position '%s').", b.other(), b.get(), b.getPosition());
 					else 
@@ -276,14 +276,14 @@ public class Template {
 				} else if (bracket.getBracket() == '}') {
 					Bracket startAt = (Bracket) create_list(stack, '{', '}');
 					List parameters = (List) stack.pop();
-					stack.push(new Calc(startAt, parameters));
+					stack.push(new Calc(startAt.getPosition(), parameters));
 				}
-			} else if (last instanceof Command) {
+			} else if (last instanceof CommandToken) {
 				int i;
-				Command endCommand  = (Command) stack.pop();
+				CommandToken endCommand  = (CommandToken) stack.pop();
 				for (i=1; i<=stack.depth(); i++) {
-					if (stack.value(i) instanceof Command) {
-						Command command  = (Command) stack.value(i);
+					if (stack.value(i) instanceof CommandToken) {
+						CommandToken command  = (CommandToken) stack.value(i);
 						if (command.isOpened() && ! command.get().equals(endCommand.other())) {
 							throw new TemplateException("Command mismatch ('%s' at position '%s' vs '%s' at position '%s').", 
 									command.get(), command.getPosition(), endCommand.get(), endCommand.getPosition());
@@ -294,11 +294,11 @@ public class Template {
 				try {
 					stack.tolist(i-1);
 					stack.swap();
-					Command cmd = (Command) stack.pop();
-					if (cmd.get().equals("if")) {
+					CommandToken cmd = (CommandToken) stack.pop();
+					if (COMMAND_TOKENS.contains(cmd.get())) {
 						stack.swap();
-						IfCommand ifCmd = new IfCommand(cmd.getPosition(), (Element) stack.pop(), (List) stack.pop());
-						stack.push(ifCmd);
+						Command command = new Command(cmd.getPosition(), cmd.get(), (Element) stack.pop(), (List) stack.pop());
+						stack.push(command);
 					} else {
 						//TODO
 						throw new TemplateException("Command zzz1");
@@ -347,17 +347,16 @@ public class Template {
 	
 	private static void change_word(Stack stack, String word, String file, int line, int column, int currentChar, boolean outsideAnExpression) throws TemplateException {
 		if (! stack.empty() && stack.value().equals("#command")) {
-			 if (word.equals("if")) {
+			if (COMMAND_TOKENS .contains(word)) {
 				 stack.pop();
-				 stack.push(new Command("if", file, line, column-word.length()));
-			 } else if (word.equals("/if")) {
-				 stack.pop();
-				 stack.push(new Command("/if", file, line, column-word.length()));
-				 eval(stack);
-			 } else {
-				 throw new TemplateException("Unknown command '%s' at position '%s'", word, String.format("%s:l%d:c%d", file, line, column));
-			 }
-			 return;
+				 stack.push(new CommandToken(word, file, line, column-word.length()));
+				 if (word.startsWith("/")) {
+					 eval(stack);
+				 }
+			} else {
+				throw new TemplateException("Unknown command '%s' at position '%s'", word, String.format("%s:l%d:c%d", file, line, column));
+			}
+			return;
 		} 
 		if (outsideAnExpression) {
 			stack.push(word);
@@ -388,7 +387,7 @@ public class Template {
 		}
 	}
 	
-	static Object writeObject(Writer out, Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws IOException, TemplateException {
+	static Object writeObject(Map<String, Transform> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException {
 		
 		if (value instanceof String || value instanceof Number)
 			return value;
@@ -414,8 +413,8 @@ public class Template {
 			return ((Calc) value).writeObject(functions, model, messages);
 		}
 		
-		if (value instanceof IfCommand) {
-			return ((IfCommand) value).writeObject(functions, model, messages);
+		if (value instanceof Command) {
+			return ((Command) value).writeObject(functions, model, messages);
 		}
 		
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
@@ -423,7 +422,7 @@ public class Template {
 	
 	public void write(Writer out, Map<String, Object> model) throws IOException, TemplateException {
 		for (int i=stack.depth(); i>0; i--) {
-			Object o = writeObject(out, functions, model, messages, stack.value(i));
+			Object o = writeObject(functions, model, messages, stack.value(i));
 			if (o != null) {
 				out.write(o.toString());
 			}

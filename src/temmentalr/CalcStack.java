@@ -1,10 +1,9 @@
 package temmentalr;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class CalcStack extends Stack {
+class CalcStack extends Stack {
 
 	static final List<String> OPERATORS = Arrays.asList("+", "-", "*", "/", "%", "neg", "odd", "even", "<", ">", 
 			"<=", ">=", "==", "!=", "sq", "pow", "ceil", "floor", "min", "max", "abs", "round", "trunc",
@@ -84,20 +83,7 @@ public class CalcStack extends Stack {
 			} else if ("==".equals(operation))  {
 				swap();
 				push(Operations.eq((Number) pop(), (Number) pop()));
-			} else if ("/%".equals(operation))  {
-				dup2();
-				swap();
-				push(Operations.div((Number) pop(), (Number) pop()));
-				unrot();
-				swap();
-				push(Operations.mod((Number) pop(), (Number) pop()));
-				try {
-					printStack(System.out);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}  else {
+			} else {
 				throw new StackException("Unsupported operation '" + operation + "'");
 			}
 		} 

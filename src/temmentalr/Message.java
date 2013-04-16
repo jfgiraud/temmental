@@ -3,7 +3,7 @@ package temmentalr;
 import java.util.List;
 import java.util.Map;
 
-public class Message extends Element {
+class Message extends Element {
 
 	private Identifier identifier;
 	private List parameters;
