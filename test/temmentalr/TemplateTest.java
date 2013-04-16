@@ -592,28 +592,45 @@ public class TemplateTest {
 	}
 	
 	@Test
-	public void testIfThen() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-		populateModel("b", false);
-		populateModel("a", false);
-		populateModel("name", "jeff");
+	public void testABlockIsRenderedIfTheConditionIsTrue() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		populateModel("aBoolean", true);
+		populateModel("firstname", "john");
+		populateModel("lastname", "doe");
 		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
-		parse("~{$b not}#if~hello ~$name:'upper~~#/if~");
-		assertWriteEquals("hello JEFF");
-		parse("~$a#if~hello ~$name:'upper~~#/if~");
-		assertWriteEquals("hello JEFF");
+
+		parse("~$aBoolean#if~Hello ~$firstname~ ~$lastname:'upper~~#/if~");
+		assertWriteEquals("Hello john DOE");
+	}
+
+	@Test
+	public void testABlockIsNotRenderedIfTheConditionIsFalse() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		populateModel("aBoolean", false);
+		parse("~$aBoolean#if~Hello~~#/if~");
+		assertWriteEquals("Hello john DOE");
 	}
 	
 	@Test
-	public void testIfThenOptional() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-		parse("~$test?#if~TRUE~#/if~");
+	public void testAConditionCanBeAnRpnOperation() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		populateModel("aBoolean", false);
+		populateModel("firstname", "john");
+		populateModel("lastname", "doe");
+		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+
+		parse("~{$aBoolean not}#if~Hello ~$firstname~ ~$lastname:'upper~~#/if~");
+		assertWriteEquals("Hello john DOE");
+	}
+	
+	@Test
+	public void testAConditionIsOptional_CaseNotPresent() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		parse("~$aBoolean?#if~lorem ipsum~#/if~");
 		assertWriteEquals("");
 	}
 	
 	@Test
-	public void testIfThenNotBoolean() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-		populateModel("test", "toto");
-		parse("~$test#if~TRUE~#/if~");
-		assertWriteThrowsException("The 'if' statement requires a boolean value at position '-:l1:c8' (receives 'java.lang.String')");
+	public void testAConditionIsOptional_CasePresent() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+		populateModel("aBoolean", true);
+		parse("~$aBoolean?#if~lorem ipsum~#/if~");
+		assertWriteEquals("lorem ipsum");
 	}
 	
 	@Test
