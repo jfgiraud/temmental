@@ -27,6 +27,17 @@ import static temmentalr.TemplateUtils.*;
 
 public class TemplateTest {
 
+    class Fruit {
+        String name;
+        public Fruit(String name) {
+            this.name = name;
+        }
+        @Override
+        public String toString() {
+            return "Fruit: " + name;
+        }
+    }
+
 	private Template interpreter;
 	private Map<String,Object> model;
 	private Properties properties;
@@ -662,16 +673,6 @@ public class TemplateTest {
 	
 	@Test
 	public void test_010d() throws IOException, TemplateException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-	    class Fruit {
-	        String name;
-	        public Fruit(String name) {
-	            this.name = name;
-	        }
-	        @Override
-	        public String toString() {
-	            return "Fruit: " + name;
-	        }
-	    }
 	    populateTransform("toModel", new Transform<List<Fruit>, List<Map<String,Object>>>() {
 			@Override
 			public List<Map<String,Object>> apply(List<Fruit> fruits) throws TemplateException {
@@ -688,6 +689,22 @@ public class TemplateTest {
 	    parse("~$fruit~/~$fruits:'toModel#for~~$index~.~$fruit~/~#/for~~$fruit~");
 	    assertWriteEquals("lemon/0.orange/1.lemon/2.apple/lemon");
     }
+
+	@Test
+	public void testForAs() throws IOException, TemplateException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	    populateModel("fruits", Arrays.asList(new Fruit("orange"), new Fruit("lemon"), new Fruit("apple")));
+	    parse("~$fruits#foras<\"fruit\">~~$fruit:'get<\"name\">~~#/for~");
+
+	    // [ lemon, orange ] 
+	    // [ (1, lemon), (2, orange) ]
+	    // [ { index:1, name: lemon }, { index:2, name: orange } ]
+	    // ~$fruits:'enumerate#for~
+	    //    ~name~
+	    // ~#/for~
+	    
+	    assertWriteEquals("le mon/0.orange/1.lemon/2.apple/lemon");
+    } 
+
 	
 	@Test
 	public void testCalc() throws IOException, TemplateException {
