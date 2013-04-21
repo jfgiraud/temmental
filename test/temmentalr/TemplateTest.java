@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -693,11 +694,39 @@ public class TemplateTest {
 	@Test
 	public void testForAs() throws IOException, TemplateException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 	    populateModel("fruits", Arrays.asList(new Fruit("orange"), new Fruit("lemon"), new Fruit("apple")));
-	    parse("~$fruits#foras<\"fruit\">~~$fruit:'get<\"name\">~~#/for~");
+	    
+	    
+	    populateTransform("as", new Transform<String, Transform<Iterable, Iterable>>() {
+			@Override
+			public Transform<Iterable, Iterable> apply(final String key) throws TemplateException {
+				return new Transform<Iterable, Iterable>() {
+					@Override
+					public Iterable apply(Iterable values) throws TemplateException {
+						List result = new ArrayList<>();
+						Iterator it = values.iterator();
+						while (it.hasNext()) {
+							Object e = it.next();
+							Map m = new HashMap();
+							m.put(key, e);
+							result.add(m);
+						}
+						return result;
+					}
+				};
+			}
+		});
+	    parse("~$fruits:'as<\"fruit\">#for~~$fruit~~#/for~");
 
+	    
+	    
+	    
 	    // [ lemon, orange ] 
 	    // [ (1, lemon), (2, orange) ]
 	    // [ { index:1, name: lemon }, { index:2, name: orange } ]
+	    // ~$fruits@fruit#for
+	    //    $fruit:'get<"name">
+	    // ~#/for~
+	    // ~$fruits:'toModel<"fruit">#
 	    // ~$fruits:'enumerate#for~
 	    //    ~name~
 	    // ~#/for~

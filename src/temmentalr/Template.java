@@ -18,7 +18,7 @@ public class Template {
 	
 	private static final boolean debug = true;
 
-	private static final List<String> COMMAND_TOKENS = Arrays.asList("if", "/if", "for", "/for");
+	private static final List<String> COMMAND_TOKENS = Arrays.asList("if", "/if", "for", "/for", "foras", "#/foras");
 
 	private Map<String, Transform> functions;
 	private TemplateMessages messages;
@@ -256,10 +256,15 @@ public class Template {
 					// $text #func $funcname #< $p1 $p2 #>
 					create_list(stack, '<', '>'); // $text #func $funcname [$p1, $p2]
 					List parameters = (List) stack.pop(); // $text #func $funcname 
-					Element func = (Element) stack.pop(); // $text #func 
-					stack.push(new Function(func, parameters)); // $text #func RpnFunc
-					stack.swap(); // $text RpnFunc #func 
-					eval(stack);
+					
+					if (stack.value() instanceof Element) {
+						Element func = (Element) stack.pop(); // $text #func 
+						stack.push(new Function(func, parameters)); // $text #func RpnFunc
+						stack.swap(); // $text RpnFunc #func 
+						eval(stack);
+					} else {
+						
+					}
 				} else if (bracket.getBracket() == ']') {
 					// $text #[ $p1 $p2 #]					
 					create_list(stack, '[', ']'); // $text [$p1, $p2]
