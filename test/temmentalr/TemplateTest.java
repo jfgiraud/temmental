@@ -695,7 +695,6 @@ public class TemplateTest {
 	public void testForAs() throws IOException, TemplateException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 	    populateModel("fruits", Arrays.asList(new Fruit("orange"), new Fruit("lemon"), new Fruit("apple")));
 	    
-	    
 	    populateTransform("as", new Transform<String, Transform<Iterable, Iterable>>() {
 			@Override
 			public Transform<Iterable, Iterable> apply(final String key) throws TemplateException {
@@ -717,9 +716,6 @@ public class TemplateTest {
 		});
 	    parse("~$fruits:'as<\"fruit\">#for~~$fruit~~#/for~");
 
-	    
-	    
-	    
 	    // [ lemon, orange ] 
 	    // [ (1, lemon), (2, orange) ]
 	    // [ { index:1, name: lemon }, { index:2, name: orange } ]
