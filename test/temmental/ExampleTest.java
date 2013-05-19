@@ -313,10 +313,10 @@ public class ExampleTest extends TestCase {
         }
     }
     public void test_007f() throws IOException, TemplateException {
-        model.put("tag", "unknown");
+//        model.put("tag", "unknown");
         model.put("firstname", "Jeff");
         try {
-            template.formatForTest("~tag[firstname]~", model);
+            template.formatForTest("~tag?[firstname]~", model);
             fail("An exception must be raised.");
         } catch (TemplateException e) {
             assertEquals("Key 'unknown' is not present in the property map to render '~tag[firstname]~'.", e.getMessage());

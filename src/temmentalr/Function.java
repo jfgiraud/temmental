@@ -54,16 +54,16 @@ class Function extends Element {
 //			e.printStackTrace();
 			String message = String.format("Unable to apply function '%s' at position '%s'. ", element.getIdentifier(), element.getPosition());
 			Throwable z = e;
-			while (z != null && ! (z instanceof TemplateException)) {
-				z = e.getCause();
-			}
-			if (z != null) {
-				message += z.getMessage();
-			} else {
-				message += String.format("This function expects %s. It receives %s.", 
-						apply.getParameterTypes()[0].getCanonicalName(),  
-						o.getClass().getCanonicalName());
-			}
+//			while (z != null && ! (z instanceof TemplateException)) {
+//				z = e.getCause();
+//			}
+//			if (z != null) {
+//				message += z.getMessage();
+//			} else {
+//				message += String.format("This function expects %s. It receives %s.", 
+//						apply.getParameterTypes()[0].getCanonicalName(),  
+//						o.getClass().getCanonicalName());
+//			}
 			throw new TemplateException(e, message);  
 		}
 	}
