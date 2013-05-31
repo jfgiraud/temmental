@@ -41,21 +41,21 @@ public class TestI18n extends TestCase {
     }
 
     private void assertFoundAndEquals(String expected, Locale locale, String file) throws IOException, TemplateException {
-        template = new Template("test/test.tpl", filters, "classpath:" + file, locale);
+        template = new Template("test/temmental/test.tpl", filters, "classpath:temmental/" + file, locale);
         assertEquals(expected, template.formatForTest("~'hello[]~", model));
-        template = new Template("test/test.tpl", filters, "file:test/" + file + ".properties", locale);
+        template = new Template("test/temmental/test.tpl", filters, "file:test/temmental/" + file + ".properties", locale);
         assertEquals(expected, template.formatForTest("~'hello[]~", model));
     }
     
     private void assertNotFound(Locale locale, String file) throws IOException, TemplateException {
         try {
-            template = new Template("test/test.tpl", filters, "classpath:" + file, locale);
+            template = new Template("test/temmental/test.tpl", filters, "classpath:temmental/" + file, locale);
             fail("An exception must be thrown!");
         } catch (TemplateException e) {
             assertTrue(e.getMessage().startsWith("Can't find bundle for "));
         }
         try {
-            template = new Template("test/test.tpl", filters, "file:test/" + file + ".properties", locale);
+            template = new Template("test/temmental/test.tpl", filters, "file:test/temmental/" + file + ".properties", locale);
             fail("An exception must be thrown!");
         } catch (TemplateException e) {
             assertTrue(e.getMessage().startsWith("Can't find properties file"));

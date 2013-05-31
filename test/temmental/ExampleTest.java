@@ -802,7 +802,7 @@ public class ExampleTest extends TestCase {
     // files
     
     public void test_13a() throws IOException, TemplateException {
-        template = new Template("test/test.tpl", filters, properties, Locale.ENGLISH);
+        template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
         StringWriter out = new StringWriter();
 
         List<Map<String, Object>> models = createList(
@@ -819,7 +819,7 @@ public class ExampleTest extends TestCase {
 
     public void test_13b() throws IOException, TemplateException {
         try {
-            template = new Template("test/test.tpl", filters, properties, Locale.ENGLISH);
+            template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
             StringWriter out = new StringWriter();
             template.printSection(out, "unknownSection", model);
             fail("aille");
@@ -831,14 +831,14 @@ public class ExampleTest extends TestCase {
     }
 
     public void test_13c() throws IOException, TemplateException {
-        template = new Template("test/test.tpl", filters, properties, Locale.ENGLISH);
+        template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
         StringWriter out = new StringWriter();
         model.remove("firstname");
         try {
             template.printSection(out, "test", model);
             fail("An exception must be raised.");
         } catch (TemplateException e) {
-            assertEquals("Key 'firstname' is not present or has null value in the model map to render '~firstname~' at position 'test/test.tpl:2'.", e.getMessage());
+            assertEquals("Key 'firstname' is not present or has null value in the model map to render '~firstname~' at position 'test/temmental/test.tpl:2'.", e.getMessage());
         } catch (Exception e) {
             fail("Bad exception.");
         }

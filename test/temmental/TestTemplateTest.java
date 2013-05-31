@@ -24,7 +24,7 @@ public class TestTemplateTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        template = new Template("test/test.tpl", filters, properties, Locale.ENGLISH);
+        template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
         TemplateRecorder.setRecording(true);
         out = new StringWriter();
     }
@@ -46,7 +46,7 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("k1", "v1");
         expectedModel.put("k2", "v2");
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/test.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental/test.tpl");
         
         Map<String, ? extends Object> model = record.getModelForFile();
         assertEquals(expectedModel, model);
@@ -71,7 +71,7 @@ public class TestTemplateTest extends TestCase {
         model.put("lastname", "Doe");
         template.printSection(out, "test", model);
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/test.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental/test.tpl");
         List<Map<String, ? extends Object>> models = record.getModelsForSection("test");
 
         HashMap<String, Object> expectedModel = new HashMap<String, Object>();
