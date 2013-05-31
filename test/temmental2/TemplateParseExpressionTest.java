@@ -111,10 +111,10 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 	@Test
 	public void testMessageWithoutParameter() throws IOException, TemplateException {
 		parseExpression("~$message[]~");
-		
+
 		assertTokensEquals(identifier("$message", p(1, 2)),
 				bracket('[', p(1, 10)),
-				bracket(']', p(1, 31)));
+				bracket(']', p(1, 11)));
 		
 		assertElementEquals(
 				message(identifier("$message", p(1, 2)),

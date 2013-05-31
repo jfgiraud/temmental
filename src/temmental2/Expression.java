@@ -86,7 +86,9 @@ class Expression {
 						out.push(new Functionp(func, initParameters));
 						commas = (Integer) oldCommas.pop();
 					} else if (b.getBracket() == ']') { 
-						if (commas != out.depth() - 1) {
+						System.out.println(">"+commas);
+						System.out.println(">"+out.depth());
+						if ((out.depth() != 0) && (commas != out.depth() - 1)) {
 							throw new TemplateException("Too much commas!"); //TODO
 						}
 						out.tolist(out.depth());
