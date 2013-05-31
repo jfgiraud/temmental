@@ -60,12 +60,18 @@ class Expression {
 								other.getBracket(), other.getPosition());
 					}
 					out.remove(out.depth());
+					System.out.println(commas);
+					try {
+						out.printStack(System.out);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					if (commas != out.depth() -1) {
-						switch (b.getBracket()) {
-						case '>':
+						if (b.getBracket() == '>') {
 							throw new TemplateException("Empty init list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
-						default:
-							throw new TemplateException("Empty list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition()); 
+						} else if (b.getBracket() != ']'){
+							throw new TemplateException("Empty list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
 						}
 					}
 					

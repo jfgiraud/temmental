@@ -19,7 +19,7 @@ public class FunctionXTest extends AbstractTestElement {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		template = new Template(messages);
+		template = new Template("-", messages);
 	}
 	
 	@Test
@@ -50,7 +50,7 @@ public class FunctionXTest extends AbstractTestElement {
 	
 
 	private void parse(String string) throws IOException, TemplateException {
-		template.parse(string, true);
+		template.parseString(string, true);
 	}
 
 	@Test

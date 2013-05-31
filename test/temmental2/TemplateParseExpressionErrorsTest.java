@@ -23,7 +23,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 	public void setUp() throws FileNotFoundException, TemplateException, IOException {
 		model = new HashMap<String, Object>();
 		properties = new Properties();
-		template = new Template(new TemplateMessages(Locale.ENGLISH, properties));
+		template = new Template("-", new TemplateMessages(Locale.ENGLISH, properties));
 	}
 	
 	@Test
@@ -74,7 +74,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 		}
 
 		try {
-			template.parse(pattern, true);
+			template.parseString(pattern, true);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			assertEquals(expectedMessage, e.getMessage());

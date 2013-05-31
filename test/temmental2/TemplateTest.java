@@ -25,7 +25,7 @@ public class TemplateTest extends AbstractTestTemplate {
 	@Before
 	public void setUp() throws FileNotFoundException, TemplateException, IOException {
 		properties = new Properties();
-		template = new Template(new TemplateMessages(Locale.ENGLISH, properties)) {
+		template = new Template("-", new TemplateMessages(Locale.ENGLISH, properties)) {
 			
 		};
 		model = new HashMap<String, Object>();
@@ -126,7 +126,7 @@ public class TemplateTest extends AbstractTestTemplate {
 		if (displayRule) {
 			displayRule(s);
 		}
-		template.parse(s, false);
+		template.parseString(s, false);
 	}
 
 	protected void assertParsingEquals(Object ... expectedStack) throws IOException {
