@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Stack {
 	
-	private List<Object> elements;
+	protected List<Object> elements;
 	
 	public Stack() {
 		elements = new ArrayList<Object>();
