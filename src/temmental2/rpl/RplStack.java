@@ -376,7 +376,36 @@ public class RplStack extends Stack {
         String text = (String) pop();
         push(text.replace(what, by));
 	}
-	public static String toTitleCase(String input) {
+	
+	public void split() {
+		if (depth()>=3 && value() instanceof Integer) {
+			Integer max = (Integer) pop();
+			_assert_string("SPLIT", 1, 2);
+			String regex = (String) pop();
+			String text = (String) pop();
+			int n=0;
+			for (String s : text.split(" ", max+1)) {
+				push(s);
+				n++;
+			}
+			push(n);
+			tolist();
+		} else if (depth() >= 1 && value() instanceof String) {
+			System.out.println("*************===");
+			String text = (String) pop();
+			int n=0;
+			for (String s : text.split("\\s+")) {
+				push(s);
+				n++;
+			}
+			push(n);
+			tolist();
+		} else {
+			System.out.println("*************!!!");
+		}
+	}
+	
+	/*public static String toTitleCase(String input) {
 	    StringBuilder titleCase = new StringBuilder();
 	    boolean nextTitleCase = true;
 
@@ -392,7 +421,7 @@ public class RplStack extends Stack {
 	    }
 
 	    return titleCase.toString();
-	}
+	}*/
 	
 	
 	

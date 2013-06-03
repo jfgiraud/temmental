@@ -39,8 +39,26 @@ public class RplStackTest {
 		
 		assertNotNull("Method '" + op + "' is not found.", found);		
 		
+		System.out.println("Method '" + op + "' is found " + found.getParameterTypes().length);
+		
 		try {
-			Object r = found.invoke(i, args);
+			Object r;
+			if (found.getParameterTypes().length>0) {
+				List aargs = new ArrayList<>(); 
+				for (int idx=0; idx<args.length; idx++) {
+					if (idx < found.getParameterTypes().length)
+						aargs.add(args[idx]);
+					else
+						i.push(args[idx]);
+				}
+				args = aargs.toArray();
+				r = found.invoke(i, args);
+			} else {
+				for (Object o : args) {
+					i.push(o);
+				}
+				r = found.invoke(i);
+			}
 			assertEquals(egv, i.getGlobalVariables());
 			assertEquals(elv, i.getLocalVariables());
 			assertEquals(e.getElements(), i.getElements());
@@ -138,9 +156,12 @@ public class RplStackTest {
 	    
 	    assertStackOp(list("nam olleh"), null, list("hello man"), "reverse");
 	    assertStackOp(list("L*REM IPSUM"), null, list("LOREM IPSUM", "O", "*"), "replace");
+	    assertStackOp(list("L*OREM IPSUM"), null, list("LOREM IPSUM", "O", "*O"), "replace");
+	    
 	    
 	    assertStackOp(list(list("lorem", "ipsum", "dolores", "est")), null, list("lorem ipsum dolores est"), "split");
 	    assertStackOp(list(list("lorem", "ipsum dolores est")), null, list("lorem ipsum dolores est"), "split", " ", 1);
+	    assertStackOp(list(list("lorem ipsum dolores est")), null, list("lorem ipsum dolores est"), "split", " ", 0);
 	    assertStackOp(list(list("lorem", "ipsum dolores est")), null, list("lorem ipsum dolores est", " ", 1), "split");
 
 	    assertStackOp(list(list("lorem", "ipsum", "dolores", "est")), null, list("lorem ipsum dolores est"), "rsplit");
