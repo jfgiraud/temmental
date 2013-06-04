@@ -208,6 +208,19 @@ public class Stack {
 		tolist((Integer) pop());
 	}
 	
+	public void revlist() {
+		if (empty()) {
+			throw new StackException("REVLIST: Too few arguments.");
+		}
+		Object o = pop();
+		if (! (o instanceof List)) {
+			throw new StackException("REVLIST: Bad argument type.");
+		}
+		List l = new ArrayList((List) o);
+		Collections.reverse(l);
+		push(l);
+	}
+	
 	public void get(int i) {
 		if (depth()<0) {
 			throw new StackException("GET: Too few arguments.");

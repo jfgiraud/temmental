@@ -381,27 +381,55 @@ public class RplStack extends Stack {
 		if (depth()>=3 && value() instanceof Integer) {
 			Integer max = (Integer) pop();
 			_assert_string("SPLIT", 1, 2);
-			String regex = (String) pop();
+			String sep = (String) pop();
 			String text = (String) pop();
 			int n=0;
-			for (String s : text.split(" ", max+1)) {
+			for (String s : StringUtils.split(text, sep, max)) {
 				push(s);
 				n++;
 			}
 			push(n);
 			tolist();
 		} else if (depth() >= 1 && value() instanceof String) {
-			System.out.println("*************===");
 			String text = (String) pop();
 			int n=0;
-			for (String s : text.split("\\s+")) {
+			for (String s : StringUtils.split(text, null, -1)) {
 				push(s);
 				n++;
 			}
 			push(n);
 			tolist();
 		} else {
-			System.out.println("*************!!!");
+			throw new StackException("SPLIT Error: Bad Argument Type");
+		}
+	}
+	
+	public void rsplit() {
+		if (depth()>=3 && value() instanceof Integer) {
+			Integer max = (Integer) pop();
+			_assert_string("RSPLIT", 1, 2);
+			String sep = (String) pop();
+			String text = (String) pop();
+			int n=0;
+			for (String s : StringUtils.split(StringUtils.reverse(text), sep, max)) {
+				push(StringUtils.reverse(s));
+				n++;
+			}
+			push(n);
+			tolist();
+			revlist();
+		} else if (depth() >= 1 && value() instanceof String) {
+			String text = (String) pop();
+			int n=0;
+			for (String s : StringUtils.split(StringUtils.reverse(text), null, -1)) {
+				push(StringUtils.reverse(s));
+				n++;
+			}
+			push(n);
+			tolist();
+			revlist();
+		} else {
+			throw new StackException("RSPLIT Error: Bad Argument Type");
 		}
 	}
 	
