@@ -11,23 +11,30 @@ public class Variable {
 		this.name = name;
 	}
 	
+	String getName() {
+		return name;
+	}
+	
 	public boolean equals(Object other) {
 		return (other instanceof Variable) && ((Variable) other).name.equals(name);
 	}
 	
+	@Override
+	public String toString() {
+		return "V<" + name + ">";
+	}
+	
 	public void apply(RplStack stack) {
-//		List lv = stack.getLocalVariables();
-//        if (lv.size() > 0 && ((Map) (lv.get(lv.size()-1))).containsKey(name)) {
-//        	stack.push(stack.l_variables[-1][self])
-//        }
+		List lv = stack.getLocalVariables();
+        if (lv.size() > 0 && ((Map) (lv.get(lv.size()-1))).containsKey(name)) {
+        	stack.push( ((Map) (lv.get(lv.size()-1))).get(name) );
+        } else if (stack.getGlobalVariables().containsKey(name)) {
+        	stack.push( stack.getGlobalVariables().get(name) );
+        } else {
+        	stack.push( this );
+        }
 
-		throw new RuntimeException("-----"+name);
-		//        		
-//            stack.push(stack.l_variables[-1][self])
-//        elif stack.g_variables.has_key(self):
-//            stack.push(stack.g_variables[self])
-//        else: 
-//            stack.push(self)		
+//		stack.push( 33 );
 	}
 
 }

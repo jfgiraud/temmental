@@ -66,19 +66,13 @@ abstract class ExprVal {
         Iterator<String> it = filterNames.iterator();
         if (it.hasNext()) {
             String first = it.next();
-            //System.out.println(first);
             ObjectFilter firstFilter = template.filters.get(first);
             s = applyFilter(firstFilter, s, first);
-
             while (it.hasNext()) {
                 String second = it.next();
-
-                //System.out.println(second);
                 // traitement
                 ObjectFilter secondFilter = template.filters.get(second);
-
                 s = applyFilter(secondFilter, s, second);
-
                 first = second;
                 firstFilter = secondFilter;
             };
@@ -117,10 +111,8 @@ abstract class ExprVal {
                 for (int i = 0; i < objs.length; i++) {
                     Object val = objs[i];
                     if (convertToString) {
-                        //System.out.println("hello");
                         Array.set(o, i, val.toString());
                     } else {
-                        //System.out.println("bye");
                         Array.set(o, i, val);
                     }
                 }
@@ -159,50 +151,32 @@ abstract class ExprVal {
         if (it.hasNext()) {
             String first = it.next();
             ObjectFilter firstFilter = template.filters.get(first);
-
             Method firstMethod = getApply(firstFilter);
             Class firstOut = firstMethod.getReturnType();
             Class firstIn = firstMethod.getParameterTypes()[0]; 
-
             if (multiple ^ firstIn.isArray()) {
                 String expect = firstIn.getCanonicalName();
                 String but = multiple ? "array" : "object";
                 throw new TemplateException("Invalid filter chain at position '%s'. Unable to render '%s'. Filter '%s' expects '%s' but will receive an %s.", positionInformation, allMatchStr, first, expect, but);
             }
-
-
             while (it.hasNext()) {
                 String second = it.next();
-
                 // traitement
                 ObjectFilter secondFilter = template.filters.get(second);
-
                 Class nextIn = getApply(secondFilter).getParameterTypes()[0];
-                
-                //System.out.println("" + firstOut + " -> " + nextIn);
-                
                 boolean firstOutArray = firstOut.isArray();
                 boolean nextInArray = nextIn.isArray();
-
-                //System.out.println("" + firstOutArray + " -> " + nextInArray);
-                //System.out.flush();
                 boolean ok = ! (firstOutArray ^ nextInArray) && ((Class<?>)nextIn).isAssignableFrom(((Class<?>)firstOut));
-
                 if (! ok && nextIn != String.class) {
                     String outClass = ((Class<?>)firstOut).getCanonicalName();
                     String inClass = ((Class<?>)nextIn).getCanonicalName();
                     throw new TemplateException("Invalid filter chain at position '%s'. Unable to render '%s'. Filter '%s' produces '%s'. Filter '%s' expects '%s'.", positionInformation, allMatchStr, first, outClass, second, inClass);
                 }
-
                 firstFilter = secondFilter;
                 first = second;
-                
-                /*firstOut = nextIn;
-                firstOutArray = nextInArray;*/
                 firstMethod = getApply(firstFilter);
                 firstOut = firstMethod.getReturnType();
                 firstOutArray = firstOut.isArray();
-                
             };
         }
     }

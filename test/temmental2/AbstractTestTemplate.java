@@ -63,7 +63,6 @@ public abstract class AbstractTestTemplate {
 	}
 
 	protected void displayRule(String s) {
-		System.out.println(s.replace('\n', '#'));
 		StringWriter swu = new StringWriter();
 		StringWriter swd = new StringWriter();
 		StringWriter swl = new StringWriter();
@@ -89,9 +88,6 @@ public abstract class AbstractTestTemplate {
 				swl.append(' ');
 			}
 		}
-		System.out.println(swu.toString());
-		System.out.println(swd.toString());
-		System.out.println(swl.toString());
 	}
 
 }

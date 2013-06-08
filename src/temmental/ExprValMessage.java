@@ -61,7 +61,6 @@ class ExprValMessage extends ExprVal {
 
     protected boolean computeEachParamWithTheirFilters(List<Object> parameters, Map<String, ? extends Object> model) throws TemplateException, IOException {
         for (ExprVal param : this.parameters) {
-//        	System.out.println(param.getTagOrKey() + " => " + param.isArobase());
         	if (! param.isArobase()) {
         		Object o = param.render(null, model);
         		if (o == null)

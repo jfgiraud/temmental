@@ -41,6 +41,26 @@ public class RplStack extends Stack {
 		return l_variables;
 	}
 	
+	protected void _set_local_vars(List variables, String caller) {
+		_assert_enough_elements(caller, variables.size());
+		Map v;
+		if (l_variables.size() == 0) {
+			v = new HashMap<>();
+		} else {
+			v = (Map) ((HashMap) l_variables.get(l_variables.size()-1)).clone();
+		}
+		for (Object e : variables) {
+			Variable ve = (Variable) e;
+			v.put(ve.getName(), pop());
+		}
+	    l_variables.add(v);
+	}
+	
+	protected void _restore_vars() {
+		l_variables.remove(l_variables.size()-1);
+	}
+
+	
 	private List list(Object ... objects) {
 		return Arrays.asList(objects);
 	}
@@ -165,7 +185,6 @@ public class RplStack extends Stack {
 	public void not() {
 		_assert_boolean("NOT", 1);
 		Boolean a = (Boolean) pop();
-		System.out.println("=+>" + a);
 		push_bool(! a);
 	}
 	

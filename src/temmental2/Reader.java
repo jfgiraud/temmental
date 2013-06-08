@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import temmental2.rpl.CaseCmd;
+import temmental2.rpl.ForCmd;
 import temmental2.rpl.Function;
 import temmental2.rpl.IfCmd;
+import temmental2.rpl.LocalProgCmd;
 import temmental2.rpl.Prog;
 import temmental2.rpl.RplStack;
 import temmental2.rpl.StartCmd;
@@ -38,19 +40,6 @@ public class Reader {
 			 if (until != null && until.contains(token)) {
 				 return token;
 			 }
-			 /*
-			  * ifCmd = IfCmd()
-                ifCmd.read_until(tokens, 'then')
-                ifCmd.tocond()
-                tok = ifCmd.read_until(tokens, ['else', 'end'])
-                if tok == 'else':
-                    ifCmd.totrue()
-                    ifCmd.read_until(tokens, 'end')
-                    ifCmd.tofalse()
-                else:
-                    ifCmd.totrue()
-                self.s.append(ifCmd)
-			 */
 			 if (token.equals("if")) {
 				IfCmd ifCmd = new IfCmd();
 				ifCmd.read_until(tokens, Arrays.asList("then"));
@@ -91,10 +80,45 @@ public class Reader {
 					 startCmd.tostep();
 				 }
 				 operations.add(startCmd);
+			 } else if (token.equals("for")) {
+				 ForCmd forCmd = new ForCmd();
+				 String tok = forCmd.read_until(tokens, Arrays.asList("next", "step"));
+				 if (tok.equals("next")) {
+					 forCmd.tonext();
+				 } else {
+					 forCmd.tostep();
+				 }
+				 operations.add(forCmd);
+			 } /*else if (token.equals("while")) {
+				 WhileCmd whileCmd = new WhileCmd();
+				 whileCmd.read_until(tokens, Arrays.asList("repeat"));
+				 whileCmd.tocond();
+				 whileCmd..read_until(tokens, Arrays.asList("ent"));
+				 whileCmd.toloopst();
+				 operations.add(whileCmd);
+			 } else if (token.equals("do")) {
+				 DoCmd doCmd = new DoCmd();
+				 doCmd.read_until(tokens, Arrays.asList("until"));
+				 doCmd.toloopst();
+				 doCmd.read_until(tokens, Arrays.asList("end"));
+				 doCmd.tocond();
+				 operations.add(doCmd);
+			 } */else if (token.equals("->")) {
+				 LocalProgCmd localProg = new LocalProgCmd();
+				 localProg.read_until(tokens, Arrays.asList("{"));
+				 localProg.tovars();
+				 localProg.read_until(tokens, Arrays.asList("}"));
+				 localProg.toprog();
+				 localProg.read_until(tokens, Arrays.asList("}"));
+				 localProg.toafter();
+				 tokens.add(0, "}");
+				 operations.add(localProg);
 			 } else if (token.equals("{")) {
 				 Prog pCmd = new Prog();
 				 pCmd.read_until(tokens, Arrays.asList("}"));
 				 operations.add(pCmd);
+			 } else if (Arrays.asList("then", "else", "end", "}").contains(token)) {
+				 throw new StackException(String.format("Unable to reach token '%s'.", StringUtils.join("' or '", until)));
 			 } else {
 				 if (token.matches("^(true|false)$")) {
 					 operations.add(new Boolean(token));

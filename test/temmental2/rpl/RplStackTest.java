@@ -36,11 +36,7 @@ public class RplStackTest {
 				break;
 			}
 		}
-		
 		assertNotNull("Method '" + op + "' is not found.", found);		
-		
-		System.out.println("Method '" + op + "' is found " + found.getParameterTypes().length);
-		
 		try {
 			Object r;
 			if (found.getParameterTypes().length>0) {

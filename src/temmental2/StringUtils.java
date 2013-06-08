@@ -161,7 +161,6 @@ public class StringUtils {
 			if (sb.toString().length() >= 1) {
 				v.add(sb.toString());
 			}
-			System.out.println(v);
 			return v.toArray(new String[]{});
 		}
 		// abcdefghdedeuuis

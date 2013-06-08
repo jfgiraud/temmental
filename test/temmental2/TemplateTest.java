@@ -140,7 +140,6 @@ public class TemplateTest extends AbstractTestTemplate {
 	protected void assertParsingThrowsException(String expectedMessage, String pattern) {
 		try {
 			parse(pattern);
-			template.getStack().printStack(System.out);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

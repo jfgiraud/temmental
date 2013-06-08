@@ -28,13 +28,6 @@ public class Function {
 	}
 	
 	public void apply(RplStack stack) throws StackException {
-		try {
-			System.out.println("-before-----------------------"+token);
-			stack.printStack(System.out);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		for (Method m : stack.getClass().getMethods()) {
 			
 			if (m.getName().equals(token)) {
@@ -49,13 +42,6 @@ public class Function {
 					throw new StackException(e.getMessage());
 				}
 			}
-		}
-		try {
-			System.out.println("-after-----------------------"+token);
-			stack.printStack(System.out);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 	}
 }

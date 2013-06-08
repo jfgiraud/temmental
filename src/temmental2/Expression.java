@@ -60,13 +60,6 @@ class Expression {
 								other.getBracket(), other.getPosition());
 					}
 					out.remove(out.depth());
-					System.out.println(commas);
-					try {
-						out.printStack(System.out);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 					if (commas != out.depth() -1) {
 						if (b.getBracket() == '>') {
 							throw new TemplateException("Empty init list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
@@ -86,8 +79,6 @@ class Expression {
 						out.push(new Functionp(func, initParameters));
 						commas = (Integer) oldCommas.pop();
 					} else if (b.getBracket() == ']') { 
-						System.out.println(">"+commas);
-						System.out.println(">"+out.depth());
 						if ((out.depth() != 0) && (commas != out.depth() - 1)) {
 							throw new TemplateException("Too much commas!"); //TODO
 						}

@@ -48,6 +48,9 @@ public class RplTest {
 		if (err != null) {
 			assertEquals(err, oo);
 		} else {
+			if (oo != null) {
+				fail(oo.getMessage());
+			}
 			assertEquals(e.getElements(), i.getElements());
 			assertEquals(egv, i.getGlobalVariables());
 			assertEquals(elv, i.getLocalVariables());
@@ -183,6 +186,22 @@ public class RplTest {
 		 // start/step
 		 assertStackOp(list("hello", "hello", "hello"), list(), "{ 1 5 start \"hello\" 2 step } eval");
 		 assertStackOp(list(7), list(), "{ 1 1 5 start 2 + 2 step } eval");
+
+		 // local prog
+		 assertStackOp(list(5), list(8), "{ -> d { 3 2 + } } eval");
+		 assertStackOp(list(16), list(8), "{ -> d { d 2 * } } eval");
+		 assertStackOp(list(16, 3), list(8), "{ -> d { d 2 * } 2 1 + } eval");
+		 assertStackOp(list(13), list(2, 3), "{ -> a b { a 2 * b 3 * + } } eval");
+		 assertStackOp(list(48), list(8), "{ -> d { d 2 * { -> d { d 3 * } } eval } } eval");
+//	        assertStackOp(([16,67],{Variable('a'): 66},[]), ([8],{Variable('a'): 66},[]), '{ -> d { d 2 * } a 1 + } eval')
+//	        assertStackOp(([16,68],{Variable('d'): 66},[]), ([8],{Variable('d'): 66},[]), '{ -> d { d 2 * } 2 d + } eval')
+
+		 // for/step
+		 assertStackOp(list(1, 3, 5), list(), "1 5 for a a 2 step");
+
+		 // for/next
+		 assertStackOp(list(45), list(), "0 1 5 for a a { -> b { b 2 * } } eval a + + next");
+		 assertStackOp(list(45), list(), "0 1 5 for a a dup { -> b { b 2 * + } } eval + next");
 
 	}
 	
