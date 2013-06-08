@@ -100,7 +100,7 @@ public class RplStack extends Stack {
 		if (a instanceof Comparable && b instanceof Comparable) {
 			push_bool( ((Comparable) a).compareTo((Comparable) b) > 0);
 		} else {
-			throw new AssertionError("< Error : Bad Argument Types");
+			throw new AssertionError("< Error: Bad Argument Types");
 		}
 	}
 	
@@ -111,7 +111,7 @@ public class RplStack extends Stack {
 		if (a instanceof Comparable && b instanceof Comparable) {
 			push_bool( ((Comparable) a).compareTo((Comparable) b) < 0);
 		} else {
-			throw new AssertionError("> Error : Bad Argument Types");
+			throw new AssertionError("> Error: Bad Argument Types");
 		}
 	}
 
@@ -122,7 +122,7 @@ public class RplStack extends Stack {
 		if (a instanceof Comparable && b instanceof Comparable) {
 			push_bool( ((Comparable) a).compareTo((Comparable) b) >= 0);
 		} else {
-			throw new AssertionError("<= Error : Bad Argument Types");
+			throw new AssertionError("<= Error: Bad Argument Types");
 		}
 	}
 
@@ -133,7 +133,7 @@ public class RplStack extends Stack {
 		if (a instanceof Comparable && b instanceof Comparable) {
 			push_bool( ((Comparable) a).compareTo((Comparable) b) <= 0);
 		} else {
-			throw new AssertionError(">= Error : Bad Argument Types");
+			throw new AssertionError(">= Error: Bad Argument Types");
 		}
 	}
 	
@@ -208,21 +208,21 @@ public class RplStack extends Stack {
 		// TODO Auto-generated method stub
 	}
 	
-	private void _assert_enough_elements(String caller, int n) {
+	void _assert_enough_elements(String caller, int n) {
 		assertTrue(String.format("%s Error: Too Few Arguments", caller), depth() >= n);
 	}
 	
-	private void _assert_number(String caller, int ... levels) {
+	void _assert_number(String caller, int ... levels) {
 		assertTrue(String.format("%s Error: Too Few Arguments", caller), levels.length >= 1);
 		for (int level : levels) {
-			assertTrue(String.format("%s Error : Bad Argument Type", caller), value(level) instanceof Number);
+			assertTrue(String.format("%s Error: Bad Argument Type", caller), value(level) instanceof Number);
 		}
 	}
 	
 	private void _assert_string(String caller, int ... levels) {
 		assertTrue(String.format("%s Error: Too Few Arguments", caller), levels.length >= 1);
 		for (int level : levels) {
-			assertTrue(String.format("%s Error : Bad Argument Type", caller), value(level) instanceof String);
+			assertTrue(String.format("%s Error: Bad Argument Type", caller), value(level) instanceof String);
 		}
 	}
 	
@@ -292,6 +292,7 @@ public class RplStack extends Stack {
 				else
 	                push_operations(stack, ((Prog) e).getOperations(), false, true);
 			} else if (e instanceof Command) {
+				((Command) e).apply(stack);
 			} else if (e instanceof Function) {
 				if (! executeFunction) {
 					stack.push(e);

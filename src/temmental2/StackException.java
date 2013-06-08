@@ -6,4 +6,11 @@ public class StackException extends RuntimeException {
 		super(message);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (! (obj instanceof StackException)) 
+			return false;
+		return getMessage().equals( ((StackException) obj).getMessage() );
+	}
+	
 }

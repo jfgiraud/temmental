@@ -1,5 +1,9 @@
 package temmental2.rpl;
 
-public class Command {
+import temmental2.StackException;
 
+public interface Command {
+
+	public abstract void apply(RplStack stack) throws StackException;
+	
 }
