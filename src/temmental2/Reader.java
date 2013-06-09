@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import temmental2.rpl.CaseCmd;
+import temmental2.rpl.DoCmd;
 import temmental2.rpl.ForCmd;
 import temmental2.rpl.Function;
 import temmental2.rpl.IfCmd;
@@ -17,15 +18,17 @@ import temmental2.rpl.Prog;
 import temmental2.rpl.RplStack;
 import temmental2.rpl.StartCmd;
 import temmental2.rpl.Variable;
+import temmental2.rpl.WhileCmd;
 
 public class Reader {
-	protected List operations = new ArrayList<>();
 	
-	protected Reader(List operations) {
-		this.operations = new ArrayList<>(operations);
+	protected List<Object> operations = new ArrayList<Object>();
+	
+	protected Reader(List<Object> operations) {
+		this.operations = new ArrayList<Object>(operations);
 	}
 	
-	public List getOperations() {
+	public List<Object> getOperations() {
 		return operations;
 	}
 	
@@ -89,11 +92,11 @@ public class Reader {
 					 forCmd.tostep();
 				 }
 				 operations.add(forCmd);
-			 } /*else if (token.equals("while")) {
+			 } else if (token.equals("while")) {
 				 WhileCmd whileCmd = new WhileCmd();
 				 whileCmd.read_until(tokens, Arrays.asList("repeat"));
 				 whileCmd.tocond();
-				 whileCmd..read_until(tokens, Arrays.asList("ent"));
+				 whileCmd.read_until(tokens, Arrays.asList("end"));
 				 whileCmd.toloopst();
 				 operations.add(whileCmd);
 			 } else if (token.equals("do")) {
@@ -103,7 +106,7 @@ public class Reader {
 				 doCmd.read_until(tokens, Arrays.asList("end"));
 				 doCmd.tocond();
 				 operations.add(doCmd);
-			 } */else if (token.equals("->")) {
+			 } else if (token.equals("->")) {
 				 LocalProgCmd localProg = new LocalProgCmd();
 				 localProg.read_until(tokens, Arrays.asList("{"));
 				 localProg.tovars();

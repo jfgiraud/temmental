@@ -203,6 +203,12 @@ public class RplTest {
 		 assertStackOp(list(45), list(), "0 1 5 for a a { -> b { b 2 * } } eval a + + next");
 		 assertStackOp(list(45), list(), "0 1 5 for a a dup { -> b { b 2 * + } } eval + next");
 
+		 // while
+		 assertStackOp(list(5, 4, 3, 2, 1, 0), list(), "5 while dup 0 > repeat dup 1 - end");
+
+		 // do
+		 assertStackOp(list(15, 16, 17, 18), list(), "5 do dup 10 + swap 1 + until dup 8 <= end drop");
+
 	}
 	
 	protected List list(Object ... objects) {
