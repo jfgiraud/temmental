@@ -9,8 +9,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import sun.rmi.runtime.NewThreadAction;
-
 public class FunctionXTest extends AbstractTestElement {
 	
 	private Template template;

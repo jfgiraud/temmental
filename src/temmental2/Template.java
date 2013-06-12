@@ -174,13 +174,13 @@ public class Template {
 		StringWriter buffer = new StringWriter();
 		boolean betweenTildes = false;
 		try {
-			int currentChar = sr.read();
+			int currentChar = sr.read();                        // je lis le caractère
 			int previousChar = 0;
-			while (currentChar != -1) {
+			while (currentChar != -1) {                         // je continue tant qu'il y a un caractère
 				cursor.next(currentChar);
-				if (currentChar == '~') {
-					previousChar = currentChar;
-					currentChar = sr.read();
+				if (currentChar == '~') {                       // si le caractère est ~ 
+					previousChar = currentChar;  
+					currentChar = sr.read();                    // je lis le suivant
 					cursor.next(currentChar);
 					if (currentChar == -1) {
 						if (! betweenTildes) {
@@ -196,10 +196,15 @@ public class Template {
 							betweenTildes = false;
 						}
 					} else if (currentChar == '~') {
-						betweenTildes = false;
-						// ~~ escape
-						cursor.move1l();
-						buffer.write('~'); 
+						if (betweenTildes) {
+//							betweenTildes = false;
+							// ~~ escape
+							cursor.move1l();
+							buffer.write('~');
+						} else {
+							cursor.move1l();
+							buffer.write('~');
+						}
 					} else {
 						String expr = buffer.toString();
 						if (! expr.startsWith("~")) {

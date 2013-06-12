@@ -117,6 +117,31 @@ public class TemplateTest extends AbstractTestTemplate {
 	}
 	
 	@Test
+	public void testForLoop() throws IOException, TemplateException {
+		parse("~#for $models~a~$v~a~#/for~");
+		//     123456789012345678901234567890
+		assertParsingEquals(
+				toparse("~#for $models~", p(1, 1)),
+				text("a", p(1, 15)),
+				toparse("~$v~", p(1, 16)),
+				text("a", p(1, 20)),
+				toparse("~#/for~", p(1, 21))
+				);
+	}
+	
+	@Test
+	public void testForLoop2() throws IOException, TemplateException {
+		parse("~#for $models~~$v~~#/for~");
+		//     123456789012345678901234567890
+		assertParsingEquals(
+				toparse("~#for $models~", p(1, 1))
+//				,
+//				toparse("~$v~", p(1, 15)),
+//				toparse("~#/for~", p(1, 19))
+				);
+	}
+	
+	@Test
 	public void testSimpleExpression() throws IOException, TemplateException {
 		parse("~$anAloneVariable~");
 		assertParsingEquals(toparse("~$anAloneVariable~", p(1, 1)));

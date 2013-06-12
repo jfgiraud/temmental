@@ -34,6 +34,10 @@ public abstract class AbstractTestTemplate {
 		return new Identifier(name, new Cursor(position));
 	}
 	
+	protected Keyword keyword(String name, String position) throws TemplateException {
+		return new Keyword(name, new Cursor(position));
+	}
+	
 	protected Function function(Identifier name, Object input) {
 		return new Function(name, input);
 	}
