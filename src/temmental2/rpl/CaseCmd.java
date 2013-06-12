@@ -47,9 +47,9 @@ public class CaseCmd extends Reader implements Command {
 		acase.conditions = condition;
 		acase.iftrue = iftrue;
 		cases.add( acase );
-		condition = new ArrayList<>();
-		iftrue = new ArrayList<>();
-		operations = new ArrayList<>();
+		condition = new ArrayList<Object>();
+		iftrue = new ArrayList<Object>();
+		operations = new ArrayList<Object>();
 	}
 	
 	
