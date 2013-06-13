@@ -65,6 +65,10 @@ public abstract class AbstractTestTemplate {
 	protected Text text(String name, String position) {
 		return new Text(name, new Cursor(position));
 	}
+	
+	protected Char character(char c, String position) {
+		return new Char(c, new Cursor(position));
+	}
 
 	protected void displayRule(String s) {
 		StringWriter swu = new StringWriter();

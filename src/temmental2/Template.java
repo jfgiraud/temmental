@@ -196,14 +196,14 @@ public class Template {
 							betweenTildes = false;
 						}
 					} else if (currentChar == '~') {
-						if (betweenTildes) {
-//							betweenTildes = false;
+						if (! betweenTildes) {
 							// ~~ escape
 							cursor.move1l();
 							buffer.write('~');
 						} else {
 							cursor.move1l();
 							buffer.write('~');
+//							buffer.write('X');
 						}
 					} else {
 						String expr = buffer.toString();

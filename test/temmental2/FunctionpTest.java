@@ -185,4 +185,18 @@ public class FunctionpTest extends AbstractTestElement {
 		}
 		
 	}
+	
+	@Test
+	public void testFunctionIsDigit() throws TemplateException, NoSuchMethodException, SecurityException {
+		Functionp f = functionp(identifier("'indexOf", "-:l1:c2"), list('m'), identifier("$text", "-:l1:c2"));
+		
+		Method indexOf = String.class.getDeclaredMethod("indexOf", int.class);
+		
+		populateTransform("indexOf", indexOf);
+		
+		populateModel("text", "Something...");
+		
+		assertEquals(2, f.writeObject(transforms, model, null));
+	}
+	
 }

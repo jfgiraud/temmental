@@ -109,6 +109,25 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 	}
 	
 	@Test
+	public void testFilterWithInitChar() throws IOException, TemplateException {
+		parseExpression("~$variable:'indexOf<'a'>~");
+		//               1234567890123456789012345               
+		assertTokensEquals(identifier("$variable", p(1, 2)),
+				toapply(p(1, 11)),
+				identifier("'indexOf", p(1, 12)),
+				bracket('<', p(1, 20)),
+				character('a', p(1, 21)),
+				bracket('>', p(1, 24))
+				);
+		
+		assertElementEquals(
+				functionp(identifier("'indexOf", p(1, 12)),
+						  list(character('a', p(1, 21))),
+						  identifier("$variable", p(1, 2))));
+		
+	}
+	
+	@Test
 	public void testMessageWithoutParameter() throws IOException, TemplateException {
 		parseExpression("~$message[]~");
 

@@ -43,7 +43,7 @@ class Expression {
 		Stack out = new Stack();
 		while (tokens.depth()>=1) {
 			Object token = tokens.pop();
-			if (token instanceof Text || token instanceof Number || token instanceof Identifier) {
+			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Identifier) {
 				out.push(token);
 			} else if (token instanceof Bracket) {
 				Bracket b = (Bracket) token;
@@ -230,6 +230,16 @@ class Expression {
 			String t = expr.substring(1); //c.move1r();
 			t = t.substring(0, t.length()-1);
 			return new Text(t, c);
+		} else if (expr.startsWith("'") && expr.endsWith("'")) {
+			Cursor c = cursor.clone().movel(expr, 0);
+			String t = expr.substring(1); //c.move1r();
+			t = t.substring(0, t.length()-1);
+			if (t.length() == 0) {
+				throw new TemplateException("Empty char at position '%s').", cursor.getPosition());
+			} else if (t.length() > 1) {
+				throw new TemplateException("Invalid length for char at position '%s').", cursor.getPosition());
+			} 
+			return new Char(t.charAt(0), c);
 		} else if (expr.matches("(-)?\\d+[lL]")) {
 			return Long.parseLong(expr.substring(0, expr.length()-1));
 		} else if (expr.matches("(-)?\\d+")) {
