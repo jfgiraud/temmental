@@ -117,13 +117,22 @@ class Expression {
 		return out.pop();
 	}	
 	
+	private boolean isValidIdentifierChar(int currentChar) {
+		return (currentChar >= 'a' && currentChar <= 'z') 
+				|| (currentChar >= 'A' && currentChar <= 'Z')
+				|| (currentChar >= '0' && currentChar <= '9')
+				|| (currentChar == '.')
+				|| (currentChar == '_');
+	}
+	
 	Stack parseToTokens() throws IOException, TemplateException {
 		Stack stack = new Stack(); 
 		
 		String expression = expr;
 		Cursor cursor = this.cursor.clone();
 		
-		boolean inSentence = false;
+		boolean inSentenceDQ = false;
+		boolean inSentenceSQ = false;
 		if (! expression.startsWith("~")) {
 			throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
 		}
@@ -142,7 +151,7 @@ class Expression {
 			int currentChar = sr.read();
 			while (currentChar != -1) {
 				cursor.next(currentChar);
-				if (! inSentence && currentChar == ',') {
+				if (! inSentenceDQ && ! inSentenceSQ && currentChar == ',') {
 					String expr = buffer.toString();
 					if (! expr.equals("")) {
 						stack.push(evalToken(expr, cursor.clone().move1l()));
@@ -151,7 +160,7 @@ class Expression {
 					}
 					buffer = new StringWriter();
 					stack.push(new Comma(cursor.clone().move1l()));
-				} else if (! inSentence && currentChar == ':') {
+				} else if (! inSentenceDQ && ! inSentenceSQ && currentChar == ':') {
 					String expr = buffer.toString();
 					if (! expr.equals("")) {
 						stack.push(evalToken(expr, cursor.clone().move1l()));
@@ -160,7 +169,7 @@ class Expression {
 					}
 					buffer = new StringWriter();
 					stack.push(new ToApply(cursor.clone().move1l()));
-				} else if (! inSentence && Bracket.isBracket(currentChar)) {
+				} else if (! inSentenceDQ && ! inSentenceSQ && Bracket.isBracket(currentChar)) {
 					String expr = buffer.toString();
 					if (! expr.equals("")) {
 						stack.push(evalToken(expr, cursor.clone().move1l()));
@@ -171,16 +180,23 @@ class Expression {
 
 					stack.push(new Bracket((char) currentChar, cursor.clone().move1l()));
 				} else {
-					if (! buffer.toString().endsWith("\\") && currentChar == '"') {
-						inSentence = ! inSentence;
-					} else if (buffer.toString().endsWith("\\") && currentChar == '"') {
+					if (! inSentenceSQ && ! buffer.toString().endsWith("\\") && currentChar == '"') {
+						inSentenceDQ = ! inSentenceDQ;
+					} /*else if (! inSentenceDQ && ! buffer.toString().endsWith("\\") && currentChar == '\'') {
+						inSentenceSQ = ! inSentenceSQ;
+					} */else if (! inSentenceSQ && buffer.toString().endsWith("\\") && currentChar == '"') {
 						String expr = buffer.toString();
 						buffer = new StringWriter();
 						buffer.append(expr.substring(0, expr.length()-1));
 						cursor.move1l();
-					}
+					} /*else if (! inSentenceDQ && buffer.toString().endsWith("\\") && currentChar == '\'') {
+						String expr = buffer.toString();
+						buffer = new StringWriter();
+						buffer.append(expr.substring(0, expr.length()-1));
+						cursor.move1l();
+					}*/
 					buffer.write(currentChar);
-				}
+				} 
 				currentChar = sr.read(); 
 			}
 		} finally {

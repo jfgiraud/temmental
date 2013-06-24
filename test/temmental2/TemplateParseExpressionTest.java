@@ -65,7 +65,6 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
 	}
 	
-	
 	@Test
 	public void testFilterWithNumInit() throws IOException, TemplateException {
 		parseExpression("~$variable:'substr<0,5>~");
@@ -225,6 +224,40 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
 	}
 		
+	@Test
+	public void testComplexMessage2() throws IOException, TemplateException {
+		parseExpression("~$message[$firstname:'upper,$lastname:'replace<'\"',','>]:'quote~");
+
+		assertTokensEquals(identifier("$message", p(1, 2)),
+				bracket('[', p(1, 10)),
+				identifier("$firstname", p(1, 11)),
+				toapply(p(1, 21)),
+				identifier("'upper", p(1, 22)),
+				comma(p(1, 28)),
+				identifier("$lastname", p(1, 29)),
+				toapply(p(1, 38)),
+				identifier("'replace", p(1, 39)),
+				bracket('<', p(1, 47)),
+				text("a", p(1, 48)),
+				comma(p(1, 51)),
+				text("A", p(1, 52)),
+				bracket('>', p(1, 55)),
+				bracket(']', p(1, 56)),
+				toapply(p(1, 57)),
+				identifier("'quote", p(1, 58))
+				);
+		
+		assertElementEquals(
+				function(identifier("'quote", p(1, 58)),
+						message(identifier("$message", p(1, 2)),
+								list(
+										function(identifier("'upper", p(1, 22)), identifier("$firstname", p(1, 11))),
+										functionp(identifier("'replace", p(1, 39)),
+												list(text("a", p(1, 48)), text("A", p(1, 52))),
+												identifier("$lastname", p(1, 29)))))));
+
+	}
+	
 	@Test
 	public void testArray() throws IOException, TemplateException {
 		parseExpression("~($b1,$b2):$f~");
