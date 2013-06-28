@@ -40,21 +40,21 @@ public class TemplateTest extends AbstractTestTemplate {
 	
 	@Test
 	public void testTildeCharacterMustBeEscapedForText() throws IOException, TemplateException {
-		parse("~~Lorem ipsum dolor sit~~ amet, consectetur adipiscing elit.~~");
+		parse("\\~Lorem ipsum dolor sit\\~ amet, consectetur adipiscing elit.\\~");
 //             1 23456789 123456789 12 3456789 123456789 123456789 12345678 901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901
 		assertParsingEquals(text("~Lorem ipsum dolor sit~ amet, consectetur adipiscing elit.~", p(1, 1)));
 		
-		parse("~~Lorem ipsum dolor sit amet, consectetur adipiscing elit.~~");
+		parse("\\~Lorem ipsum dolor sit amet, consectetur adipiscing elit.\\~");
 		assertParsingEquals(text("~Lorem ipsum dolor sit amet, consectetur adipiscing elit.~", p(1, 1)));
 	
-		parse("Lorem ipsum dolor sit amet, consectetur adipiscing elit.~~");
+		parse("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\\~");
 		assertParsingEquals(text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.~", p(1, 1)));
 	}
 	
 	@Test
 	public void testAnExceptionIsRaisedWhenTildeIsNotEscaped() throws IOException, TemplateException {
 		assertParsingThrowsException("End of parsing. Character '~' is not escaped at position '-:l1:c59'.", 
-				"~~Lorem ipsum dolor sit~~ amet, consectetur adipiscing elit.~");
+				"\\~Lorem ipsum dolor sit\\~ amet, consectetur adipiscing elit.~");
 	}
 
 	@Test
@@ -77,10 +77,10 @@ public class TemplateTest extends AbstractTestTemplate {
 	
 	@Test
 	public void testTildeShouldBeEscapedInStringParameters() throws IOException, TemplateException {
-		assertParsingThrowsException("Reach end of line. A character '~' is not escaped at position '-:l1:c42'.", 
+		assertParsingThrowsException("End of parsing. Character '~' is not escaped at position '-:l1:c42'.", 
 				"Some text...~$data[\"some~thing\"]~And after");
 		
-		parse("Some text...~$data[\"some~~thing\"]~And after");
+		parse("Some text...~$data[\"some\\~thing\"]~And after");
 		
 		assertParsingEquals(text("Some text...", p(1, 1)),
 				toparse("~$data[\"some~thing\"]~", p(1, 13)),
@@ -90,7 +90,7 @@ public class TemplateTest extends AbstractTestTemplate {
 	
 	@Test
 	public void testAnExceptionIsRaisedWhenAnExpressionEndsWithoutClosingTildeCharacterOnEndOfLine() throws IOException, TemplateException {
-		assertParsingThrowsException("Reach end of line. A character '~' is not escaped at position '-:l1:c45'.", 
+		assertParsingThrowsException("End of parsing. Character '~' is not escaped at position '-:l1:c45'.", 
 				"~$hello['mister[$firstname],$lastname:'upper]");
 	}	
 	
@@ -165,6 +165,8 @@ public class TemplateTest extends AbstractTestTemplate {
 	protected void assertParsingThrowsException(String expectedMessage, String pattern) {
 		try {
 			parse(pattern);
+			Stack stack = template.getStack();
+			stack.printStack(System.out);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

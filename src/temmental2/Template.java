@@ -169,7 +169,7 @@ public class Template {
 		return stack;
 	}
 
-	private static Stack parseToTextAndExpressions(Reader sr, Cursor cursor) throws IOException, TemplateException {
+	private static Stack parseToTextAndExpressions2(Reader sr, Cursor cursor) throws IOException, TemplateException {
 		Stack stack = new Stack();
 		StringWriter buffer = new StringWriter();
 		boolean betweenTildes = false;
@@ -249,6 +249,60 @@ public class Template {
 		return stack;
 	}
 
+
+	private static Stack parseToTextAndExpressions(Reader sr, Cursor cursor) throws IOException, TemplateException {
+		Stack stack = new Stack();
+		StringWriter buffer = new StringWriter();
+		boolean opened = false;
+		try {
+			int currentChar = sr.read();                       
+//			int previousChar = 0;
+			boolean escape = false;
+			while (currentChar != -1) {                        
+				cursor.next(currentChar);
+				if (currentChar == '\\') {
+					escape = true;
+					cursor.move1l();
+				} else if (escape) {
+					buffer.write(currentChar);
+					escape = false;
+				} else if (! opened && currentChar == '~') {
+					String expr = buffer.toString();
+					if (! expr.equals("")) {
+						stack.push(new Text(expr, cursor.clone().movel(expr, 0)));
+						buffer = new StringWriter();
+					}
+					buffer.write(currentChar);
+					opened = true;
+				} else if (opened && currentChar == '~') {
+					buffer.write(currentChar);
+					String expr = buffer.toString();
+					if (! expr.equals("")) {
+						stack.push(new Expression(expr, cursor.clone().movel(expr, 1)));
+						buffer = new StringWriter();
+					}
+					opened = false;
+				} else {
+					buffer.write(currentChar);
+				}
+//				previousChar = currentChar;
+				currentChar = sr.read(); 
+			}
+		} finally {
+			sr.close();
+		}
+		if (opened) {
+			throw new TemplateException("End of parsing. Character '~' is not escaped at position '%s'.", cursor.getPosition());
+		}
+		String expr = buffer.toString();
+		if (! expr.equals("")) {
+			stack.push(new Text(expr, cursor.clone().movel(expr, 1)));
+			buffer = new StringWriter();
+		}
+		return stack;
+	}
+
+	
 	static Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException {
 		
 		if (value instanceof String || value instanceof Number)
