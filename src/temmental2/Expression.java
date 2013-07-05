@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class Expression {
 
@@ -19,6 +21,7 @@ class Expression {
 	public Object parse() throws IOException, TemplateException {
 		Stack tokens = parseToTokens();
 		tokens.reverse();
+//		tokens.printStack(System.out);
 		return interpretTokens(tokens);
 	}
 	
@@ -56,7 +59,7 @@ class Expression {
 				} else {
 					Bracket other = (Bracket) out.value(out.depth());
 					if (other.getBracket() != b.neg()) {
-						throw new TemplateException("Corresponding bracket for '%c' at position '%s' is invalid (found '%c' at position '%s') .", b.getBracket(), b.getPosition(),
+						throw new TemplateException("Corresponding bracket for '%c' at position '%s' is invalid (found '%c' at position '%s').", b.getBracket(), b.getPosition(),
 								other.getBracket(), other.getPosition());
 					}
 					out.remove(out.depth());
@@ -111,8 +114,10 @@ class Expression {
 		}
 		
 		
-		if (out.depth() != 1) {
+		if (out.depth() > 1) {
 			throw new TemplateException("Too much objects in the stack!");
+		} else if (out.empty()) {
+			throw new TemplateException("Not enougth object in the stack!");
 		}
 		return out.pop();
 	}	
@@ -126,6 +131,120 @@ class Expression {
 	}
 	
 	Stack parseToTokens() throws IOException, TemplateException {
+		Stack stack = new Stack();
+		
+		String expression = expr;
+		Cursor cursor = this.cursor.clone();
+		
+		if (! expression.startsWith("~")) {
+			throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
+		}
+		if (! expression.endsWith("~")) {
+			throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, cursor.getPosition());
+		}
+		
+		expression = expression.substring(1);
+		expression = expression.substring(0, expression.length()-1);
+		cursor.move1r();
+		StringReader sr = new StringReader(expression);
+		StringWriter word = new StringWriter();
+		int level = 0;
+		boolean inDQ = false;
+		boolean inSQ = false;
+		boolean escape = false;
+		
+		List<String> tokens = new ArrayList<>();
+		
+		try {
+			int currentChar = sr.read();
+			while (currentChar != -1) {
+				cursor.next(currentChar);
+//				System.out.println(String.format("S%sD%s %c %s", inSQ, inDQ, currentChar, cursor.getPosition()));
+				
+				if (! inSQ && ! inDQ && currentChar == '\\') {
+					throw new TemplateException("Invalid escape char '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
+				} else if ((inSQ || inDQ) && currentChar == '\\') {
+					escape = true;
+					cursor.move1l();
+				} else if (escape) {
+					word.write(currentChar);
+					escape = false;
+				} else if (! inSQ && ! inDQ && currentChar == ':') {
+					String expr = word.toString();
+					if (! expr.equals("")) {
+						stack.push(evalToken(expr, cursor.clone().move1l()));
+					} else {
+						behaviourOnEmptyToken(currentChar, stack, cursor);
+					}
+					word = new StringWriter();
+					stack.push(new ToApply(cursor.clone().move1l()));
+				} else if (! inSQ && ! inDQ && Bracket.isBracket(currentChar)) {
+					String expr = word.toString();
+					if (! expr.equals("")) {
+						stack.push(evalToken(expr, cursor.clone().move1l()));
+					} else {
+						behaviourOnEmptyToken(currentChar, stack, cursor);
+					}
+					word = new StringWriter();
+					stack.push(new Bracket((char) currentChar, cursor.clone().move1l()));
+				} else if (! inSQ && ! inDQ && currentChar == ',') {
+					String expr = word.toString();
+					if (! expr.equals("")) {
+						stack.push(evalToken(expr, cursor.clone().move1l()));
+					} else {
+						behaviourOnEmptyToken(currentChar, stack, cursor);
+					}
+					word = new StringWriter();
+					stack.push(new Comma(cursor.clone().move1l()));
+				} else if (! inSQ && ! inDQ && currentChar == '"') { 
+					inDQ = true;
+					word.write(currentChar);
+				} else if (! inSQ && ! inDQ && currentChar == '\'') { 
+					inSQ = true;
+					word.write(currentChar);
+				} else if (inSQ && currentChar == '\'') {
+					inSQ = false;
+					word.write(currentChar);
+//					String expr = word.toString();
+//					if (! expr.equals("")) {
+//						stack.push(evalToken(expr, cursor.clone()));
+//					} else {
+//						behaviourOnEmptyToken(0, stack, cursor);
+//					}
+//					word = new StringWriter();
+				} else if (inDQ && currentChar == '"') {
+					inDQ = false;
+					word.write(currentChar);
+//					if (! expr.equals("")) {
+//						stack.push(evalToken(expr, cursor.clone()));
+//					} else {
+//						behaviourOnEmptyToken(0, stack, cursor);
+//					}
+//					word = new StringWriter();
+				} else if (inDQ || inSQ) {
+					word.write(currentChar);
+				} else {
+					word.write(currentChar);
+				}
+				if (inSQ && word.toString().length()==3) {
+					inSQ = false;
+				}
+				currentChar = sr.read();
+			}
+		} finally {
+			sr.close();
+		}
+		String expr = word.toString();
+		if (! expr.equals("")) {
+			stack.push(evalToken(expr, cursor.clone()));
+		} else {
+			behaviourOnEmptyToken(0, stack, cursor);
+		}
+		
+		return stack;
+	}
+	
+	Stack parseToTokens2() throws IOException, TemplateException {
 		Stack stack = new Stack(); 
 		
 		String expression = expr;
@@ -238,6 +357,7 @@ class Expression {
 	}
 
 	private static Object evalToken(String expr, Cursor cursor) throws TemplateException {
+//		System.out.println(String.format("token %s", expr));
 		if (expr.startsWith("\"")) {
 			if (! expr.endsWith("\"")) {
 				throw new TemplateException("Sentence not closed at position '%s').", cursor.getPosition());

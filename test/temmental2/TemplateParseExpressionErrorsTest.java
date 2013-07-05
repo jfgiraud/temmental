@@ -63,10 +63,23 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 	}
 	
 	@Test
+	public void testErrorInvalidBracket() throws IOException, TemplateException {
+		assertParseThrowsException("Corresponding bracket for ')' at position '-:l1:c23' is invalid (found '<' at position '-:l1:c18').", 
+				"~$msg[]:$function<$arg)~");
+	}
+	
+	@Test
 	public void testErrorXXX() throws IOException, TemplateException {
 		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.", 
 				"~{$variable}:$function~");
 	}
+	
+	@Test
+	public void testComplexMessage2() throws IOException, TemplateException {
+		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.",
+				"~$message[$firstname:'upper,$lastname:'replace<'ab',','>]:'quote~");
+	}
+	
 	
 	protected void assertParseThrowsException(String expectedMessage, String pattern) {
 		if (displayRule ) {

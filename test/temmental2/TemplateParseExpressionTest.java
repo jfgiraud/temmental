@@ -238,9 +238,9 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 				toapply(p(1, 38)),
 				identifier("'replace", p(1, 39)),
 				bracket('<', p(1, 47)),
-				text("a", p(1, 48)),
+				character('"', p(1, 48)),
 				comma(p(1, 51)),
-				text("A", p(1, 52)),
+				character(',', p(1, 52)),
 				bracket('>', p(1, 55)),
 				bracket(']', p(1, 56)),
 				toapply(p(1, 57)),
@@ -253,7 +253,7 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 								list(
 										function(identifier("'upper", p(1, 22)), identifier("$firstname", p(1, 11))),
 										functionp(identifier("'replace", p(1, 39)),
-												list(text("a", p(1, 48)), text("A", p(1, 52))),
+												list(character('"', p(1, 48)), character(',', p(1, 52))),
 												identifier("$lastname", p(1, 29)))))));
 
 	}
