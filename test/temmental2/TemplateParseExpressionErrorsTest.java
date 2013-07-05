@@ -76,7 +76,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 	
 	@Test
 	public void testComplexMessage2() throws IOException, TemplateException {
-		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.",
+		assertParseThrowsException("Invalid length for char at position '-:l1:c54').",
 				"~$message[$firstname:'upper,$lastname:'replace<'ab',','>]:'quote~");
 	}
 	

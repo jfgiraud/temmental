@@ -134,10 +134,9 @@ public class TemplateTest extends AbstractTestTemplate {
 		parse("~#for $models~~$v~~#/for~");
 		//     123456789012345678901234567890
 		assertParsingEquals(
-				toparse("~#for $models~", p(1, 1))
-//				,
-//				toparse("~$v~", p(1, 15)),
-//				toparse("~#/for~", p(1, 19))
+				toparse("~#for $models~", p(1, 1)),
+				toparse("~$v~", p(1, 15)),
+				toparse("~#/for~", p(1, 19))
 				);
 	}
 	
