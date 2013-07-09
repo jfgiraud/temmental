@@ -8,7 +8,7 @@ class Cursor {
 	private Stack linesLength;
 
 	Cursor(String file, int line, int column) {
-		this.file = file;
+		this.file = (file == null ? "-" : file);
 		this.line = line;
 		this.column = column;
 		linesLength = new Stack();

@@ -25,11 +25,30 @@ public class Template {
     private HashMap<String, Stack> sections = new HashMap<>();
     
     
-	public Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) {
+    /**
+     * Create a template with the given parameters.
+     * @param filepath the path to the template file to parse
+     * @param transforms the map of transform functions
+     * @param properties the messages
+     * @param locale locale to use to format messages (date, numbers...)
+     * @throws IOException if an I/O error occurs when reading the template file
+     * @throws TemplateException if an other error occurs when reading the template file
+     */
+    public Template(String filepath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
+    throws IOException, TemplateException {
+        this(filepath, transforms, new TemplateMessages(properties, locale));
+    }
+    
+    
+	public Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) 
+	throws IOException, TemplateException {
 		sections.put(DEFAULT_SECTION, new Stack());
 		this.transforms = transforms;
 		this.messages = messages;
 		this.filepath = filepath;
+		if (filepath != null) {
+            readFile(filepath);
+        }
 	}
 	
     /**
@@ -57,25 +76,7 @@ public class Template {
     }
     
     
-    /**
-     * Create a template with the given parameters.
-     * @param filepath the path to the template file to parse
-     * @param transforms the map of transform functions
-     * @param properties the messages
-     * @param locale locale to use to format messages (date, numbers...)
-     * @throws IOException if an I/O error occurs when reading the template file
-     * @throws TemplateException if an other error occurs when reading the template file
-     */
-    public Template(String filepath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
-    throws IOException, TemplateException {
-		sections.put(DEFAULT_SECTION, new Stack());
-        this.transforms = transforms;
-        this.messages = new TemplateMessages(properties, locale);
-        this.filepath = filepath;
-        if (filepath != null) {
-            readFile(filepath);
-        }
-    }
+   
 
     /**
      * Create a template with the given parameters.
@@ -173,87 +174,6 @@ public class Template {
 	Stack getStack() {
 		return sections.get(DEFAULT_SECTION);
 	}
-
-	private static Stack parseToTextAndExpressions2(Reader sr, Cursor cursor) throws IOException, TemplateException {
-		Stack stack = new Stack();
-		StringWriter buffer = new StringWriter();
-		boolean betweenTildes = false;
-		try {
-			int currentChar = sr.read();                        // je lis le caractère
-			int previousChar = 0;
-			while (currentChar != -1) {                         // je continue tant qu'il y a un caractère
-				cursor.next(currentChar);
-				if (currentChar == '~') {                       // si le caractère est ~ 
-					previousChar = currentChar;  
-					currentChar = sr.read();                    // je lis le suivant
-					cursor.next(currentChar);
-					if (currentChar == -1) {
-						if (! betweenTildes) {
-							throw new TemplateException("End of parsing. Character '~' is not escaped at position '%s'.", cursor.getPosition(-1));
-						} else {
-							buffer.write('~');
-							String expr = buffer.toString();
-							if (! expr.equals("")) {
-								stack.push(new Expression(expr, cursor.clone().movel(expr, 0)));
-								buffer = new StringWriter();
-								betweenTildes = false;
-							}
-							betweenTildes = false;
-						}
-					} else if (currentChar == '~') {
-						if (! betweenTildes) {
-							// ~~ escape
-							cursor.move1l();
-							buffer.write('~');
-						} else {
-							cursor.move1l();
-							buffer.write('~');
-//							buffer.write('X');
-						}
-					} else {
-						String expr = buffer.toString();
-						if (! expr.startsWith("~")) {
-							if (! expr.equals("")) {
-								// text~$| cursor-len(text)-len(~)
-								stack.push(new Text(expr, cursor.clone().movel(expr, -1)));
-								buffer = new StringWriter();
-							}
-							betweenTildes = true;
-							buffer.write(previousChar); 
-							buffer.write(currentChar); 
-						} else {
-							betweenTildes = true;
-							buffer.write('~'); 
-							expr = buffer.toString();
-							if (! expr.equals("")) {
-								stack.push(new Expression(expr, cursor.clone().movel(expr, 0)));
-								buffer = new StringWriter();
-								betweenTildes = false;
-							}
-							buffer.write(currentChar);
-						}
-					}
-				} else {
-					buffer.write(currentChar); 
-				}
-
-				previousChar = currentChar;
-				currentChar = sr.read(); 
-			}
-		} finally {
-			sr.close();
-		}
-		if (betweenTildes) {
-			throw new TemplateException("Reach end of line. A character '~' is not escaped at position '%s'.", cursor.getPosition());
-		}
-		String expr = buffer.toString();
-		if (! expr.equals("")) {
-			stack.push(new Text(expr, cursor.clone().movel(expr, 1)));
-			buffer = new StringWriter();
-		}
-		return stack;
-	}
-
 
 	private static Stack parseToTextAndExpressions(Reader sr, Cursor cursor) throws IOException, TemplateException {
 		Stack stack = new Stack();

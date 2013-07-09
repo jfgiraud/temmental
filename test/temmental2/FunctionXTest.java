@@ -17,7 +17,7 @@ public class FunctionXTest extends AbstractTestElement {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		template = new Template("-", transforms, messages);
+		template = new Template(null, transforms, messages);
 	}
 	
 	@Test

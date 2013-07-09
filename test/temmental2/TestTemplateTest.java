@@ -37,15 +37,15 @@ public class TestTemplateTest extends TestCase {
     public void testPrintFile() throws IOException, TemplateException {
 
         model = new HashMap<String, Object>();
-        model.put("k1", "v1");
-        model.put("k2", "v2");
+        model.put("firstname", "John");
+        model.put("lastname", "Doe");
         template.printFile(out, model);
 
         HashMap<String, Object> expectedModel = new HashMap<String, Object>();
-        expectedModel.put("k1", "v1");
-        expectedModel.put("k2", "v2");
+        expectedModel.put("firstname", "John");
+        expectedModel.put("lastname", "Doe");
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental/test2.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental2/test.tpl");
         
         Map<String, ? extends Object> model = record.getModelForFile();
         assertEquals(expectedModel, model);
