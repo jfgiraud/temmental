@@ -17,13 +17,17 @@ import java.util.ResourceBundle;
 
 public class Template {
 
-	private Stack stack;
 	private TemplateMessages messages;
 	private String filepath;
 	private Map<String, ? extends Object> transforms;
-	
-	public Template(String filepath, TemplateMessages messages) {
-		this.stack = new Stack();
+    private static final String DEFAULT_SECTION = "__default_section";
+
+    private HashMap<String, Stack> sections = new HashMap<>();
+    
+    
+	public Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) {
+		sections.put(DEFAULT_SECTION, new Stack());
+		this.transforms = transforms;
 		this.messages = messages;
 		this.filepath = filepath;
 	}
@@ -43,7 +47,7 @@ public class Template {
     
     public Template(String filepath, Map<String, ? extends Object> transforms, Locale locale, Object ... resourcesContainers) 
     throws IOException, TemplateException {
-    	this.stack = new Stack();
+		sections.put(DEFAULT_SECTION, new Stack());
         this.transforms = transforms;
         this.messages = new TemplateMessages(locale, resourcesContainers);
         this.filepath = filepath;
@@ -64,7 +68,7 @@ public class Template {
      */
     public Template(String filepath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
     throws IOException, TemplateException {
-    	this.stack = new Stack();
+		sections.put(DEFAULT_SECTION, new Stack());
         this.transforms = transforms;
         this.messages = new TemplateMessages(properties, locale);
         this.filepath = filepath;
@@ -83,7 +87,7 @@ public class Template {
      */
     public Template(String filepath, Map<String, ? extends Object> transforms, ResourceBundle bundle) 
     throws IOException, TemplateException {
-    	this.stack = new Stack();
+		sections.put(DEFAULT_SECTION, new Stack());
         this.transforms = transforms;
         this.messages = new TemplateMessages(bundle);
         this.filepath = filepath;
@@ -116,7 +120,7 @@ public class Template {
      */
     public Template(String filepath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale) 
     throws IOException, TemplateException {
-    	this.stack = new Stack();
+		sections.put(DEFAULT_SECTION, new Stack());
         this.transforms = transforms;
         this.filepath = filepath;
         this.messages = new TemplateMessages(resourcePath, locale);
@@ -153,6 +157,7 @@ public class Template {
 	}
 	
 	private void readReader(Reader sr, int line, int column, boolean parseExpression) throws IOException, TemplateException {
+		Stack stack = sections.get(DEFAULT_SECTION);
 		Stack taeStack = parseToTextAndExpressions(sr, new Cursor(filepath, line, column));
 		stack.clear();
 		while (! taeStack.empty()) {
@@ -166,7 +171,7 @@ public class Template {
 	}
 
 	Stack getStack() {
-		return stack;
+		return sections.get(DEFAULT_SECTION);
 	}
 
 	private static Stack parseToTextAndExpressions2(Reader sr, Cursor cursor) throws IOException, TemplateException {
@@ -312,6 +317,10 @@ public class Template {
 			return ((Identifier) value).writeObject(functions, model, messages);
 		}
 		
+		if (value instanceof Text) {
+			return ((Text) value).writeObject(functions, model, messages);
+		}
+		
 		if (value instanceof Function) {
 			Function function = ((Function) value); 
 			Object result = function.writeObject(functions, model, messages);
@@ -328,7 +337,8 @@ public class Template {
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
 	}
 	
-	public void write(Writer out, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
+	public void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
+		Stack stack = sections.get(sectionName);
 		for (int i=stack.depth(); i>0; i--) {
 			Object o = writeObject(functions, model, messages, stack.value(i));
 			if (o != null) {
@@ -348,9 +358,66 @@ public class Template {
     String formatForTest(String format, HashMap<String, Object> model) throws IOException, TemplateException {
     	parseString(format, true);
         StringWriter out = new StringWriter();
-        write(out, (Map<String, Object>) transforms, model);
+        writeSection(out, "__default_section", (Map<String, Object>) transforms, model);
         TemplateRecorder.log(this, "__default_section", model);
         return out.toString();
     }
 
+    /* Prints the whole file on the stream.
+    * @param out the stream
+    * @throws TemplateException if an error is detected by the template engine 
+    * @throws java.io.IOException if an I/O error occurs
+    */
+   public void printFile(Writer out) throws TemplateException, java.io.IOException {
+       printSection(out, DEFAULT_SECTION, new HashMap<String, Object>());
+   }
+
+   /**
+    * Prints the whole file on the stream.
+    * @param out the stream
+    * @param model the model  
+    * @throws TemplateException if an error is detected by the template engine 
+    * @throws java.io.IOException if an I/O error occurs
+    */
+   public void printFile(Writer out, Map<String, ? extends Object> model) throws TemplateException,
+   java.io.IOException {
+       printSection(out, DEFAULT_SECTION, model);
+   }
+    
+   /**
+    * Prints a section of the file on the stream. The tags are replaced by the corresponding values in the model. 
+    * @param out the stream
+    * @param sectionName the section to display
+    * @param model the model  
+    * @throws TemplateException if an error is detected by the template engine 
+    * @throws java.io.IOException if an I/O error occurs
+    */
+   public void printSection(Writer out, String sectionName, Map<String, ? extends Object> model)
+   throws TemplateException, java.io.IOException {
+       if (sectionName == null || !hasSection(sectionName)) {
+           throw new TemplateException("Section '" + sectionName + "' not found.");
+       }
+       writeSection(out, sectionName, (Map<String, Object>) transforms, (Map<String, Object>) model);
+       TemplateRecorder.log(this, sectionName, model);
+   }
+
+   /**
+    * Prints a section of the file on the stream.  
+    * @param out the stream
+    * @param sectionName the section to display
+    * @throws TemplateException if an error is detected by the template engine 
+    * @throws java.io.IOException if an I/O error occurs
+    */
+   public void printSection(Writer out, String sectionName) throws TemplateException, java.io.IOException {
+       printSection(out, sectionName, new HashMap<String, Object>());
+   }
+   
+   /**
+    * Tests if the given section exists in the template
+    * @param sectionName the possible section name
+    * @return <code>true</code> if the section exists, <code>false</code> otherwise.
+    */
+   public boolean hasSection(String sectionName) {
+       return sections.containsKey(sectionName);
+   }
 }

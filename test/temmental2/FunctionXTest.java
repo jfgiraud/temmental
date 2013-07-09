@@ -17,7 +17,7 @@ public class FunctionXTest extends AbstractTestElement {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		template = new Template("-", messages);
+		template = new Template("-", transforms, messages);
 	}
 	
 	@Test
@@ -31,14 +31,14 @@ public class FunctionXTest extends AbstractTestElement {
 	
 	private void assertWriteEquals(String expected) throws IOException, TemplateException {
 		StringWriter out = new StringWriter();
-		template.write(out, transforms, model);
+		template.printFile(out, model);
 		assertEquals(expected, out.toString());
 	}
 	
 	private void assertWriteThrowsException(String expected) throws IOException, TemplateException {
 		StringWriter out = new StringWriter();
 		try {
-			template.write(out, transforms, model);
+			template.printFile(out, model);
 			fail("An exception must be raised.");
 		} catch (TemplateException e) {
 			assertEquals(expected, e.getMessage());
