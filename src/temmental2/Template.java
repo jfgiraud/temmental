@@ -8,12 +8,17 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import temmental.Template;
 
 public class Template {
 
@@ -132,10 +137,23 @@ public class Template {
 			if (parseExpression && (o instanceof Expression)) {
 				stack.push(((Expression) o).parse());
 			} else {
-				stack.push(o);
+				parseToSections(stack, (Text) o);
 			}
 		}
 	}
+
+	private void parseToSections(Stack stack, Text o) {
+		Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
+        Matcher m = p.matcher((String) o.writeObject(null, null, messages));
+        while (m.find()) {
+        	String name = m.group(1);
+        	System.out.println(m.start());
+        	System.out.println(m.end());
+        }
+		stack.push(o);
+		System.out.println("TEXT " + o);
+	}
+
 
 	Stack getStack() {
 		return sections.get(DEFAULT_SECTION);

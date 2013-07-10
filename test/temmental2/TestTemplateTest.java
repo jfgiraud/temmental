@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 import static temmental2.TemplateUtils.createModel;
@@ -18,12 +20,10 @@ public class TestTemplateTest extends TestCase {
     private HashMap<String, Object> model;
     protected Properties properties;
     protected StringWriter out;
-    protected Template template;
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        template = new Template("test/temmental2/test.tpl", filters, properties, Locale.ENGLISH);
         TemplateRecorder.setRecording(true);
         out = new StringWriter();
     }
@@ -34,7 +34,42 @@ public class TestTemplateTest extends TestCase {
         TemplateRecorder.setRecording(false);
     }
 
+    private String extractSection(String s) {
+    	Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
+        Matcher m = p.matcher(s);
+        if (m.find()) {
+        	String before = s.substring(0, m.start());
+        	System.out.println("BEFORE " + before);
+        	String name = m.group(1);
+        	int b = m.end();
+        	while (m.find()) {
+        		int e = m.start();
+        		String after = s.substring(b, e);
+        		System.out.println("AFTER " + after + " << " + name);
+        		name = m.group(1);
+//        		System.out.println(name);
+        		b = m.end();
+        	}
+        	String after = s.substring(b);
+        	System.out.println("AFTER " + after + " << " + name);
+        	return null;
+        } else {
+        	return s;
+        }
+    }
+    
+    
+    public void testSectionRe() {
+    	assertEquals("", extractSection(""));
+    	assertEquals("Something...", extractSection("Something..."));
+//    	assertEquals("foo", extractSection("abc<!-- #section foo  -->def<!-- #section bar  -->ghi<!-- #section shi  -->klm"));
+    	assertEquals("foo", extractSection("abc<!-- #section foo  -->def<!-- #section bar  -->ghi<!-- #section shi  -->"));
+    }
+
+    
     public void testPrintFile() throws IOException, TemplateException {
+
+    	Template template = new Template("test/temmental2/test-file.tpl", filters, properties, Locale.ENGLISH);
 
         model = new HashMap<String, Object>();
         model.put("firstname", "John");
@@ -45,7 +80,7 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("firstname", "John");
         expectedModel.put("lastname", "Doe");
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental2/test.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental2/test-file.tpl");
         
         Map<String, ? extends Object> model = record.getModelForFile();
         assertEquals(expectedModel, model);
@@ -53,6 +88,8 @@ public class TestTemplateTest extends TestCase {
 
     public void testPrintSection() throws IOException, TemplateException {
 
+    	Template template = new Template("test/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+    	
         List<Map<String, Object>> list = createList(
                 createModel("index", 0, "fruit", "orange"),
                 createModel("index", 1, "fruit", "apple"),
