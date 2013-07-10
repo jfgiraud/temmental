@@ -25,9 +25,7 @@ public class TemplateTest extends AbstractTestTemplate {
 	@Before
 	public void setUp() throws FileNotFoundException, TemplateException, IOException {
 		properties = new Properties();
-		template = new Template(null, null, new TemplateMessages(Locale.ENGLISH, properties)) {
-			
-		};
+		template = new Template(null, null, properties);
 		model = new HashMap<String, Object>();
 		stack = new Stack();
 	}

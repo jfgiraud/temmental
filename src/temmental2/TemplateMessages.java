@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 /**
  * Wrapper to ResourceBundle or Properties. It is used for internationalization. Instances are created on Template constructors calls.
  */
-public class TemplateMessages {
+class TemplateMessages {
 
     List<Object> messages;
     private Locale locale;

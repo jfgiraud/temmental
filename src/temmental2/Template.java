@@ -40,7 +40,7 @@ public class Template {
     }
     
     
-	public Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) 
+	private Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) 
 	throws IOException, TemplateException {
 		sections.put(DEFAULT_SECTION, new Stack());
 		this.transforms = transforms;
@@ -66,17 +66,8 @@ public class Template {
     
     public Template(String filepath, Map<String, ? extends Object> transforms, Locale locale, Object ... resourcesContainers) 
     throws IOException, TemplateException {
-		sections.put(DEFAULT_SECTION, new Stack());
-        this.transforms = transforms;
-        this.messages = new TemplateMessages(locale, resourcesContainers);
-        this.filepath = filepath;
-        if (filepath != null) {
-            readFile(filepath);
-        }
+        this(filepath, transforms, new TemplateMessages(locale, resourcesContainers));
     }
-    
-    
-   
 
     /**
      * Create a template with the given parameters.
@@ -88,13 +79,7 @@ public class Template {
      */
     public Template(String filepath, Map<String, ? extends Object> transforms, ResourceBundle bundle) 
     throws IOException, TemplateException {
-		sections.put(DEFAULT_SECTION, new Stack());
-        this.transforms = transforms;
-        this.messages = new TemplateMessages(bundle);
-        this.filepath = filepath;
-        if (filepath != null) {
-            readFile(filepath);
-        }
+        this(filepath, transforms, new TemplateMessages(bundle));
     }
     
     /**
@@ -121,27 +106,8 @@ public class Template {
      */
     public Template(String filepath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale) 
     throws IOException, TemplateException {
-		sections.put(DEFAULT_SECTION, new Stack());
-        this.transforms = transforms;
-        this.filepath = filepath;
-        this.messages = new TemplateMessages(resourcePath, locale);
-        if (filepath != null) {
-            readFile(filepath);
-        }
+        this(filepath, transforms, new TemplateMessages(resourcePath, locale));
     }
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
 	private void readFile(String filepath) throws IOException, TemplateException {
 		FileReader fr = new FileReader(new File(filepath));
@@ -181,7 +147,6 @@ public class Template {
 		boolean opened = false;
 		try {
 			int currentChar = sr.read();                       
-//			int previousChar = 0;
 			boolean escape = false;
 			while (currentChar != -1) {                        
 				cursor.next(currentChar);
@@ -210,7 +175,6 @@ public class Template {
 				} else {
 					buffer.write(currentChar);
 				}
-//				previousChar = currentChar;
 				currentChar = sr.read(); 
 			}
 		} finally {
@@ -257,7 +221,7 @@ public class Template {
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
 	}
 	
-	public void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
+	private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
 		Stack stack = sections.get(sectionName);
 		for (int i=stack.depth(); i>0; i--) {
 			Object o = writeObject(functions, model, messages, stack.value(i));
@@ -278,19 +242,19 @@ public class Template {
     String formatForTest(String format, HashMap<String, Object> model) throws IOException, TemplateException {
     	parseString(format, true);
         StringWriter out = new StringWriter();
-        writeSection(out, "__default_section", (Map<String, Object>) transforms, model);
-        TemplateRecorder.log(this, "__default_section", model);
+        writeSection(out, DEFAULT_SECTION, (Map<String, Object>) transforms, model);
+        TemplateRecorder.log(this, DEFAULT_SECTION, model);
         return out.toString();
     }
 
-    /* Prints the whole file on the stream.
-    * @param out the stream
-    * @throws TemplateException if an error is detected by the template engine 
-    * @throws java.io.IOException if an I/O error occurs
-    */
-   public void printFile(Writer out) throws TemplateException, java.io.IOException {
-       printSection(out, DEFAULT_SECTION, new HashMap<String, Object>());
-   }
+    /** Prints the whole file on the stream.
+     * @param out the stream
+     * @throws TemplateException if an error is detected by the template engine 
+     * @throws java.io.IOException if an I/O error occurs
+     */
+    public void printFile(Writer out) throws TemplateException, java.io.IOException {
+        printSection(out, DEFAULT_SECTION, new HashMap<String, Object>());
+    }
 
    /**
     * Prints the whole file on the stream.
