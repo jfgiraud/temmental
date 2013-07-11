@@ -9,7 +9,6 @@ class Keyword extends Element {
 	Keyword(String expr, Cursor cursor) throws TemplateException {
 		super(cursor);
 		this.identifier = expr;
-		
 		boolean valid = (expr.matches("'\\w+") || expr.matches("\\$\\w+(\\?)?"));
 		if (! valid) {
 			throw new TemplateException("Invalid identifier syntax for '%s' at position '%s'.", expr, cursor.getPosition());

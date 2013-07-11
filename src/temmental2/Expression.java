@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class Expression {
 
@@ -108,6 +110,8 @@ class Expression {
 				out.push(new Function(filter, input));
 			} else if (token instanceof Comma) {
 				commas += 1;
+			} else if (token instanceof Command) {
+				throw new TemplateException("TODO " + token);
 			} else {
 				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
 			}
@@ -122,45 +126,28 @@ class Expression {
 		return out.pop();
 	}	
 	
-	private boolean isValidIdentifierChar(int currentChar) {
-		return (currentChar >= 'a' && currentChar <= 'z') 
-				|| (currentChar >= 'A' && currentChar <= 'Z')
-				|| (currentChar >= '0' && currentChar <= '9')
-				|| (currentChar == '.')
-				|| (currentChar == '_');
-	}
-	
 	Stack parseToTokens() throws IOException, TemplateException {
 		Stack stack = new Stack();
-		
 		String expression = expr;
 		Cursor cursor = this.cursor.clone();
-		
 		if (! expression.startsWith("~")) {
 			throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
 		}
 		if (! expression.endsWith("~")) {
 			throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, cursor.getPosition());
 		}
-		
 		expression = expression.substring(1);
 		expression = expression.substring(0, expression.length()-1);
 		cursor.move1r();
 		StringReader sr = new StringReader(expression);
 		StringWriter word = new StringWriter();
-		int level = 0;
 		boolean inDQ = false;
 		boolean inSQ = false;
 		boolean escape = false;
-		
-		List<String> tokens = new ArrayList<>();
-		
 		try {
 			int currentChar = sr.read();
 			while (currentChar != -1) {
 				cursor.next(currentChar);
-//				System.out.println(String.format("S%sD%s %c %s", inSQ, inDQ, currentChar, cursor.getPosition()));
-				
 				if (! inSQ && ! inDQ && currentChar == '\\') {
 					throw new TemplateException("Invalid escape char '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
 				} else if ((inSQ || inDQ) && currentChar == '\\') {
@@ -205,22 +192,9 @@ class Expression {
 				} else if (inSQ && currentChar == '\'') {
 					inSQ = false;
 					word.write(currentChar);
-//					String expr = word.toString();
-//					if (! expr.equals("")) {
-//						stack.push(evalToken(expr, cursor.clone()));
-//					} else {
-//						behaviourOnEmptyToken(0, stack, cursor);
-//					}
-//					word = new StringWriter();
 				} else if (inDQ && currentChar == '"') {
 					inDQ = false;
 					word.write(currentChar);
-//					if (! expr.equals("")) {
-//						stack.push(evalToken(expr, cursor.clone()));
-//					} else {
-//						behaviourOnEmptyToken(0, stack, cursor);
-//					}
-//					word = new StringWriter();
 				} else if (inDQ || inSQ) {
 					word.write(currentChar);
 				} else {
@@ -235,94 +209,6 @@ class Expression {
 			sr.close();
 		}
 		String expr = word.toString();
-		if (! expr.equals("")) {
-			stack.push(evalToken(expr, cursor.clone()));
-		} else {
-			behaviourOnEmptyToken(0, stack, cursor);
-		}
-		
-		return stack;
-	}
-	
-	Stack parseToTokens2() throws IOException, TemplateException {
-		Stack stack = new Stack(); 
-		
-		String expression = expr;
-		Cursor cursor = this.cursor.clone();
-		
-		boolean inSentenceDQ = false;
-		boolean inSentenceSQ = false;
-		if (! expression.startsWith("~")) {
-			throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
-		}
-		if (! expression.endsWith("~")) {
-			throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, cursor.getPosition());
-		}
-
-		expression = expression.substring(1);
-		expression = expression.substring(0, expression.length()-1);
-		cursor.move1r();
-
-		//'~$hello[$firstname,$lastname:'upper:'quote<\"'\">]~'
-		StringReader sr = new StringReader(expression);
-		StringWriter buffer = new StringWriter();
-		try {
-			int currentChar = sr.read();
-			while (currentChar != -1) {
-				cursor.next(currentChar);
-				if (! inSentenceDQ && ! inSentenceSQ && currentChar == ',') {
-					String expr = buffer.toString();
-					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l()));
-					} else {
-						behaviourOnEmptyToken(currentChar, stack, cursor);
-					}
-					buffer = new StringWriter();
-					stack.push(new Comma(cursor.clone().move1l()));
-				} else if (! inSentenceDQ && ! inSentenceSQ && currentChar == ':') {
-					String expr = buffer.toString();
-					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l()));
-					} else {
-						behaviourOnEmptyToken(currentChar, stack, cursor);
-					}
-					buffer = new StringWriter();
-					stack.push(new ToApply(cursor.clone().move1l()));
-				} else if (! inSentenceDQ && ! inSentenceSQ && Bracket.isBracket(currentChar)) {
-					String expr = buffer.toString();
-					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l()));
-					} else {
-						behaviourOnEmptyToken(currentChar, stack, cursor);
-					}
-					buffer = new StringWriter();
-
-					stack.push(new Bracket((char) currentChar, cursor.clone().move1l()));
-				} else {
-					if (! inSentenceSQ && ! buffer.toString().endsWith("\\") && currentChar == '"') {
-						inSentenceDQ = ! inSentenceDQ;
-					} /*else if (! inSentenceDQ && ! buffer.toString().endsWith("\\") && currentChar == '\'') {
-						inSentenceSQ = ! inSentenceSQ;
-					} */else if (! inSentenceSQ && buffer.toString().endsWith("\\") && currentChar == '"') {
-						String expr = buffer.toString();
-						buffer = new StringWriter();
-						buffer.append(expr.substring(0, expr.length()-1));
-						cursor.move1l();
-					} /*else if (! inSentenceDQ && buffer.toString().endsWith("\\") && currentChar == '\'') {
-						String expr = buffer.toString();
-						buffer = new StringWriter();
-						buffer.append(expr.substring(0, expr.length()-1));
-						cursor.move1l();
-					}*/
-					buffer.write(currentChar);
-				} 
-				currentChar = sr.read(); 
-			}
-		} finally {
-			sr.close();
-		}
-
-		String expr = buffer.toString();
 		if (! expr.equals("")) {
 			stack.push(evalToken(expr, cursor.clone()));
 		} else {
@@ -384,7 +270,18 @@ class Expression {
 			return Double.parseDouble(expr);
 		} else if (expr.matches("(-)?(\\d*.)?\\d+?([eE][+-]?\\d+)?[fF]")) {
 			return Float.parseFloat(expr);
+		} else if (expr.matches("#\\w+\\s.*")) {
+	    	Pattern p = Pattern.compile("#(\\w+)\\s(.*)");
+	        Matcher m = p.matcher(expr);
+	        m.find();
+	        return new Command(m.group(1), true, cursor.clone());
+		}else if (expr.matches("#/\\w+")) {
+	    	Pattern p = Pattern.compile("#/(\\w+)");
+	        Matcher m = p.matcher(expr);
+	        m.find();
+	        return new Command(m.group(1), false, cursor.clone());
 		}
+		System.out.println(expr);
 		return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
 	

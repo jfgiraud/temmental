@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +18,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import temmental.Template;
 
 public class Template {
 
@@ -134,24 +133,42 @@ public class Template {
 		stack.clear();
 		while (! taeStack.empty()) {
 			Object o = taeStack.pop();
-			if (parseExpression && (o instanceof Expression)) {
-				stack.push(((Expression) o).parse());
+			if (o instanceof Expression) {
+				if (parseExpression) {
+					stack.push(((Expression) o).parse());
+				} else {
+					stack.push(o);
+				}
 			} else {
 				parseToSections(stack, (Text) o);
 			}
 		}
 	}
 
-	private void parseToSections(Stack stack, Text o) {
-		Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
-        Matcher m = p.matcher((String) o.writeObject(null, null, messages));
-        while (m.find()) {
+	private Stack parseToSections(Stack stack, Text o) throws TemplateException {
+		String s = (String) o.writeObject(null, null, null);
+    	Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
+        Matcher m = p.matcher(s);
+        if (m.find()) {
+        	stack.push(s.substring(0, m.start())); // before
         	String name = m.group(1);
-        	System.out.println(m.start());
-        	System.out.println(m.end());
+        	int b = m.end();
+        	while (m.find()) {
+        		int e = m.start();
+        		stack = new Stack();
+        		sections.put(name, stack);
+        		System.out.println("#section " + name);
+        		stack.push(s.substring(b, e)); // after
+        		name = m.group(1);
+        		b = m.end();
+        	}
+    		stack = new Stack();
+    		sections.put(name, stack);
+    		stack.push(s.substring(b)); // after
+        } else {
+        	stack.push(o);
         }
-		stack.push(o);
-		System.out.println("TEXT " + o);
+        return stack;
 	}
 
 
