@@ -153,6 +153,7 @@ public class TemplateTest extends AbstractTestTemplate {
 
 	protected void assertParsingEquals(Object ... expectedStack) throws IOException {
 		Stack stack = template.getStack();
+		stack.printStack(System.out);
 		assertEquals(expectedStack.length, stack.depth());
 		for (int i=0; i<expectedStack.length; i++) {
 			assertEquals("Invalid element #" + (i+1), expectedStack[i], stack.value(i+1));

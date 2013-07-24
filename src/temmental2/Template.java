@@ -26,7 +26,7 @@ public class Template {
 	private Map<String, ? extends Object> transforms;
     private static final String DEFAULT_SECTION = "__default_section";
 
-    private HashMap<String, Stack> sections = new HashMap<>();
+    private HashMap<String, Stack> sections;
     
     
     /**
@@ -46,7 +46,6 @@ public class Template {
     
 	private Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) 
 	throws IOException, TemplateException {
-		sections.put(DEFAULT_SECTION, new Stack());
 		this.transforms = transforms;
 		this.messages = messages;
 		this.filepath = filepath;
@@ -128,19 +127,43 @@ public class Template {
 	}
 	
 	private void readReader(Reader sr, int line, int column, boolean parseExpression) throws IOException, TemplateException {
-		Stack stack = sections.get(DEFAULT_SECTION);
-		Stack taeStack = parseToTextAndExpressions(sr, new Cursor(filepath, line, column));
-		stack.clear();
-		while (! taeStack.empty()) {
-			Object o = taeStack.pop();
-			if (o instanceof Expression) {
-				if (parseExpression) {
-					stack.push(((Expression) o).parse());
+
+		{
+			sections = new HashMap<String, Stack>();
+			sections.put(DEFAULT_SECTION, new Stack());
+			Stack stack = sections.get(DEFAULT_SECTION);
+
+			Stack taeStack = parseToTextAndExpressions(sr, new Cursor(filepath, line, column));
+			System.out.println(">>> taeStack");
+			taeStack.printStack(System.out);
+			
+			while (! taeStack.empty()) {
+				Object o = taeStack.pop();
+				if (o instanceof Text) {
+					stack = parseToSections(stack, (Text) o);
 				} else {
 					stack.push(o);
 				}
-			} else {
-				parseToSections(stack, (Text) o);
+			}
+		}
+		
+		{
+			Stack stack;
+			for (String sectionName : sections.keySet()) {
+				Stack taeStack = sections.get(sectionName);
+				System.out.println(">>> section " + sectionName);
+				taeStack.printStack(System.out);
+				taeStack.reverse();
+				stack = new Stack();
+				while (! taeStack.empty()) {
+					Object o = taeStack.pop();
+					if (parseExpression && (o instanceof Expression)) {
+						stack.push(((Expression) o).parse());
+					} else {
+						stack.push(o);
+					}
+				}
+				sections.put(sectionName, stack);
 			}
 		}
 	}
@@ -157,7 +180,6 @@ public class Template {
         		int e = m.start();
         		stack = new Stack();
         		sections.put(name, stack);
-        		System.out.println("#section " + name);
         		stack.push(s.substring(b, e)); // after
         		name = m.group(1);
         		b = m.end();
@@ -168,6 +190,7 @@ public class Template {
         } else {
         	stack.push(o);
         }
+
         return stack;
 	}
 

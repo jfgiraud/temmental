@@ -88,6 +88,8 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
 		try {
 			template.parseString(pattern, true);
+			System.out.println(">>assert");
+			template.getStack().printStack(System.out);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			assertEquals(expectedMessage, e.getMessage());

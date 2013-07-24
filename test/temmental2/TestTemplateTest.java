@@ -78,6 +78,7 @@ public class TestTemplateTest extends TestCase {
 
         
         TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental2/test-sections.tpl");
+        
         List<Map<String, ? extends Object>> models = record.getModelsForSection("first");
 
         HashMap<String, Object> expectedModel = new HashMap<String, Object>();
@@ -90,7 +91,10 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("lastname", "Doe");
         assertEquals(expectedModel, models.get(1));
         
-        fail("fruits");
+        models = record.getModelsForSection("second");
+        expectedModel = new HashMap<String, Object>();
+        expectedModel.put("fruits", list);
+        assertEquals(expectedModel, models.get(0));
     }
 
 }

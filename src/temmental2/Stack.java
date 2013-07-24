@@ -264,14 +264,16 @@ public class Stack {
 		return this.elements.toString();
 	}
 	
-	public void printStack(PrintStream out) throws IOException {
+	public void printStack(PrintStream out) {
 		printStack(new PrintWriter(out));
 	}
 	
-	public void printStack(PrintWriter out) throws IOException {
+	public void printStack(PrintWriter out) {
 		for (int i=depth(); i>0; i--) {
+			String v = ((String) value(i).toString());
+			v = v.replace("\n", "\u00b7");
 			out.write(i + ": ");
-			out.write(((String) value(i).toString()));
+			out.write(v);
 			out.write('\n');
 		}
 		out.flush();

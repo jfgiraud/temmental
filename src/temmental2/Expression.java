@@ -23,7 +23,6 @@ class Expression {
 	public Object parse() throws IOException, TemplateException {
 		Stack tokens = parseToTokens();
 		tokens.reverse();
-//		tokens.printStack(System.out);
 		return interpretTokens(tokens);
 	}
 	
@@ -111,7 +110,8 @@ class Expression {
 			} else if (token instanceof Comma) {
 				commas += 1;
 			} else if (token instanceof Command) {
-				throw new TemplateException("TODO " + token);
+				System.out.println("TODO " + token);
+//				throw new TemplateException("TODO " + token);
 			} else {
 				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
 			}
@@ -281,7 +281,6 @@ class Expression {
 	        m.find();
 	        return new Command(m.group(1), false, cursor.clone());
 		}
-		System.out.println(expr);
 		return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
 	
