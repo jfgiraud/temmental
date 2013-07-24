@@ -134,9 +134,7 @@ public class Template {
 			Stack stack = sections.get(DEFAULT_SECTION);
 
 			Stack taeStack = parseToTextAndExpressions(sr, new Cursor(filepath, line, column));
-			System.out.println(">>> taeStack");
-			taeStack.printStack(System.out);
-			
+			taeStack.reverse();
 			while (! taeStack.empty()) {
 				Object o = taeStack.pop();
 				if (o instanceof Text) {
@@ -151,8 +149,6 @@ public class Template {
 			Stack stack;
 			for (String sectionName : sections.keySet()) {
 				Stack taeStack = sections.get(sectionName);
-				System.out.println(">>> section " + sectionName);
-				taeStack.printStack(System.out);
 				taeStack.reverse();
 				stack = new Stack();
 				while (! taeStack.empty()) {
@@ -163,12 +159,49 @@ public class Template {
 						stack.push(o);
 					}
 				}
-				sections.put(sectionName, stack);
+				sections.put(sectionName, commandize(stack));
 			}
 		}
 	}
 
-	private Stack parseToSections(Stack stack, Text o) throws TemplateException {
+	private Stack commandize(Stack stack) throws TemplateException {
+	    Stack oldOut = new Stack();
+	    Stack out = new Stack();
+	    stack.reverse();
+	    while (! stack.empty()) {
+	        Object obj = stack.pop();
+	        System.out.println(obj);
+	        if (obj instanceof Command) {
+	            Command cmd = (Command) obj;
+	            if (cmd.isOpening()) {
+	                oldOut.push(out);
+	                out = new Stack();
+	                out.push(cmd);
+	            } else {
+	                Command opening = (Command) out.value(out.depth());
+	                if (! opening.getCommand().equals(cmd.getCommand())) {
+	                    throw new TemplateException("close " + opening);
+	                }
+	                out.remove(out.depth());
+	                out.tolist(out.depth());
+	            }
+	        } else {
+	            out.push(obj);
+	        }
+	    }
+	    
+	    System.out.println("###");
+	    out.printStack(System.out);
+
+	    if (! oldOut.empty()) {
+            throw new TemplateException("A command is not closed!");
+        } 
+	    
+        return out;
+    }
+
+
+    private Stack parseToSections(Stack stack, Text o) throws TemplateException {
 		String s = (String) o.writeObject(null, null, null);
     	Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
         Matcher m = p.matcher(s);

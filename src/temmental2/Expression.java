@@ -110,8 +110,8 @@ class Expression {
 			} else if (token instanceof Comma) {
 				commas += 1;
 			} else if (token instanceof Command) {
-				System.out.println("TODO " + token);
-//				throw new TemplateException("TODO " + token);
+			    Command command = (Command) token;
+			    out.push(command);
 			} else {
 				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
 			}
@@ -274,12 +274,12 @@ class Expression {
 	    	Pattern p = Pattern.compile("#(\\w+)\\s(.*)");
 	        Matcher m = p.matcher(expr);
 	        m.find();
-	        return new Command(m.group(1), true, cursor.clone());
+	        return new Command(m.group(1), new Expression(m.group(2), cursor.clo ne()), cursor.clone());
 		}else if (expr.matches("#/\\w+")) {
 	    	Pattern p = Pattern.compile("#/(\\w+)");
 	        Matcher m = p.matcher(expr);
 	        m.find();
-	        return new Command(m.group(1), false, cursor.clone());
+	        return new Command(m.group(1), cursor.clone());
 		}
 		return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
