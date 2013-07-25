@@ -142,7 +142,7 @@ public class Reader {
 						 "+", "-", "*", "/", "+", "==", "!=", "<", ">", "<=", ">=", 
 						 "eval", 
 						 "and", "or", "not", "xor").contains(token)) {
-					 Map<String,String> associations = new HashMap<>();
+					Map<String,String> associations = new HashMap<String,String>();
                     associations.put("+", "add");
                     associations.put("-", "sub");
                     associations.put("*", "mul");
@@ -159,7 +159,7 @@ public class Reader {
                     token = associations.containsKey(token) ? associations.get(token) : original;
 
                     boolean found = false;
-                    for (Method m : new RplStack(new ArrayList<>()).getClass().getMethods()) {
+                    for (Method m : new RplStack(new ArrayList<Object>()).getClass().getMethods()) {
                    	 if (m.getName().equals(token))
                    		 found = true;
                     }

@@ -13,28 +13,27 @@ public class IfCmd extends Reader implements Command {
 	private List iffalse;
 
 	public IfCmd() {
-		super(new ArrayList<>());
-		condition = new ArrayList<>();
-		iftrue = new ArrayList<>();
-		iffalse = new ArrayList<>();
+		super(new ArrayList<Object>());
+		condition = new ArrayList<Object>();
+		iftrue = new ArrayList<Object>();
+		iffalse = new ArrayList<Object>();
 	}
 
 	public void tocond() {
 		this.condition = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
 	public void totrue() {
 		this.iftrue = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 	
 	public void tofalse() {
 		this.iffalse = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
-	@Override
 	public void apply(RplStack stack) throws StackException {
 		RplStack.push_operations(stack, condition, false, true);
 		boolean r = (Boolean) stack.pop();

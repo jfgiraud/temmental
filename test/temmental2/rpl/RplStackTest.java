@@ -17,15 +17,15 @@ import temmental2.rpl.RplStack;
 public class RplStackTest {
 
 	private void assertStackOp(List expected, Object ret, List elements, String op, Object ... args) {
-		HashMap<Object, Object> egv = new HashMap<>();
-		HashMap<Object, Object> igv = new HashMap<>();
+		HashMap egv = new HashMap();
+		HashMap igv = new HashMap();
 
-		List elv = new ArrayList<>();
-		List ilv = new ArrayList<>();
+        List ilv = new ArrayList();
+        List elv = new ArrayList();
 
 		assertEquals(expected.getClass(), elements.getClass());
-		RplStack e = new RplStack((List<Object>) expected);
-		RplStack i = new RplStack((List<Object>) elements);
+		RplStack e = new RplStack((List) expected);
+		RplStack i = new RplStack((List) elements);
 		i.setGlobalVariables(igv);
 		i.setLocalVariables(ilv);
 
@@ -40,7 +40,7 @@ public class RplStackTest {
 		try {
 			Object r;
 			if (found.getParameterTypes().length>0) {
-				List aargs = new ArrayList<>(); 
+				List aargs = new ArrayList<Object>();
 				for (int idx=0; idx<args.length; idx++) {
 					if (idx < found.getParameterTypes().length)
 						aargs.add(args[idx]);

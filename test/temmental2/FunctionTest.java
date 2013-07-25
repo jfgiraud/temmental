@@ -20,13 +20,11 @@ public class FunctionTest extends AbstractTestElement {
 	public void setUp() throws Exception {
 		super.setUp();
 		tupper = new Transform<String, String>() {
-			@Override
 			public String apply(String value) throws TemplateException {
 				return value.toUpperCase();
 			}
 		};
 		tquote = new Transform<String, String>() {
-			@Override
 			public String apply(String value) throws TemplateException {
 				return "'" + value + "'";
 			}
@@ -197,10 +195,8 @@ public class FunctionTest extends AbstractTestElement {
 		Function f = function(identifier("'substr", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 		
 		Transform tsubstr = new Transform<Integer[], Transform>() {
-			@Override
 			public Transform apply(final Integer[] indexes) throws TemplateException {
 				return new Transform<String, String>() {
-					@Override
 					public String apply(String value) throws TemplateException {
 						return value.substring(indexes[0], indexes[1]);
 					}

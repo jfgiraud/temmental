@@ -12,22 +12,21 @@ public class WhileCmd  extends Reader implements Command {
 	private List<Object> condition;
 	
 	public WhileCmd() {
-		super(new ArrayList<>());
-		this.condition = new ArrayList<>();
-		this.loopst = new ArrayList<>();
+		super(new ArrayList<Object>());
+		this.condition = new ArrayList<Object>();
+		this.loopst = new ArrayList<Object>();
 	}
 
 	public void tocond() {
 		this.condition = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 	
 	public void toloopst() {
 		this.loopst = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
-	@Override
 	public void apply(RplStack stack) throws StackException {
 		RplStack.push_operations(stack, condition, false, true);
 		boolean r = (Boolean) stack.pop();

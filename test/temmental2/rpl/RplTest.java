@@ -22,15 +22,15 @@ public class RplTest {
 	}
 	
 	private void assertStackOp(List expected, List elements, String ops, StackException err) {
-		HashMap<Object, Object> egv = new HashMap<>();
-		HashMap<Object, Object> igv = new HashMap<>();
+		HashMap egv = new HashMap();
+		HashMap igv = new HashMap();
 
-		List elv = new ArrayList<>();
-		List ilv = new ArrayList<>();
+		List elv = new ArrayList();
+		List ilv = new ArrayList();
 
 		assertEquals(expected.getClass(), elements.getClass());
-		RplStack e = new RplStack((List<Object>) expected);
-		RplStack i = new RplStack((List<Object>) elements);
+		RplStack e = new RplStack((List) expected);
+		RplStack i = new RplStack((List) elements);
 		i.setGlobalVariables(igv);
 		i.setLocalVariables(ilv);
 

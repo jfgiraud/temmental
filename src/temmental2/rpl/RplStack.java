@@ -21,8 +21,8 @@ public class RplStack extends Stack {
 	@SuppressWarnings("rawtypes")
 	public RplStack(List<Object> expected) {
 		super(expected);
-		g_variables = new HashMap<>();
-		l_variables = new ArrayList<>();
+		g_variables = new HashMap<Object, Object>();
+		l_variables = new ArrayList<Object>();
 	}
 
 	void setGlobalVariables(Map m) {
@@ -45,7 +45,7 @@ public class RplStack extends Stack {
 		_assert_enough_elements(caller, variables.size());
 		Map v;
 		if (l_variables.size() == 0) {
-			v = new HashMap<>();
+			v = new HashMap<Object, Object>();
 		} else {
 			v = (Map) ((HashMap) l_variables.get(l_variables.size()-1)).clone();
 		}
@@ -259,9 +259,9 @@ public class RplStack extends Stack {
 	}
 
 	public static List<String> tokenize(String t) {
-		List<String> s = new ArrayList<>();
+		List<String> s = new ArrayList<String>();
 		StringWriter w = new StringWriter();
-		Map<Integer,Boolean> ins = new HashMap<>();
+		Map<Integer,Boolean> ins = new HashMap<Integer, Boolean>();
 		ins.put((int) '\'', false);
 		ins.put((int) '"', false);
 		for (int i=0; i<t.length(); i++) {

@@ -15,25 +15,24 @@ public class ForCmd  extends Reader implements Command {
 	private List loopst;
 	
 	public ForCmd() {
-		super(new ArrayList<>());
+		super(new ArrayList<Object>());
 		this.next = false;
 		this.step = false;
-		this.loopst = new ArrayList<>();
+		this.loopst = new ArrayList<Object>();
 	}
 
 	public void tonext() {
 		this.loopst = operations;
 		this.next = true;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 	
 	public void tostep() {
 		this.loopst = operations;
 		this.step = true;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
-	@Override
 	public void apply(RplStack stack) throws StackException {
 		if (next) {
 			stack._assert_enough_elements("FOR", 2);

@@ -14,29 +14,28 @@ public class LocalProgCmd extends Reader implements Command {
 	private List prog;
 	
 	public LocalProgCmd() {
-		super(new ArrayList<>());
-		this.vars = new ArrayList<>();
-		this.after = new ArrayList<>();
-		this.prog = new ArrayList<>();
+		super(new ArrayList<Object>());
+		this.vars = new ArrayList<Object>();
+		this.after = new ArrayList<Object>();
+		this.prog = new ArrayList<Object>();
 	}
 	
 	public void tovars() {
 		Collections.reverse(operations);
 		this.vars = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
 	public void toprog() {
 		this.prog = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
 	public void toafter() {
 		this.after = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
-	@Override
 	public void apply(RplStack stack) throws StackException {
 		stack._set_local_vars(vars, "->");
 		RplStack.push_operations(stack, prog, false, true);

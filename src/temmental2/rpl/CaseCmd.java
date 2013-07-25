@@ -19,7 +19,7 @@ public class CaseCmd extends Reader implements Command {
 	}
 	
 	public CaseCmd() {
-		super(new ArrayList<>());
+		super(new ArrayList<Object>());
 		this.condition = new ArrayList();
 		this.iftrue = new ArrayList();
 		this.cases = new ArrayList();
@@ -29,17 +29,17 @@ public class CaseCmd extends Reader implements Command {
 	
 	public void tocond() {
 		this.condition = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
 	public void totrue() {
 		this.iftrue = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 	
 	public void todefault() {
 		this.d3fault = operations;
-		operations = new ArrayList<>();
+		operations = new ArrayList<Object>();
 	}
 
 	public void append() {
@@ -52,8 +52,6 @@ public class CaseCmd extends Reader implements Command {
 		operations = new ArrayList<Object>();
 	}
 	
-	
-	@Override
 	public void apply(RplStack stack) throws StackException {
 		boolean found = false;
 		for (ACase acase : cases) {
