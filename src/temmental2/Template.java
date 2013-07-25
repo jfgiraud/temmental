@@ -192,6 +192,7 @@ public class Template {
 	    
 	    System.out.println("###");
 	    out.printStack(System.out);
+	    oldOut.printStack(System.out);
 
 	    if (! oldOut.empty()) {
             throw new TemplateException("A command is not closed!");

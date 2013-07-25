@@ -20,6 +20,8 @@ class Command {
 		this.opening = opening;
 		this.cursor = cursor.clone();
 		this.expression = expression;
+		if (command.startsWith("#/"))
+			throw new RuntimeException(expression.toString());
 	}
 	
 	@Override

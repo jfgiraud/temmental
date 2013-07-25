@@ -74,6 +74,10 @@ class Cursor {
 		return move(-expr.length() + i);
 	}
 	
+	public Cursor mover(int delta) {
+		return move(delta);
+	}
+	
 	private Cursor move(int delta) {
 		boolean neg = (delta < 0);
 		if (neg) delta = -delta;

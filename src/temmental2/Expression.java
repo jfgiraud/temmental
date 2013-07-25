@@ -274,7 +274,9 @@ class Expression {
 	    	Pattern p = Pattern.compile("#(\\w+)\\s(.*)");
 	        Matcher m = p.matcher(expr);
 	        m.find();
-	        return new Command(m.group(1), new Expression(m.group(2), cursor.clo ne()), cursor.clone());
+	        Cursor commandCursor = cursor.clone().movel(expr, -1);
+	        Cursor expressionCursor = commandCursor.clone().mover(m.start(2)+1);
+	        return new Command(m.group(1), new Expression(m.group(2), expressionCursor), commandCursor);
 		}else if (expr.matches("#/\\w+")) {
 	    	Pattern p = Pattern.compile("#/(\\w+)");
 	        Matcher m = p.matcher(expr);
