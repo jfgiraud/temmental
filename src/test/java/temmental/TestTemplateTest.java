@@ -1,17 +1,13 @@
 package temmental;
 
-import static temmental.TemplateUtils.createList;
-import static temmental.TemplateUtils.createModel;
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
-import junit.framework.TestCase;
+import static temmental.TemplateUtils.createList;
+import static temmental.TemplateUtils.createModel;
 
 public class TestTemplateTest extends TestCase {
 
@@ -24,7 +20,7 @@ public class TestTemplateTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
+        template = new Template("src/test/resources/temmental/test.tpl", filters, properties, Locale.ENGLISH);
         TemplateRecorder.setRecording(true);
         out = new StringWriter();
     }
@@ -46,7 +42,7 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("k1", "v1");
         expectedModel.put("k2", "v2");
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental/test.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental/test.tpl");
         
         Map<String, ? extends Object> model = record.getModelForFile();
         assertEquals(expectedModel, model);
@@ -71,7 +67,7 @@ public class TestTemplateTest extends TestCase {
         model.put("lastname", "Doe");
         template.printSection(out, "test", model);
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental/test.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental/test.tpl");
         List<Map<String, ? extends Object>> models = record.getModelsForSection("test");
 
         HashMap<String, Object> expectedModel = new HashMap<String, Object>();

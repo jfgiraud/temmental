@@ -1,24 +1,14 @@
 package temmental;
 
-import static temmental.TemplateUtils.convert;
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
-import junit.framework.TestCase;
+import static temmental.TemplateUtils.convert;
 
 public class ExampleTest extends TestCase {
 
@@ -802,7 +792,7 @@ public class ExampleTest extends TestCase {
     // files
     
     public void test_13a() throws IOException, TemplateException {
-        template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
+        template = new Template("src/test/resources/temmental/test.tpl", filters, properties, Locale.ENGLISH);
         StringWriter out = new StringWriter();
 
         List<Map<String, Object>> models = createList(
@@ -819,7 +809,7 @@ public class ExampleTest extends TestCase {
 
     public void test_13b() throws IOException, TemplateException {
         try {
-            template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
+            template = new Template("src/test/resources/temmental/test.tpl", filters, properties, Locale.ENGLISH);
             StringWriter out = new StringWriter();
             template.printSection(out, "unknownSection", model);
             fail("aille");
@@ -831,14 +821,14 @@ public class ExampleTest extends TestCase {
     }
 
     public void test_13c() throws IOException, TemplateException {
-        template = new Template("test/temmental/test.tpl", filters, properties, Locale.ENGLISH);
+        template = new Template("src/test/resources/temmental/test.tpl", filters, properties, Locale.ENGLISH);
         StringWriter out = new StringWriter();
         model.remove("firstname");
         try {
             template.printSection(out, "test", model);
             fail("An exception must be raised.");
         } catch (TemplateException e) {
-            assertEquals("Key 'firstname' is not present or has null value in the model map to render '~firstname~' at position 'test/temmental/test.tpl:2'.", e.getMessage());
+            assertEquals("Key 'firstname' is not present or has null value in the model map to render '~firstname~' at position 'src/test/resources/temmental/test.tpl:2'.", e.getMessage());
         } catch (Exception e) {
             fail("Bad exception.");
         }

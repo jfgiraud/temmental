@@ -1,18 +1,13 @@
 package temmental2;
 
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
-import junit.framework.TestCase;
-import static temmental2.TemplateUtils.createModel;
 import static temmental2.TemplateUtils.createList;
+import static temmental2.TemplateUtils.createModel;
 
 public class TestTemplateTest extends TestCase {
 
@@ -36,7 +31,7 @@ public class TestTemplateTest extends TestCase {
 
     public void testPrintFile() throws IOException, TemplateException {
 
-    	Template template = new Template("test/temmental2/test-file.tpl", filters, properties, Locale.ENGLISH);
+    	Template template = new Template("src/test/resources/temmental2/test-file.tpl", filters, properties, Locale.ENGLISH);
 
         model = new HashMap<String, Object>();
         model.put("firstname", "John");
@@ -47,7 +42,7 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("firstname", "John");
         expectedModel.put("lastname", "Doe");
 
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental2/test-file.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental2/test-file.tpl");
         
         Map<String, ? extends Object> model = record.getModelForFile();
         assertEquals(expectedModel, model);
@@ -55,7 +50,7 @@ public class TestTemplateTest extends TestCase {
 
     public void testPrintSection() throws IOException, TemplateException {
 
-    	Template template = new Template("test/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+    	Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
     	
         List<Map<String, Object>> list = createList(
                 createModel("index", 0, "fruit", "orange"),
@@ -77,7 +72,7 @@ public class TestTemplateTest extends TestCase {
         template.printSection(out, "second", model);
 
         
-        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("test/temmental2/test-sections.tpl");
+        TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental2/test-sections.tpl");
         
         List<Map<String, ? extends Object>> models = record.getModelsForSection("first");
 
