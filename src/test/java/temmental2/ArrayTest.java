@@ -13,7 +13,6 @@ public class ArrayTest  extends AbstractTestElement {
 	public void testArray() throws TemplateException, NoSuchMethodException, SecurityException {
 		
 		Transform<List<Integer>, Integer> add = new Transform<List<Integer>, Integer>() {
-			@Override
 			public Integer apply(List<Integer> values) throws TemplateException {
 				int s = 0;
 				for (int i : values) {

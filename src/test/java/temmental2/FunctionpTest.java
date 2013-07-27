@@ -113,10 +113,8 @@ public class FunctionpTest extends AbstractTestElement {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
-			@Override
 			public Transform<String,String> apply(final Integer[] values) throws TemplateException {
 				return new Transform<String, String>() {
-					@Override
 					public String apply(String value) throws TemplateException {
 						return value.substring(values[0], values[1]);
 					}
@@ -135,10 +133,8 @@ public class FunctionpTest extends AbstractTestElement {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list("2", "5"), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
-			@Override
 			public Transform<String,String> apply(final Integer[] values) throws TemplateException {
 				return new Transform<String, String>() {
-					@Override
 					public String apply(String value) throws TemplateException {
 						return value.substring(values[0], values[1]);
 					}
@@ -163,10 +159,8 @@ public class FunctionpTest extends AbstractTestElement {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
-			@Override
 			public Transform<String,String> apply(final Integer[] values) throws TemplateException {
 				return new Transform<String, String>() {
-					@Override
 					public String apply(String value) throws TemplateException {
 						return value.substring(values[0], values[1]);
 					}

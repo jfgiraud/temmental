@@ -27,7 +27,6 @@ public class DoCmd  extends Reader implements Command {
 		operations = new ArrayList<Object>();
 	}
 
-	@Override
 	public void apply(RplStack stack) throws StackException {
 		boolean r = true;
 		while (r) {
