@@ -14,7 +14,7 @@ class Array extends Element {
 
 	@Override
 	String getIdentifier() {
-		throw new RuntimeException("Sould not be called!");
+		throw new RuntimeException("Should not be called!");
 	}
 
 	@Override

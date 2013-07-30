@@ -1,5 +1,7 @@
 package temmental2;
 
+import java.io.IOException;
+
 class Command {
 
 	private String command;
@@ -26,7 +28,7 @@ class Command {
 	
 	@Override
 	public String toString() {
-		return "@" + cursor.getPosition() + "\tCommand(" + (opening?"":"/") + command +  ")" ;
+		return "@" + cursor.getPosition() + "\tCommand(" + (opening ? "" : "/") + command +  ")" ;
 	}
 
 	public String getPosition() {
@@ -47,5 +49,9 @@ class Command {
 	public boolean isOpening() {
 	    return opening;
 	}
+
+    public Object parseExpression() throws IOException, TemplateException {
+        return expression.parse();
+    }
 
 }

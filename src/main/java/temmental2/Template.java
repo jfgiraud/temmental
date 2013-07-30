@@ -143,14 +143,19 @@ public class Template {
 					stack.push(o);
 				}
 			}
-		}
-		
+        }
+
 		{
 			Stack stack;
 			for (String sectionName : sections.keySet()) {
 				Stack taeStack = sections.get(sectionName);
 				taeStack.reverse();
-				stack = new Stack();
+
+                System.out.println("###!");
+                taeStack.printStack(System.out);
+                System.out.println("#/#!");
+
+                stack = new Stack();
 				while (! taeStack.empty()) {
 					Object o = taeStack.pop();
 					if (parseExpression && (o instanceof Expression)) {
@@ -159,18 +164,18 @@ public class Template {
 						stack.push(o);
 					}
 				}
-				sections.put(sectionName, commandize(stack));
+				sections.put(sectionName, commandize(stack, parseExpression));
 			}
 		}
 	}
 
-	private Stack commandize(Stack stack) throws TemplateException {
+	private Stack commandize(Stack stack, boolean parseExpression) throws TemplateException, IOException {
 	    Stack oldOut = new Stack();
 	    Stack out = new Stack();
 	    stack.reverse();
+
 	    while (! stack.empty()) {
 	        Object obj = stack.pop();
-	        System.out.println(obj);
 	        if (obj instanceof Command) {
 	            Command cmd = (Command) obj;
 	            if (cmd.isOpening()) {
@@ -184,15 +189,20 @@ public class Template {
 	                }
 	                out.remove(out.depth());
 	                out.tolist(out.depth());
+                    if (parseExpression) {
+                        //opening.parseExpression();
+                    }
 	            }
 	        } else {
 	            out.push(obj);
 	        }
 	    }
 	    
-	    System.out.println("###");
+	    System.out.println("###B");
 	    out.printStack(System.out);
+        System.out.println("###I");
 	    oldOut.printStack(System.out);
+        System.out.println("###E");
 
 	    if (! oldOut.empty()) {
             throw new TemplateException("A command is not closed!");

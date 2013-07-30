@@ -14,10 +14,16 @@ class Expression {
 
 	private String expr;
 	private Cursor cursor;
-	
+	private boolean betweenTildes;
+
+    Expression(String expr, Cursor cursor, boolean betweenTildes) {
+        this.expr = expr;
+        this.cursor = cursor.clone();
+        this.betweenTildes = betweenTildes;
+    }
+
 	Expression(String expr, Cursor cursor) {
-		this.expr = expr;
-		this.cursor = cursor.clone();
+        this(expr, cursor, true);
 	}
 	
 	public Object parse() throws IOException, TemplateException {
@@ -121,7 +127,7 @@ class Expression {
 		if (out.depth() > 1) {
 			throw new TemplateException("Too much objects in the stack!");
 		} else if (out.empty()) {
-			throw new TemplateException("Not enougth object in the stack!");
+			throw new TemplateException("Not enough object in the stack!");
 		}
 		return out.pop();
 	}	
@@ -130,15 +136,17 @@ class Expression {
 		Stack stack = new Stack();
 		String expression = expr;
 		Cursor cursor = this.cursor.clone();
-		if (! expression.startsWith("~")) {
-			throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
-		}
-		if (! expression.endsWith("~")) {
-			throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, cursor.getPosition());
-		}
-		expression = expression.substring(1);
-		expression = expression.substring(0, expression.length()-1);
-		cursor.move1r();
+		if (betweenTildes) {
+            if (! expression.startsWith("~")) {
+			    throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
+		    }
+		    if (! expression.endsWith("~")) {
+			    throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, cursor.getPosition());
+		    }
+            expression = expression.substring(1);
+            expression = expression.substring(0, expression.length()-1);
+            cursor.move1r();
+        }
 		StringReader sr = new StringReader(expression);
 		StringWriter word = new StringWriter();
 		boolean inDQ = false;
@@ -276,7 +284,7 @@ class Expression {
 	        m.find();
 	        Cursor commandCursor = cursor.clone().movel(expr, -1);
 	        Cursor expressionCursor = commandCursor.clone().mover(m.start(2)+1);
-	        return new Command(m.group(1), new Expression(m.group(2), expressionCursor), commandCursor);
+	        return new Command(m.group(1), new Expression(m.group(2), expressionCursor, false), commandCursor);
 		}else if (expr.matches("#/\\w+")) {
 	    	Pattern p = Pattern.compile("#/(\\w+)");
 	        Matcher m = p.matcher(expr);
