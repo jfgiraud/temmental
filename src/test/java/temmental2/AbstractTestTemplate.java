@@ -26,14 +26,18 @@ public abstract class AbstractTestTemplate {
 		return new Array(Arrays.asList(objects), new Cursor(position));
 	}
 	
-	protected Bracket bracket(char name, String position) {
-		return new Bracket(name, new Cursor(position));
+	protected BracketTok bracket(char name, String position) {
+		return new BracketTok(name, new Cursor(position));
 	}
 
 	protected Identifier identifier(String name, String position) throws TemplateException {
 		return new Identifier(name, new Cursor(position));
 	}
-	
+
+    protected Command command(String tag, Element element, List<Object> betweenTags) {
+        return new Command(tag, element, betweenTags);
+    }
+
 	protected Function function(Identifier name, Object input) {
 		return new Function(name, input);
 	}
@@ -46,12 +50,12 @@ public abstract class AbstractTestTemplate {
 		return new Message(name, parameters);
 	}
 
-	protected ToApply toapply(String position) {
-		return new ToApply(new Cursor(position));
+	protected ToApplyTok toapply(String position) {
+		return new ToApplyTok(new Cursor(position));
 	}
 
-	protected Comma comma(String position) {
-		return new Comma(new Cursor(position));
+	protected CommaTok comma(String position) {
+		return new CommaTok(new Cursor(position));
 	}
 
 	protected Expression toparse(String expr, String position) {

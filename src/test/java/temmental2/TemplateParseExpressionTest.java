@@ -1,18 +1,10 @@
 package temmental2;
 
-import static org.junit.Assert.*;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-
-import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
 
 public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
@@ -189,7 +181,18 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 						list(identifier("$firstname", p(1, 11)), text("$last,$na:'me", p(1, 22)))));
 		
 	}
-	
+
+    @Test
+    public void testCommand() throws IOException, TemplateException {
+        parseExpression("~#for $models:'filter~hello~#/for~");
+
+        assertTokensEquals(command("for", function(
+                identifier("'filter", p(1, 2)),
+                identifier("$models", p(1, 2))),
+                list(text("hello", p(5,6)))));
+    }
+
+
 	@Test
 	public void testComplexMessage() throws IOException, TemplateException {
 		parseExpression("~$message[$firstname:'upper,$lastname:'replace<\"a\",\"A\">]:'quote~");

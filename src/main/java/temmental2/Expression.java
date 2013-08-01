@@ -3,10 +3,7 @@ package temmental2;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,8 +52,8 @@ class Expression {
 			Object token = tokens.pop();
 			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Identifier) {
 				out.push(token);
-			} else if (token instanceof Bracket) {
-				Bracket b = (Bracket) token;
+			} else if (token instanceof BracketTok) {
+				BracketTok b = (BracketTok) token;
 				if (b.isOpening()) {
 					oldOut.push(out);
 					out = new Stack();
@@ -64,7 +61,7 @@ class Expression {
 					oldCommas.push(commas);
 					commas = 0;
 				} else {
-					Bracket other = (Bracket) out.value(out.depth());
+					BracketTok other = (BracketTok) out.value(out.depth());
 					if (other.getBracket() != b.neg()) {
 						throw new TemplateException("Corresponding bracket for '%c' at position '%s' is invalid (found '%c' at position '%s').", b.getBracket(), b.getPosition(),
 								other.getBracket(), other.getPosition());
@@ -106,17 +103,18 @@ class Expression {
 						out.push(new Array((List<Object>) out.pop(), other.cursor));
 						commas = (Integer) oldCommas.pop();
 					} else {
-						throw new TemplateException("Bracket %c not supported!", b.getBracket()); //TODO
+						throw new TemplateException("BracketTok %c not supported!", b.getBracket()); //TODO
 					}
 				}
-			} else if (token instanceof ToApply) {
+			} else if (token instanceof ToApplyTok) {
 				Identifier filter = (Identifier) tokens.pop();
 				Object input = out.pop();
 				out.push(new Function(filter, input));
-			} else if (token instanceof Comma) {
+			} else if (token instanceof CommaTok) {
 				commas += 1;
-			} else if (token instanceof Command) {
-			    Command command = (Command) token;
+			} else if (token instanceof CommandTok) {
+                System.out.println(token.toString());
+                CommandTok command = (CommandTok) token;
 			    out.push(command);
 			} else {
 				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
@@ -172,8 +170,8 @@ class Expression {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
-					stack.push(new ToApply(cursor.clone().move1l()));
-				} else if (! inSQ && ! inDQ && Bracket.isBracket(currentChar)) {
+					stack.push(new ToApplyTok(cursor.clone().move1l()));
+				} else if (! inSQ && ! inDQ && BracketTok.isBracket(currentChar)) {
 					String expr = word.toString();
 					if (! expr.equals("")) {
 						stack.push(evalToken(expr, cursor.clone().move1l()));
@@ -181,7 +179,7 @@ class Expression {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
-					stack.push(new Bracket((char) currentChar, cursor.clone().move1l()));
+					stack.push(new BracketTok((char) currentChar, cursor.clone().move1l()));
 				} else if (! inSQ && ! inDQ && currentChar == ',') {
 					String expr = word.toString();
 					if (! expr.equals("")) {
@@ -190,7 +188,7 @@ class Expression {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
-					stack.push(new Comma(cursor.clone().move1l()));
+					stack.push(new CommaTok(cursor.clone().move1l()));
 				} else if (! inSQ && ! inDQ && currentChar == '"') { 
 					inDQ = true;
 					word.write(currentChar);
@@ -232,8 +230,8 @@ class Expression {
 		} else if (currentChar == ':') {
 			if (stack.empty())
 				throw new TemplateException("No identifier before ':' at position '%s'.", cursor.getPosition(-1));
-			if (stack.value() instanceof Bracket) {
-				Bracket b = (Bracket) stack.value();
+			if (stack.value() instanceof BracketTok) {
+				BracketTok b = (BracketTok) stack.value();
 				if (b.isOpening()) {
 					throw new TemplateException("No parameter before ':' at position '%s'.", cursor.getPosition(-1));
 				} else {
@@ -242,7 +240,7 @@ class Expression {
 						throw new TemplateException("No token at position '%s'.", cursor.getPosition(-1));
 					}
 				}
-			} else if (stack.value() instanceof Comma) {
+			} else if (stack.value() instanceof CommaTok) {
 				throw new TemplateException("No parameter before ':' at position '%s'.", cursor.getPosition(-1));
 			}
 		} else if (currentChar == '[' || currentChar == '<') {
@@ -284,12 +282,12 @@ class Expression {
 	        m.find();
 	        Cursor commandCursor = cursor.clone().movel(expr, -1);
 	        Cursor expressionCursor = commandCursor.clone().mover(m.start(2)+1);
-	        return new Command(m.group(1), new Expression(m.group(2), expressionCursor, false), commandCursor);
+	        return new CommandTok(m.group(1), new Expression(m.group(2), expressionCursor, false), commandCursor);
 		}else if (expr.matches("#/\\w+")) {
 	    	Pattern p = Pattern.compile("#/(\\w+)");
 	        Matcher m = p.matcher(expr);
 	        m.find();
-	        return new Command(m.group(1), cursor.clone());
+	        return new CommandTok(m.group(1), cursor.clone());
 		}
 		return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}

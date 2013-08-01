@@ -1,11 +1,11 @@
 package temmental2;
 
-class Bracket {
+class BracketTok {
 
 	private char bracket;
 	Cursor cursor;
 
-	Bracket(char bracket, Cursor cursor) {
+	BracketTok(char bracket, Cursor cursor) {
 		this.bracket = bracket;
 		this.cursor = cursor.clone();
 	}
@@ -41,7 +41,7 @@ class Bracket {
 	
 	@Override
 	public String toString() {
-		return "@" + cursor.getPosition() + "\tBracket(" + bracket +  ")" ;
+		return "@" + cursor.getPosition() + "\tBracketTok(" + bracket +  ")" ;
 	}
 
 	public String getPosition() {
@@ -49,9 +49,9 @@ class Bracket {
 	}
 	
 	public boolean equals(Object o) {
-		if (o == null || ! (o instanceof Bracket))
+		if (o == null || ! (o instanceof BracketTok))
 			return false;
-		Bracket oc = (Bracket) o;
+		BracketTok oc = (BracketTok) o;
 		return oc.bracket == bracket && oc.cursor.equals(cursor);
 	}
 	

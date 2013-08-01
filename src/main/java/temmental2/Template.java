@@ -8,10 +8,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -31,89 +28,89 @@ public class Template {
     
     /**
      * Create a template with the given parameters.
-     * @param filepath the path to the template file to parse
+     * @param filePath the path to the template file to parse
      * @param transforms the map of transform functions
      * @param properties the messages
      * @param locale locale to use to format messages (date, numbers...)
      * @throws IOException if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filepath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
+    public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
     throws IOException, TemplateException {
-        this(filepath, transforms, new TemplateMessages(properties, locale));
+        this(filePath, transforms, new TemplateMessages(properties, locale));
     }
     
     
-	private Template(String filepath, Map<String, ? extends Object> transforms, TemplateMessages messages) 
+	private Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
 	throws IOException, TemplateException {
 		this.transforms = transforms;
 		this.messages = messages;
-		this.filepath = filepath;
-		if (filepath != null) {
-            readFile(filepath);
+		this.filepath = filePath;
+		if (filePath != null) {
+            readFile(filePath);
         }
 	}
 	
     /**
      * Create a template with the given parameters. The default locale is used to retrieve localized messages and format messages (date, numbers...).
-     * @param filepath the path to the template file to parse
+     * @param filePath the path to the template file to parse
      * @param transforms the map of transform functions
      * @param properties the messages
      * @throws IOException if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filepath, Map<String, ? extends Object> transforms, Properties properties) 
+    public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties)
     throws IOException, TemplateException {
-        this(filepath, transforms, properties, Locale.getDefault());
+        this(filePath, transforms, properties, Locale.getDefault());
     }
     
-    public Template(String filepath, Map<String, ? extends Object> transforms, Locale locale, Object ... resourcesContainers) 
+    public Template(String filePath, Map<String, ? extends Object> transforms, Locale locale, Object ... resourcesContainers)
     throws IOException, TemplateException {
-        this(filepath, transforms, new TemplateMessages(locale, resourcesContainers));
+        this(filePath, transforms, new TemplateMessages(locale, resourcesContainers));
     }
 
     /**
      * Create a template with the given parameters.
-     * @param filepath the path to the template file to parse
+     * @param filePath the path to the template file to parse
      * @param transforms the map of transform functions
      * @param bundle the messages
      * @throws IOException if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filepath, Map<String, ? extends Object> transforms, ResourceBundle bundle) 
+    public Template(String filePath, Map<String, ? extends Object> transforms, ResourceBundle bundle)
     throws IOException, TemplateException {
-        this(filepath, transforms, new TemplateMessages(bundle));
+        this(filePath, transforms, new TemplateMessages(bundle));
     }
     
     /**
      * Create a template with the given parameters. The default locale is used to retrieve localized messages and format messages (date, numbers...).
-     * @param filepath the path to the template file to parse
+     * @param filePath the path to the template file to parse
      * @param transforms the map of transform functions
      * @param resourcePath the messages (<code>classpath:path.to.my.file</code> or <code>file:/path/to/my/file.properties</code>)
      * @throws IOException if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filepath, Map<String, ? extends Object> transforms, String resourcePath) 
+    public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath)
     throws IOException, TemplateException {
-        this(filepath, transforms, resourcePath, Locale.getDefault());
+        this(filePath, transforms, resourcePath, Locale.getDefault());
     }
     
     /**
      * Create a template with the given parameters. 
-     * @param filepath the path to the template file to parse
+     * @param filePath the path to the template file to parse
      * @param transforms the map of transform functions
      * @param resourcePath the messages (<code>classpath:path.to.my.file</code> or <code>file:/path/to/my/file.properties</code>)
      * @param locale locale to retrieve localized messages and format messages (date, numbers...)
      * @throws IOException if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filepath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale) 
+    public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale)
     throws IOException, TemplateException {
-        this(filepath, transforms, new TemplateMessages(resourcePath, locale));
+        this(filePath, transforms, new TemplateMessages(resourcePath, locale));
     }
     
-	private void readFile(String filepath) throws IOException, TemplateException {
-		FileReader fr = new FileReader(new File(filepath));
+	private void readFile(String filePath) throws IOException, TemplateException {
+		FileReader fr = new FileReader(new File(filePath));
 		try {
 			readReader(fr, 1, 0, true);
 		} finally {
@@ -176,14 +173,14 @@ public class Template {
 
 	    while (! stack.empty()) {
 	        Object obj = stack.pop();
-	        if (obj instanceof Command) {
-	            Command cmd = (Command) obj;
+	        if (obj instanceof CommandTok) {
+	            CommandTok cmd = (CommandTok) obj;
 	            if (cmd.isOpening()) {
 	                oldOut.push(out);
 	                out = new Stack();
 	                out.push(cmd);
 	            } else {
-	                Command opening = (Command) out.value(out.depth());
+	                CommandTok opening = (CommandTok) out.value(out.depth());
 	                if (! opening.getCommand().equals(cmd.getCommand())) {
 	                    throw new TemplateException("close " + opening);
 	                }

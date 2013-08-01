@@ -1,57 +1,23 @@
 package temmental2;
 
-import java.io.IOException;
+import java.util.List;
 
-class Command {
+public class Command {
 
-	private String command;
-    Cursor cursor;
-	private boolean opening;
-    private Expression expression;
+    private String tag;
+    private Element element;
+    private List<Object> betweenTags;
 
-	Command(String command, Expression expression, Cursor cursor) {
-	    this(command, true, cursor, expression);
-	}
+    public Command(String tag, Element element, List<Object> betweenTags) {
+        this.tag = tag;
+        this.element = element;
+        this.betweenTags = betweenTags;
+    }
 
-	Command(String command, Cursor cursor) {
-	    this(command, false, cursor, null);
-	}
-
-    private Command(String command, boolean opening, Cursor cursor, Expression expression) {
-		this.command = command;
-		this.opening = opening;
-		this.cursor = cursor.clone();
-		this.expression = expression;
-		if (command.startsWith("#/"))
-			throw new RuntimeException(expression.toString());
-	}
-	
-	@Override
-	public String toString() {
-		return "@" + cursor.getPosition() + "\tCommand(" + (opening ? "" : "/") + command +  ")" ;
-	}
-
-	public String getPosition() {
-		return cursor.getPosition();
-	}
-	
-	public boolean equals(Object o) {
-		if (o == null || ! (o instanceof Command))
-			return false;
-		Command oc = (Command) o;
-		return oc.command == command && oc.cursor.equals(cursor);
-	}
-
-	public String getCommand() {
-	    return command;
-	}
-
-	public boolean isOpening() {
-	    return opening;
-	}
-
-    public Object parseExpression() throws IOException, TemplateException {
-        return expression.parse();
+    @Override
+    public String toString() {
+        //TODO
+        return "@Command===>TODO" + tag;
     }
 
 }
