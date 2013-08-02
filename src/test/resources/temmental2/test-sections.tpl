@@ -1,7 +1,8 @@
 <!-- #section second -->
 You like these fruits:
-~#for $fruits:'bye~~$fruit~
-~#/for~
+~#for $fruits:'bye~
+    ~$fruit~
+~#end~
 a
 <!-- #section first -->
 Hello ~$firstname~ ~$lastname~!
