@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 class Expression {
 
@@ -131,7 +129,8 @@ class Expression {
 	}	
 	
 	Stack parseToTokens() throws IOException, TemplateException {
-		Stack stack = new Stack();
+        System.out.println("EXPR=>"+expr);
+        Stack stack = new Stack();
 		String expression = expr;
 		Cursor cursor = this.cursor.clone();
 		if (betweenTildes) {
@@ -150,6 +149,7 @@ class Expression {
 		boolean inDQ = false;
 		boolean inSQ = false;
 		boolean escape = false;
+        boolean afterDiese = false;
 		try {
 			int currentChar = sr.read();
 			while (currentChar != -1) {
@@ -162,45 +162,62 @@ class Expression {
 				} else if (escape) {
 					word.write(currentChar);
 					escape = false;
-				} else if (! inSQ && ! inDQ && currentChar == ':') {
+				} else if (! inSQ && ! inDQ && currentChar == '#') {
+                    String expr = word.toString();
+                    if (! expr.equals("")) {
+                        stack.push(evalToken(expr, cursor.clone().move1l(), afterDiese));
+                    } else {
+                        behaviourOnEmptyToken(currentChar, stack, cursor);
+                    }
+                    word = new StringWriter();
+                    stack.push(new CommandTok(cursor.clone().move1l()));
+                    afterDiese = true;
+                } else if (! inSQ && ! inDQ && currentChar == ':') {
 					String expr = word.toString();
 					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l()));
+						stack.push(evalToken(expr, cursor.clone().move1l(), afterDiese));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
 					stack.push(new ToApplyTok(cursor.clone().move1l()));
+                    afterDiese = false;
 				} else if (! inSQ && ! inDQ && BracketTok.isBracket(currentChar)) {
 					String expr = word.toString();
 					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l()));
+						stack.push(evalToken(expr, cursor.clone().move1l(), afterDiese));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
 					stack.push(new BracketTok((char) currentChar, cursor.clone().move1l()));
+                    afterDiese = false;
 				} else if (! inSQ && ! inDQ && currentChar == ',') {
 					String expr = word.toString();
 					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l()));
+						stack.push(evalToken(expr, cursor.clone().move1l(), afterDiese));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
 					stack.push(new CommaTok(cursor.clone().move1l()));
+                    afterDiese = false;
 				} else if (! inSQ && ! inDQ && currentChar == '"') { 
 					inDQ = true;
 					word.write(currentChar);
+                    afterDiese = false;
 				} else if (! inSQ && ! inDQ && currentChar == '\'') { 
 					inSQ = true;
 					word.write(currentChar);
+                    afterDiese = false;
 				} else if (inSQ && currentChar == '\'') {
 					inSQ = false;
 					word.write(currentChar);
+                    afterDiese = false;
 				} else if (inDQ && currentChar == '"') {
 					inDQ = false;
 					word.write(currentChar);
+                    afterDiese = false;
 				} else if (inDQ || inSQ) {
 					word.write(currentChar);
 				} else {
@@ -216,7 +233,7 @@ class Expression {
 		}
 		String expr = word.toString();
 		if (! expr.equals("")) {
-			stack.push(evalToken(expr, cursor.clone()));
+			stack.push(evalToken(expr, cursor.clone(), afterDiese));
 		} else {
 			behaviourOnEmptyToken(0, stack, cursor);
 		}
@@ -248,7 +265,7 @@ class Expression {
 		}
 	}
 
-	private static Object evalToken(String expr, Cursor cursor) throws TemplateException {
+	private static Object evalToken(String expr, Cursor cursor, boolean afterDiese) throws TemplateException {
 //		System.out.println(String.format("token %s", expr));
 		if (expr.startsWith("\"")) {
 			if (! expr.endsWith("\"")) {
@@ -276,19 +293,9 @@ class Expression {
 			return Double.parseDouble(expr);
 		} else if (expr.matches("(-)?(\\d*.)?\\d+?([eE][+-]?\\d+)?[fF]")) {
 			return Float.parseFloat(expr);
-		} else if (expr.matches("#\\w+\\s.*")) {
-	    	Pattern p = Pattern.compile("#(\\w+)\\s(.*)");
-	        Matcher m = p.matcher(expr);
-	        m.find();
-	        Cursor commandCursor = cursor.clone().movel(expr, -1);
-	        Cursor expressionCursor = commandCursor.clone().mover(m.start(2)+1);
-	        return new CommandTok(m.group(1), new Expression(m.group(2), expressionCursor, false), commandCursor);
-		}else if (expr.matches("#/\\w+")) {
-	    	Pattern p = Pattern.compile("#/(\\w+)");
-	        Matcher m = p.matcher(expr);
-	        m.find();
-	        return new CommandTok(m.group(1), cursor.clone());
-		}
+		} else if (afterDiese) {
+            return new Keyword(expr, cursor.clone());
+        }
 		return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
 	

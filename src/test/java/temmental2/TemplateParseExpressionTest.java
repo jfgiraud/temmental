@@ -184,7 +184,14 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
     @Test
     public void testCommand() throws IOException, TemplateException {
-        parseExpression("~#for $models:'filter~hello~#/for~");
+        parseExpression("~$models:'filter#iter~");
+
+        assertTokensEquals(identifier("$models", p(1, 2)),
+                toapply(p(1, 19)),
+                identifier("'filter", p(1, 10)),
+                tocommand(p(1, 17)),
+                keyword("iter", p(1, 18))
+                );
 
         assertTokensEquals(command("for", function(
                 identifier("'filter", p(1, 2)),

@@ -17,7 +17,7 @@ abstract class Element {
 	abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException;
 	
 	Object getInModel(Map<String, Object> map) throws TemplateException {
-		String varname = getIdentifier(); 
+		String varname = getIdentifier();
 		varname = varname.substring(1);
 		boolean force = varname.endsWith("!");
 		varname = varname.replace("!", "");

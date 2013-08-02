@@ -34,6 +34,10 @@ public abstract class AbstractTestTemplate {
 		return new Identifier(name, new Cursor(position));
 	}
 
+    protected Keyword keyword(String name, String position) throws TemplateException {
+        return new Keyword(name, new Cursor(position));
+    }
+
     protected Command command(String tag, Element element, List<Object> betweenTags) {
         return new Command(tag, element, betweenTags);
     }
@@ -53,6 +57,10 @@ public abstract class AbstractTestTemplate {
 	protected ToApplyTok toapply(String position) {
 		return new ToApplyTok(new Cursor(position));
 	}
+
+    protected CommandTok tocommand(String position) {
+        return new CommandTok(new Cursor(position));
+    }
 
 	protected CommaTok comma(String position) {
 		return new CommaTok(new Cursor(position));
