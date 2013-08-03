@@ -46,6 +46,8 @@ class Expression {
 		Stack oldCommas = new Stack();
 		int commas = 0;
 		Stack out = new Stack();
+        System.out.println("eee");
+        tokens.printStack(System.out);
 		while (tokens.depth()>=1) {
 			Object token = tokens.pop();
 			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Identifier) {
@@ -111,11 +113,11 @@ class Expression {
 			} else if (token instanceof CommaTok) {
 				commas += 1;
 			} else if (token instanceof CommandTok) {
-                System.out.println(token.toString());
                 CommandTok command = (CommandTok) token;
 			    out.push(command);
 			} else {
-				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
+
+.				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
 			}
 		}
 		
@@ -149,6 +151,7 @@ class Expression {
 		boolean inDQ = false;
 		boolean inSQ = false;
 		boolean escape = false;
+        boolean afterHash = false;
 		try {
 			int currentChar = sr.read();
 			while (currentChar != -1) {
@@ -161,42 +164,46 @@ class Expression {
 				} else if (escape) {
 					word.write(currentChar);
 					escape = false;
-				} else if (! inSQ && ! inDQ && currentChar == ' ') {
+				} else if (! inSQ && ! inDQ && currentChar == '#') {
                     String expr = word.toString();
                     if (! expr.equals("")) {
-                        stack.push(evalToken(expr, cursor.clone().move1l(), true));
+                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
                     } else {
                         behaviourOnEmptyToken(currentChar, stack, cursor);
                     }
                     word = new StringWriter();
                     stack.push(new CommandTok(cursor.clone().move1l()));
+                    afterHash = true;
                 } else if (! inSQ && ! inDQ && currentChar == ':') {
 					String expr = word.toString();
 					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l(), false));
+						stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
 					stack.push(new ToApplyTok(cursor.clone().move1l()));
+                    afterHash = false;
 				} else if (! inSQ && ! inDQ && BracketTok.isBracket(currentChar)) {
 					String expr = word.toString();
 					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l(), false));
+						stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
 					stack.push(new BracketTok((char) currentChar, cursor.clone().move1l()));
+                    afterHash = false;
 				} else if (! inSQ && ! inDQ && currentChar == ',') {
 					String expr = word.toString();
 					if (! expr.equals("")) {
-						stack.push(evalToken(expr, cursor.clone().move1l(), false));
+						stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
 					stack.push(new CommaTok(cursor.clone().move1l()));
+                    afterHash = false;
 				} else if (! inSQ && ! inDQ && currentChar == '"') {
 					inDQ = true;
 					word.write(currentChar);
@@ -224,7 +231,7 @@ class Expression {
 		}
 		String expr = word.toString();
 		if (! expr.equals("")) {
-			stack.push(evalToken(expr, cursor.clone(), false));
+			stack.push(evalToken(expr, cursor.clone(), afterHash));
 		} else {
 			behaviourOnEmptyToken(0, stack, cursor);
 		}

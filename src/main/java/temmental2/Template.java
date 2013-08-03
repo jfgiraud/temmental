@@ -147,11 +147,6 @@ public class Template {
 			for (String sectionName : sections.keySet()) {
 				Stack taeStack = sections.get(sectionName);
 				taeStack.reverse();
-
-                System.out.println("###!");
-                taeStack.printStack(System.out);
-                System.out.println("#/#!");
-
                 stack = new Stack();
 				while (! taeStack.empty()) {
 					Object o = taeStack.pop();

@@ -10,7 +10,7 @@ class Keyword extends Element {
 		super(cursor);
 		this.keyword = expr;
 		
-		boolean valid = expr.matches("#\\w+");
+		boolean valid = expr.matches("\\w+");
 		if (! valid) {
 			throw new TemplateException("Invalid keyword syntax for '%s' at position '%s'.", expr, cursor.getPosition());
 		} 
@@ -18,7 +18,7 @@ class Keyword extends Element {
 	
 	@Override
 	public String toString() {
-		return "@" + cursor.getPosition() + "\tIdentifier(" + keyword + ")";
+		return "@" + cursor.getPosition() + "\tKeyword(" + keyword + ")";
 	}
 
 	public boolean equals(Object o) {
