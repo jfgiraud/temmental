@@ -187,16 +187,16 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
         parseExpression("~$models:'filter#for~");
 
         assertTokensEquals(identifier("$models", p(1, 2)),
-                toapply(p(1, 19)),
+                toapply(p(1, 9)),
                 identifier("'filter", p(1, 10)),
                 tocommand(p(1, 17)),
                 keyword("for", p(1, 18))
                 );
 
-        assertTokensEquals(command("for", function(
-                identifier("'filter", p(1, 2)),
-                identifier("$models", p(1, 2))),
-                list(text("hello", p(5,6)))));
+        assertElementEquals(command("for", p(1, 18), function(
+                identifier("'filter", p(1, 10)),
+                identifier("$models", p(1, 2)))
+                ));
     }
 
 
@@ -305,6 +305,7 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 	}
 
 	protected void assertTokensEquals(Object ... expectedTokens) throws IOException {
+        System.out.println("rrr");tokens.printStack(System.out);
 		assertEquals(expectedTokens.length, tokens.depth());
 		for (int i=0; i<expectedTokens.length; i++) {
 			assertEquals("Invalid element #" + (i+1), expectedTokens[expectedTokens.length-i-1], tokens.value(i+1));

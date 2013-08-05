@@ -38,8 +38,8 @@ public abstract class AbstractTestTemplate {
         return new Keyword(name, new Cursor(position));
     }
 
-    protected Command command(String tag, Element element, List<Object> betweenTags) {
-        return new Command(tag, element, betweenTags);
+    protected Command command(String tag, String position, Element element) {
+        return new Command(tag, new Cursor(position), element);
     }
 
 	protected Function function(Identifier name, Object input) {

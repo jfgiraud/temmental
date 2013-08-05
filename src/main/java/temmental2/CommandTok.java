@@ -3,6 +3,7 @@ package temmental2;
 class CommandTok {
 
     private String expr;
+
     private Cursor cursor;
 
     CommandTok(Cursor cursor) {
@@ -20,5 +21,9 @@ class CommandTok {
             return false;
         CommandTok oc = (CommandTok) o;
         return oc.expr.equals(expr) && oc.cursor.equals(cursor);
+    }
+
+    Cursor getCursor() {
+        return cursor;
     }
 }

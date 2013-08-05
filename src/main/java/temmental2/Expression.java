@@ -46,8 +46,6 @@ class Expression {
 		Stack oldCommas = new Stack();
 		int commas = 0;
 		Stack out = new Stack();
-        System.out.println("eee");
-        tokens.printStack(System.out);
 		while (tokens.depth()>=1) {
 			Object token = tokens.pop();
 			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Identifier) {
@@ -113,11 +111,15 @@ class Expression {
 			} else if (token instanceof CommaTok) {
 				commas += 1;
 			} else if (token instanceof CommandTok) {
-                CommandTok command = (CommandTok) token;
-			    out.push(command);
-			} else {
+                Keyword keyword = (Keyword) tokens.pop();
+                Element input = (Element) out.pop();
+                out.push(new Command(keyword.getIdentifier(), ((CommandTok) token).getCursor(), input));
+			} else if (token instanceof Keyword) {
+                System.out.println("eee");
+                out.printStack(System.out);
 
-.				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
+            } else {
+				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
 			}
 		}
 		
@@ -292,7 +294,7 @@ class Expression {
 		} else if (expr.matches("(-)?(\\d*.)?\\d+?([eE][+-]?\\d+)?[fF]")) {
 			return Float.parseFloat(expr);
 		} else if (allowKeyword) {
-            return new Keyword(expr, cursor.clone());
+            return new Keyword(expr, cursor.clone().movel(expr, 0));
         }
 		return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
