@@ -42,6 +42,11 @@ class Expression {
 	// ====== static methods ======================================================================================
 	
 	Object interpretTokens(Stack tokens) throws TemplateException {
+
+        System.out.println("Entree");
+        tokens.printStack(System.out);
+
+
 		Stack oldOut = new Stack();
 		Stack oldCommas = new Stack();
 		int commas = 0;
@@ -112,18 +117,20 @@ class Expression {
 				commas += 1;
 			} else if (token instanceof CommandTok) {
                 Keyword keyword = (Keyword) tokens.pop();
-                Element input = (Element) out.pop();
-                out.push(new Command(keyword.getIdentifier(), ((CommandTok) token).getCursor(), input));
-			} else if (token instanceof Keyword) {
-                System.out.println("eee");
-                out.printStack(System.out);
-
+                if (keyword.isOpening()) {
+                    Element input = (Element) out.pop();
+                    out.push(new Command(keyword.getIdentifier(), ((CommandTok) token).getCursor(), input));
+                } else {
+                }
             } else {
-				throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
-			}
-		}
-		
-		
+                throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
+            }
+        }
+
+        System.out.println("Sortie");
+        out.printStack(System.out);
+        System.out.println("------------------");
+
 		if (out.depth() > 1) {
 			throw new TemplateException("Too much objects in the stack!");
 		} else if (out.empty()) {
@@ -133,7 +140,7 @@ class Expression {
 	}	
 	
 	Stack parseToTokens() throws IOException, TemplateException {
-        System.out.println("EXPR=>"+expr);
+//        System.out.println("EXPR=>"+expr);
         Stack stack = new Stack();
 		String expression = expr;
 		Cursor cursor = this.cursor.clone();

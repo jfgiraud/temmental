@@ -10,7 +10,7 @@ class Keyword extends Element {
 		super(cursor);
 		this.keyword = expr;
 		
-		boolean valid = expr.matches("\\w+");
+		boolean valid = expr.matches("\\w+") || expr.matches("/\\w+");
 		if (! valid) {
 			throw new TemplateException("Invalid keyword syntax for '%s' at position '%s'.", expr, cursor.getPosition());
 		} 
@@ -28,21 +28,19 @@ class Keyword extends Element {
 		return oc.keyword.equals(keyword) && oc.cursor.equals(cursor);
 	}
 
+    public boolean isClosing() {
+        return keyword.startsWith("/");
+    }
+
+    public boolean isOpening() {
+        return ! isClosing();
+    }
+
 	@Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		if (keyword.startsWith("'")) {
-			return keyword.substring(1);
-		} else if (keyword.startsWith("$")) {
-			return getInModel(model);
-		} else {
-			throw new TemplateException("Unsupported case #eval for '%s'", keyword);
-		}
+        throw new TemplateException("No sense to call writeObject for keyword '%s'", keyword);
 	}
 
-	boolean isRequired() {
-		return keyword != null && (keyword.startsWith("'") || ! keyword.endsWith("?"));
-	}
-	
 	@Override
 	String getIdentifier() {
 		return keyword;

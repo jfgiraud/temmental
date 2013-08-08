@@ -2,7 +2,7 @@
 You like these fruits:
 ~$fruits:'bye#for~
     ~$fruit~
-~#for~
+~#/for~
 a
 <!-- #section first -->
 Hello ~$firstname~ ~$lastname~!
