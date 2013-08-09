@@ -112,12 +112,25 @@ class Expression {
 				commas += 1;
 			} else if (token instanceof CommandTok) {
                 Keyword keyword = (Keyword) tokens.pop();
-                if (keyword.isOpening()) {
+                if (out.empty()) {
+                    out.push(new Command(keyword, ((CommandTok) token).getCursor()));
+                } else {
                     Element input = (Element) out.pop();
                     out.push(new Command(keyword, ((CommandTok) token).getCursor(), input));
-                } else {
-                    out.push(new Command(keyword, ((CommandTok) token).getCursor()));
                 }
+                System.out.println("out: ");
+                out.printStack(System.out);
+                System.out.println("---------------------------");
+                System.out.println("tokens: ");
+                tokens.printStack(System.out);
+                System.out.println("---------------------------");
+//                Keyword keyword = (Keyword) tokens.pop();
+//                if (keyword.isOpening()) {
+//                    Element input = (Element) out.pop();
+//                    out.push(new Command(keyword, ((CommandTok) token).getCursor(), input));
+//                } else {
+//                    out.push(new Command(keyword, ((CommandTok) token).getCursor()));
+//                }
             } else {
                 throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
             }

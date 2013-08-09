@@ -2,15 +2,16 @@ package temmental2;
 
 import java.util.Map;
 
-class Keyword extends Element {
+class Keyword {
 
-	private String keyword;
+    private final Cursor cursor;
+    private String keyword;
 
 	Keyword(String expr, Cursor cursor) throws TemplateException {
-		super(cursor);
+		this.cursor = cursor.clone();
 		this.keyword = expr;
 		
-		boolean valid = expr.matches("\\w+") || expr.matches("/\\w+");
+		boolean valid = expr.matches("\\w+");
 		if (! valid) {
 			throw new TemplateException("Invalid keyword syntax for '%s' at position '%s'.", expr, cursor.getPosition());
 		} 
@@ -28,25 +29,4 @@ class Keyword extends Element {
 		return oc.keyword.equals(keyword) && oc.cursor.equals(cursor);
 	}
 
-    public boolean isClosing() {
-        return keyword.startsWith("/");
-    }
-
-    public boolean isOpening() {
-        return ! isClosing();
-    }
-
-	@Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        throw new TemplateException("No sense to call writeObject for keyword '%s'", keyword);
-	}
-
-	@Override
-	String getIdentifier() {
-		return keyword;
-	}
-
-    public Cursor getCursor() {
-        return cursor;
-    }
 }

@@ -2,8 +2,8 @@
 You like these fruits:
 ~$fruits:'bye#for~
     ~$fruit~
-~#/for~
-a
+~#for~
+
 <!-- #section first -->
 Hello ~$firstname~ ~$lastname~!
 

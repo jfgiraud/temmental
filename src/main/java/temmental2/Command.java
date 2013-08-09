@@ -9,17 +9,18 @@ public class Command extends Element {
     private Keyword keyword;
     private Element element;
     private List<Object> betweenTags;
+    private boolean opening;
 
     public Command(Keyword keyword, Cursor cursor, Element element) {
         super(cursor);
         this.keyword = keyword;
         this.element = element;
         this.betweenTags = new ArrayList<Object>();
+        this.opening = (element != null);
     }
 
     public Command(Keyword keyword, Cursor cursor) {
         this(keyword, cursor, null);
-
     }
 
     @Override
@@ -44,8 +45,9 @@ public class Command extends Element {
             return false;
         if (o instanceof Command) {
             Command oc = (Command) o;
-            return oc.keyword.equals(keyword) && oc.element.equals(element) && oc.betweenTags.equals(betweenTags);
+            return oc.keyword.equals(keyword) && ((oc.element != null && oc.element.equals(element)) || (oc.element == element)) && oc.betweenTags.equals(betweenTags) && (oc.opening == opening);
         }
         return false;
     }
+
 }

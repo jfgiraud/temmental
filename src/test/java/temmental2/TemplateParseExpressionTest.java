@@ -199,22 +199,16 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
                 ));
     }
 
-//    @Test
-//    public void testClosingCommand() throws IOException, TemplateException {
-//        parseExpression("~#/for~");
-//
-//        assertTokensEquals(identifier("$models", p(1, 2)),
-//                toapply(p(1, 9)),
-//                identifier("'filter", p(1, 10)),
-//                tocommand(p(1, 17)),
-//                keyword("for", p(1, 18))
-//        );
-//
-//        assertElementEquals(command("for", p(1, 18), function(
-//                identifier("'filter", p(1, 10)),
-//                identifier("$models", p(1, 2)))
-//        ));
-//    }
+    @Test
+    public void testClosingCommand() throws IOException, TemplateException {
+        parseExpression("~#for~");
+
+        assertTokensEquals(tocommand(p(1, 2)),
+                keyword("for", p(1, 3))
+        );
+
+        assertElementEquals(command(keyword("for", p(1, 3)), p(1, 2), null));
+    }
 
 	@Test
 	public void testComplexMessage() throws IOException, TemplateException {
