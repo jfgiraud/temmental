@@ -193,7 +193,7 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
                 keyword("for", p(1, 18))
                 );
 
-        assertElementEquals(command("for", p(1, 18), function(
+        assertElementEquals(command(keyword("for", p(1, 18)), p(1, 2), function(
                 identifier("'filter", p(1, 10)),
                 identifier("$models", p(1, 2)))
                 ));

@@ -45,5 +45,8 @@ class Keyword extends Element {
 	String getIdentifier() {
 		return keyword;
 	}
-	
+
+    public Cursor getCursor() {
+        return cursor;
+    }
 }

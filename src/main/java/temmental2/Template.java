@@ -191,12 +191,6 @@ public class Template {
 	        }
 	    }
 	    
-	    System.out.println("###B");
-	    out.printStack(System.out);
-        System.out.println("###I");
-	    oldOut.printStack(System.out);
-        System.out.println("###E");
-
 	    if (! oldOut.empty()) {
             throw new TemplateException("A command is not closed!");
         } 
@@ -318,6 +312,7 @@ public class Template {
 	
 	private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
 		Stack stack = sections.get(sectionName);
+        stack.printStack(System.out);
 		for (int i=stack.depth(); i>0; i--) {
 			Object o = writeObject(functions, model, messages, stack.value(i));
 			if (o != null) {

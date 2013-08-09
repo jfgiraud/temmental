@@ -6,25 +6,26 @@ import java.util.Map;
 
 public class Command extends Element {
 
-    private String tag;
+    private Keyword keyword;
     private Element element;
     private List<Object> betweenTags;
 
-    public Command(String tag, Cursor cursor, Element element, List<Object> betweenTags) {
+    public Command(Keyword keyword, Cursor cursor, Element element) {
         super(cursor);
-        this.tag = tag;
+        this.keyword = keyword;
         this.element = element;
-        this.betweenTags = betweenTags;
+        this.betweenTags = new ArrayList<Object>();
     }
 
-    public Command(String tag, Cursor cursor, Element element) {
-        this(tag, cursor, element, new ArrayList<Object>());
+    public Command(Keyword keyword, Cursor cursor) {
+        this(keyword, cursor, null);
+
     }
 
     @Override
     public String toString() {
         //TODO
-        return "@Command===>TODO" + tag;
+        return "@Command===>TODO" + keyword;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class Command extends Element {
             return false;
         if (o instanceof Command) {
             Command oc = (Command) o;
-            return oc.tag.equals(tag) && oc.element.equals(element) && oc.betweenTags.equals(betweenTags);
+            return oc.keyword.equals(keyword) && oc.element.equals(element) && oc.betweenTags.equals(betweenTags);
         }
         return false;
     }
