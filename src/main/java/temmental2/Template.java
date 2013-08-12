@@ -8,11 +8,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -166,26 +162,14 @@ public class Template {
 	    Stack out = new Stack();
 	    stack.reverse();
 
+        stack.printStack(System.out);
+
 	    while (! stack.empty()) {
 	        Object obj = stack.pop();
-	        if (obj instanceof CommandTok) {
-                throw new RuntimeException("a iomplementer");
-//	            CommandTok cmd = (CommandTok) obj;
-//	            if (cmd.isOpening()) {
-//	                oldOut.push(out);
-//	                out = new Stack();
-//	                out.push(cmd);
-//	            } else {
-//	                CommandTok opening = (CommandTok) out.value(out.depth());
-//	                if (! opening.getCommand().equals(cmd.getCommand())) {
-//	                    throw new TemplateException("close " + opening);
-//	                }
-//	                out.remove(out.depth());
-//	                out.tolist(out.depth());
-//                    if (parseExpression) {
-//                        //opening.parseExpression();
-//                    }
-//	            }
+	        if (obj instanceof Command) {
+                Command cmd = (Command) obj;
+                cmd.readUntilClosing(stack);
+                out.push(cmd);
 	        } else {
 	            out.push(obj);
 	        }

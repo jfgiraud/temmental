@@ -23,15 +23,22 @@ public class Command extends Element {
         this(keyword, cursor, null);
     }
 
+    /*public boolean isOpening() {
+        return isOpening();
+    }
+
+    public boolean isClosing() {
+        return ! isOpening();
+    } */
+
     @Override
     public String toString() {
-        //TODO
-        return "@Command===>TODO" + keyword;
+        return "@Command(" + (opening ? "open" : "close") + "): " + keyword;
     }
 
     @Override
     String getIdentifier() {
-        throw new RuntimeException("No identifier for command");
+        return keyword.toString();
     }
 
     @Override
@@ -50,4 +57,27 @@ public class Command extends Element {
         return false;
     }
 
+    public void readUntilClosing(Stack stack) throws TemplateException {
+        if (stack.empty()) {
+            throw new TemplateException("Reach end of stack. No closing tag for command '%s' at position '%s'.", keyword.getKeyword(), cursor.getPosition());
+        }
+        while (! stack.empty()) {
+            Object line = stack.pop();
+            if (line instanceof Command) {
+                Command cmd = (Command) line;
+                if (cmd.opening) {
+                    cmd.readUntilClosing(stack);
+                } else {
+                    if (! cmd.keyword.getKeyword().equals(keyword.getKeyword())) {
+                        throw new TemplateException("Mismatch closing tag for command '%s' at position '%s' (reach '%s' at position '%s').", keyword.getKeyword(), cursor.getPosition(), cmd.keyword.getKeyword(), cmd.cursor.getPosition());
+                    } else {
+                        return;
+                    }
+                }
+            } else {
+                betweenTags.add(line);
+            }
+        }
+        return;
+    }
 }

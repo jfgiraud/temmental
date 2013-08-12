@@ -1,7 +1,5 @@
 package temmental2;
 
-import java.util.Map;
-
 class Keyword {
 
     private final Cursor cursor;
@@ -16,7 +14,11 @@ class Keyword {
 			throw new TemplateException("Invalid keyword syntax for '%s' at position '%s'.", expr, cursor.getPosition());
 		} 
 	}
-	
+
+    public String getKeyword() {
+        return keyword;
+    }
+
 	@Override
 	public String toString() {
 		return "@" + cursor.getPosition() + "\tKeyword(" + keyword + ")";

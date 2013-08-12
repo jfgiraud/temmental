@@ -118,19 +118,12 @@ class Expression {
                     Element input = (Element) out.pop();
                     out.push(new Command(keyword, ((CommandTok) token).getCursor(), input));
                 }
-                System.out.println("out: ");
+                /*System.out.println("out: ");
                 out.printStack(System.out);
                 System.out.println("---------------------------");
                 System.out.println("tokens: ");
                 tokens.printStack(System.out);
-                System.out.println("---------------------------");
-//                Keyword keyword = (Keyword) tokens.pop();
-//                if (keyword.isOpening()) {
-//                    Element input = (Element) out.pop();
-//                    out.push(new Command(keyword, ((CommandTok) token).getCursor(), input));
-//                } else {
-//                    out.push(new Command(keyword, ((CommandTok) token).getCursor()));
-//                }
+                System.out.println("---------------------------");*/
             } else {
                 throw new TemplateException("Case " + token.getClass().getCanonicalName() + " not supported");
             }
