@@ -1,9 +1,7 @@
 package temmental2;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -270,15 +268,27 @@ public class Stack {
 	
 	public void printStack(PrintWriter out) {
 		for (int i=depth(); i>0; i--) {
-			String v = ((String) value(i).toString());
-			v = v.replace("\n", "\u00b7");
+//            v = v.replace("\n", "\u00b6");
+//            v = v.replace(" ", "\u00b7");
+//            v = v.replace("\u00a6", "\n");
 			out.write(i + ": ");
-			out.write(v);
-			out.write('\n');
+            Object o = value(i);
+            if (o instanceof Element) {
+                out.write(((Element) o).repr(0));
+            } else {
+                out.write(repr(String.valueOf(o)));
+            }
+            out.write('\n');
 		}
 		out.flush();
 	}
-	
+
+    private static String repr(String s) {
+        s = s.replace("\n", "\u00b6");
+        s = s.replace(" ", "\u00b7");
+        return s;
+    }
+
 //	void reverse() {
 //		Collections.reverse(elements);
 //	}

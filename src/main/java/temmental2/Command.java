@@ -23,17 +23,24 @@ public class Command extends Element {
         this(keyword, cursor, null);
     }
 
-    /*public boolean isOpening() {
-        return isOpening();
-    }
-
-    public boolean isClosing() {
-        return ! isOpening();
-    } */
-
-    @Override
-    public String toString() {
-        return "@Command(" + (opening ? "open" : "close") + "): " + keyword;
+    public String repr(int d) {
+        String buffer = "@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n";
+        if (element instanceof Element) {
+            buffer += "   " + ((Element) element).repr(d + 1);
+        } else {
+            buffer += "   " + repr(String.valueOf(element));
+        }
+        buffer += "\n";
+        for (int i=0; i<betweenTags.size(); i++) {
+            Object obj = betweenTags.get(i);
+            if (obj instanceof Element) {
+                buffer += "   " + ((Element) obj).repr(d + 2);
+            } else {
+                buffer += "   " + repr(String.valueOf(obj));
+            }
+            buffer += ((i < betweenTags.size()-1) ? "\n" : "");
+        }
+        return buffer;
     }
 
     @Override
@@ -67,6 +74,7 @@ public class Command extends Element {
                 Command cmd = (Command) line;
                 if (cmd.opening) {
                     cmd.readUntilClosing(stack);
+                    betweenTags.add(cmd);
                 } else {
                     if (! cmd.keyword.getKeyword().equals(keyword.getKeyword())) {
                         throw new TemplateException("Mismatch closing tag for command '%s' at position '%s' (reach '%s' at position '%s').", keyword.getKeyword(), cursor.getPosition(), cmd.keyword.getKeyword(), cmd.cursor.getPosition());

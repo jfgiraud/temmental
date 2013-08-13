@@ -2,6 +2,9 @@
 You like these fruits:
 ~$fruits:'bye#for~
 This fruit: ~$fruit~
+  a~$b#if~
+    hh
+  ~#if~z
 ~#for~
 
 <!-- #section first -->

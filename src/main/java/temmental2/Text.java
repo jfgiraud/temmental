@@ -11,11 +11,6 @@ class Text extends Element {
 		this.expr = expr;
 	}
 	
-	@Override
-	public String toString() {
-		return "@" + cursor.getPosition() + "\tText(" + expr + ")";
-	}
-
 	public boolean equals(Object o) {
 		if (o == null || ! (o instanceof Text))
 			return false;
@@ -32,5 +27,10 @@ class Text extends Element {
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		return expr;
 	}
+
+    @Override
+    public String repr(int d) {
+        return "@" + cursor.getPosition() + pref(d) + "Text(" + repr(expr) + ")";
+    }
 
 }

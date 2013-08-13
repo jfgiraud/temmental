@@ -69,4 +69,25 @@ abstract class Element {
         }
 		return args;
 	}
+
+    protected final String pref(int d) {
+        String p = "\t";
+        for (int i=0; i<d; i++) {
+            p += "\t";
+        }
+        return p;
+    }
+
+    public final String toString() {
+        return repr(0);
+    }
+
+    public abstract String repr(int d);
+
+    protected static String repr(String s) {
+        s = s.replace("\n", "\u00b6");
+        s = s.replace(" ", "\u00b7");
+        return s;
+    }
+
 }

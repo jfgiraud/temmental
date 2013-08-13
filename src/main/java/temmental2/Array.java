@@ -21,8 +21,13 @@ class Array extends Element {
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		return create_parameters_after_process(parameters, functions, model, messages);
 	}
-	
-	public boolean equals(Object o) {
+
+    @Override
+    public String repr(int d) {
+        return pref(d) + "Array";
+    }
+
+    public boolean equals(Object o) {
 		if (o == null || ! (o instanceof Array))
 			return false;
 		Array oc = (Array) o;

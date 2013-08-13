@@ -1,13 +1,17 @@
 
 package temmental2;
 
+
 import java.io.File;
+import java.io.Reader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -161,9 +165,6 @@ public class Template {
 	    Stack oldOut = new Stack();
 	    Stack out = new Stack();
 	    stack.reverse();
-
-        stack.printStack(System.out);
-
 	    while (! stack.empty()) {
 	        Object obj = stack.pop();
 	        if (obj instanceof Command) {
@@ -174,10 +175,10 @@ public class Template {
 	            out.push(obj);
 	        }
 	    }
-	    
+
 	    if (! oldOut.empty()) {
             throw new TemplateException("A command is not closed!");
-        } 
+        }
 	    
         return out;
     }
@@ -296,7 +297,6 @@ public class Template {
 	
 	private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
 		Stack stack = sections.get(sectionName);
-        stack.printStack(System.out);
 		for (int i=stack.depth(); i>0; i--) {
 			Object o = writeObject(functions, model, messages, stack.value(i));
 			if (o != null) {
@@ -304,6 +304,17 @@ public class Template {
 			}
 		}
 	}
+
+    public void printStructure(PrintStream out) throws IOException {
+        printStructure(new PrintWriter(out));
+    }
+
+    public void printStructure(PrintWriter out) throws IOException {
+        for (Map.Entry<String, Stack> entry : sections.entrySet()) {
+            out.println("--- section '" + entry.getKey() + "'");
+            entry.getValue().printStack(out);
+        }
+    }
 	
     public TemplateMessages getMessages() {
         return messages;

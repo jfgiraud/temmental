@@ -1,16 +1,16 @@
 package temmental2;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
@@ -88,8 +88,6 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
 		try {
 			template.parseString(pattern, true);
-			System.out.println(">>assert");
-			template.getStack().printStack(System.out);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
 			assertEquals(expectedMessage, e.getMessage());

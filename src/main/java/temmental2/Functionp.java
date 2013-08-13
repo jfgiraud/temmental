@@ -24,11 +24,6 @@ class Functionp extends Function {
 	}
 	
 	@Override
-	public String toString() {
-		return "@" + cursor.getPosition() + "\tFunctionp(" + function + "," + initParameters + ", " + input + ")";
-	}
-
-	@Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		String o = (String) function.writeObject(functions, model, messages);
 
@@ -160,5 +155,10 @@ class Functionp extends Function {
 		} 
 		return false;
 	}
+
+    public String repr(int d) {
+        return "@" + cursor.getPosition() + pref(d) + "Functionp(" + function + "," + initParameters + ", " + input + ")";
+    }
+
 
 }

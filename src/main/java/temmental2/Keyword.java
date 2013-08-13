@@ -31,4 +31,7 @@ class Keyword {
 		return oc.keyword.equals(keyword) && oc.cursor.equals(cursor);
 	}
 
+    public Cursor getCursor() {
+        return cursor;
+    }
 }
