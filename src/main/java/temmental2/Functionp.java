@@ -156,8 +156,9 @@ class Functionp extends Function {
 		return false;
 	}
 
-    public String repr(int d) {
-        return "@" + cursor.getPosition() + pref(d) + "Functionp(" + function + "," + initParameters + ", " + input + ")";
+    @Override
+    public String repr(int d, boolean displayPosition) {
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Functionp(" + function + "," + initParameters + "," + input + ")";
     }
 
 
