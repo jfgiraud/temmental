@@ -21,8 +21,8 @@ class Function extends Element {
 	}
 	
 	@Override
-	public String repr(int d) {
-		return "@" + cursor.getPosition() + pref(d) + "Function(" + function + ", " + input + ")";
+	public String repr(int d, boolean displayPostion) {
+		return (displayPostion ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + ", " + input + ")";
 	}
 
 	@Override

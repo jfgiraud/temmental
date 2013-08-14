@@ -17,8 +17,8 @@ class Identifier extends Element {
 	}
 	
 	@Override
-	public String repr(int d) {
-		return "@" + cursor.getPosition() + pref(d) + "Identifier(" + identifier + ")";
+	public String repr(int d, boolean displayPostion) {
+        return (displayPostion ? "@" + cursor.getPosition() + pref(d) : "") + "Identifier(" + identifier + ")";
 	}
 
 	public boolean equals(Object o) {

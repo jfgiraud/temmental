@@ -15,8 +15,8 @@ class Message extends Element {
 	}
 	
 	@Override
-	public String repr(int d) {
-		return "@" + cursor.getPosition() + pref(d) + "Message(" + messageIdentifier.getIdentifier() + "," + parameters + ")";
+	public String repr(int d, boolean displayPosition) {
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Message(" + messageIdentifier.getIdentifier() + "," + parameters + ")";
 	}
 
 	@Override

@@ -274,7 +274,7 @@ public class Stack {
 			out.write(i + ": ");
             Object o = value(i);
             if (o instanceof Element) {
-                out.write(((Element) o).repr(0));
+                out.write(((Element) o).repr(0, true));
             } else {
                 out.write(repr(String.valueOf(o)));
             }

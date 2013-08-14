@@ -12,8 +12,8 @@ class Char extends Element {
 	}
 	
 	@Override
-	public String repr(int d) {
-		return "@" + cursor.getPosition() + pref(d) + "Char(" + expr + ")";
+	public String repr(int d, boolean displayPosition) {
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Char(" + expr + ")";
 	}
 
 	public boolean equals(Object o) {

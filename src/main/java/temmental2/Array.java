@@ -23,8 +23,8 @@ class Array extends Element {
 	}
 
     @Override
-    public String repr(int d) {
-        return pref(d) + "Array";
+    public String repr(int d, boolean displayPosition) {
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Array";
     }
 
     public boolean equals(Object o) {

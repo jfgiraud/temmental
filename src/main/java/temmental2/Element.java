@@ -79,10 +79,10 @@ abstract class Element {
     }
 
     public final String toString() {
-        return repr(0);
+        return repr(0, false);
     }
 
-    public abstract String repr(int d);
+    public abstract String repr(int d, boolean displayPosition);
 
     protected static String repr(String s) {
         s = s.replace("\n", "\u00b6");

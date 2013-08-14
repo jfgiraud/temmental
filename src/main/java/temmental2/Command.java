@@ -23,10 +23,10 @@ public class Command extends Element {
         this(keyword, cursor, null);
     }
 
-    public String repr(int d) {
+    public String repr(int d, boolean displayPosition) {
         String buffer = "@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n";
         if (element instanceof Element) {
-            buffer += "   " + ((Element) element).repr(d + 1);
+            buffer += "   " + ((Element) element).repr(d + 1, true);
         } else {
             buffer += "   " + repr(String.valueOf(element));
         }
@@ -34,7 +34,7 @@ public class Command extends Element {
         for (int i=0; i<betweenTags.size(); i++) {
             Object obj = betweenTags.get(i);
             if (obj instanceof Element) {
-                buffer += "   " + ((Element) obj).repr(d + 2);
+                buffer += "   " + ((Element) obj).repr(d + 2, true);
             } else {
                 buffer += "   " + repr(String.valueOf(obj));
             }
