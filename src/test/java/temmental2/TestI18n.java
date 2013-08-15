@@ -9,10 +9,8 @@ import java.util.Locale;
 public class TestI18n extends TestCase {
 
     private static final Locale locale_en = new Locale("en");
-    private static final Locale locale_en_AU = new Locale("en", "AU");
     private static final Locale locale_en_CA = new Locale("en", "CA");
     private static final Locale locale_en_GB = new Locale("en", "GB");
-    private static final Locale locale_en_US = new Locale("en", "US");
     private static final Locale locale_es_AR = new Locale("es", "AR");
     private static final Locale locale_es_BO = new Locale("es", "BO");
     private static final Locale locale_fr_CA = new Locale("fr", "CA");

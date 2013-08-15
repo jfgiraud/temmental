@@ -1,7 +1,6 @@
 <!-- #section second -->
 You like these fruits:
-~$fruits:'bye<"a
-z">#for~
+~$fruits:'bye<"az">#for~
 This fruit: ~$fruit~
   a~$b#if~
     hh

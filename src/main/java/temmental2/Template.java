@@ -156,12 +156,12 @@ public class Template {
 						stack.push(o);
 					}
 				}
-				sections.put(sectionName, commandize(stack, parseExpression));
+				sections.put(sectionName, createCommands(stack, parseExpression));
 			}
 		}
 	}
 
-	private Stack commandize(Stack stack, boolean parseExpression) throws TemplateException, IOException {
+	private Stack createCommands(Stack stack, boolean parseExpression) throws TemplateException, IOException {
 	    Stack oldOut = new Stack();
 	    Stack out = new Stack();
 	    stack.reverse();
@@ -292,6 +292,10 @@ public class Template {
 			return ((Message) value).writeObject(functions, model, messages);
 		}
 		
+        if (value instanceof Command) {
+            return ((Command) value).writeObject(functions, model, messages);
+        }
+
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
 	}
 	
@@ -324,7 +328,7 @@ public class Template {
 		return filepath;
 	}
 
-    String formatForTest(String format, HashMap<String, Object> model) throws IOException, TemplateException {
+    String formatForTest(String format, Map<String, Object> model) throws IOException, TemplateException {
     	parseString(format, true);
         StringWriter out = new StringWriter();
         writeSection(out, DEFAULT_SECTION, (Map<String, Object>) transforms, model);

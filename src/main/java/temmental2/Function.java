@@ -21,8 +21,8 @@ class Function extends Element {
 	}
 	
 	@Override
-	public String repr(int d, boolean displayPostion) {
-		return (displayPostion ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
+	public String repr(int d, boolean displayPosition) {
+		return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
 	}
 
 	@Override
@@ -63,7 +63,7 @@ class Function extends Element {
 			throws TemplateException {
 		
 		
-		if (params != null && ! ((Class<?>)method.getParameterTypes()[0]).isAssignableFrom(((Class<?>)params.getClass()))) {
+		if (params != null && ! method.getParameterTypes()[0].isAssignableFrom(params.getClass())) {
 			throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s. It receives %s.", 
 					getIdentifier(),
 					cursor.getPosition(),
@@ -72,21 +72,21 @@ class Function extends Element {
 					params.getClass().getCanonicalName()); 
 		}
 		
-		Exception occured = null;
+		Exception occurred;
 		try {
 			if (params == null)
 				return method.invoke(obj);
 			else 
 				return method.invoke(obj, params);
 		} catch (IllegalAccessException e) {
-			occured = e;
+			occurred = e;
 		} catch (IllegalArgumentException e) {
-			occured = e;
+			occurred = e;
 		} catch (InvocationTargetException e) {
-			occured = e;
+			occurred = e;
 		}
 		
-		if (! ((Class<?>)method.getDeclaringClass()).isAssignableFrom(((Class<?>)obj.getClass()))) {
+		if (! method.getDeclaringClass().isAssignableFrom(obj.getClass())) {
 			throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s. It receives %s.", 
 					getIdentifier(),
 					cursor.getPosition(),
@@ -102,7 +102,7 @@ class Function extends Element {
 						(method.getParameterTypes().length == 1 ? "one" : Integer.toString(method.getParameterTypes().length)),
 						(method.getParameterTypes().length > 1 ? "s" : "")); 
 			} else {
-				throw new TemplateException(occured, "Unable to determine reason.");
+				throw new TemplateException(occurred, "Unable to determine reason.");
 			}
 		}
 	} 

@@ -12,7 +12,7 @@ import static temmental2.TemplateUtils.createModel;
 public class TestTemplateTest extends TestCase {
 
     protected HashMap<String, Object> filters;
-    private HashMap<String, Object> model;
+    private Map<String, Object> model;
     protected Properties properties;
     protected StringWriter out;
     
@@ -92,6 +92,17 @@ public class TestTemplateTest extends TestCase {
         expectedModel = new HashMap<String, Object>();
         expectedModel.put("fruits", list);
         assertEquals(expectedModel, models.get(0));
+    }
+
+    public void testCommand() throws IOException, TemplateException {
+        Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+        List<Map<String, Object>> elements = createList(
+                createModel("elem", 1),
+                createModel("elem", 1),
+                createModel("elem", 1)
+        );
+        model = createModel("l", elements);
+        assertEquals("zzz", template.formatForTest("~$l#iter~<~$elem~>~#iter~", model));
     }
 
 }

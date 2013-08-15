@@ -50,7 +50,8 @@ public class Command extends Element {
 
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        System.out.println(model);
+        throw new TemplateException("jjj");
     }
 
     @Override
