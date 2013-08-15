@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static temmental2.StringUtils.viewWhiteSpaces;
+
 
 public class Stack {
 	
@@ -268,26 +270,17 @@ public class Stack {
 	
 	public void printStack(PrintWriter out) {
 		for (int i=depth(); i>0; i--) {
-//            v = v.replace("\n", "\u00b6");
-//            v = v.replace(" ", "\u00b7");
-//            v = v.replace("\u00a6", "\n");
 			out.write(i + ": ");
             Object o = value(i);
             if (o instanceof Element) {
                 out.write(((Element) o).repr(0, true));
             } else {
-                out.write(repr(String.valueOf(o)));
+                out.write(viewWhiteSpaces(String.valueOf(o)));
             }
             out.write('\n');
 		}
 		out.flush();
 	}
-
-    private static String repr(String s) {
-        s = s.replace("\n", "\u00b6");
-        s = s.replace(" ", "\u00b7");
-        return s;
-    }
 
 //	void reverse() {
 //		Collections.reverse(elements);

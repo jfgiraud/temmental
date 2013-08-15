@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static temmental2.StringUtils.viewWhiteSpaces;
+
 public class Command extends Element {
 
     private Keyword keyword;
@@ -28,7 +30,7 @@ public class Command extends Element {
         if (element instanceof Element) {
             buffer += "   " + ((Element) element).repr(d + 1, true);
         } else {
-            buffer += "   " + repr(String.valueOf(element));
+            buffer += "   " + viewWhiteSpaces(String.valueOf(element));
         }
         buffer += "\n";
         for (int i=0; i<betweenTags.size(); i++) {
@@ -36,7 +38,7 @@ public class Command extends Element {
             if (obj instanceof Element) {
                 buffer += "   " + ((Element) obj).repr(d + 2, true);
             } else {
-                buffer += "   " + repr(String.valueOf(obj));
+                buffer += "   " + viewWhiteSpaces(String.valueOf(obj));
             }
             buffer += ((i < betweenTags.size()-1) ? "\n" : "");
         }

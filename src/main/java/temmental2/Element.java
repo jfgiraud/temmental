@@ -84,10 +84,4 @@ abstract class Element {
 
     public abstract String repr(int d, boolean displayPosition);
 
-    protected static String repr(String s) {
-        s = s.replace("\n", "\u00b6");
-        s = s.replace(" ", "\u00b7");
-        return s;
-    }
-
 }

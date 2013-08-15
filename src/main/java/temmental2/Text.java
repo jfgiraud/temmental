@@ -2,6 +2,8 @@ package temmental2;
 
 import java.util.Map;
 
+import static temmental2.StringUtils.viewWhiteSpaces;
+
 class Text extends Element {
 	
 	private String expr;
@@ -30,7 +32,7 @@ class Text extends Element {
 
     @Override
     public String repr(int d, boolean displayPosition) {
-        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Text(" + repr(expr) + ")";
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Text(" + viewWhiteSpaces(expr) + ")";
     }
 
 }
