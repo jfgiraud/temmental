@@ -3,11 +3,7 @@ package temmental2;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class Functionp extends Function {
 
@@ -160,6 +156,5 @@ class Functionp extends Function {
     public String repr(int d, boolean displayPosition) {
         return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Functionp(" + function + "," + initParameters + "," + input + ")";
     }
-
 
 }

@@ -1,9 +1,6 @@
 package temmental2;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -191,34 +188,9 @@ public class StringUtils {
     public static String viewWhiteSpaces(String s) {
         s = s.replace("\n", "\u00b6");
         s = s.replace(" ", "\u00b7");
-        s = s.replace("\t", "\u02c9");
+        //s = s.replace("\t", "\u02c9");
+        s = s.replace("\t", "\u2022");
         return s;
     }
 
-    public static void tree(Writer out, int depth, Collection c) throws IOException {
-        Iterator it = c.iterator();
-        boolean isFirst = true;
-        while (it.hasNext()) {
-            Object o = it.next();
-            boolean isLast = it.hasNext();
-            for (int i=0; i<depth; i++) {
-                if (! isLast) {
-                    out.write("\u2514\u2500");
-                } else {
-                    out.write("\u251c\u2500");
-                }
-                if (i < depth-1) {
-                    out.write("  ");
-                }
-            }
-            if (o instanceof Collection) {
-                tree(out, depth+1, (Collection) o);
-            } else {
-                out.write(" " + String.valueOf(o));
-            }
-            out.write("\n");
-        }
-        out.flush();
-
-    }
 }

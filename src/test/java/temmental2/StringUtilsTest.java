@@ -2,14 +2,10 @@ package temmental2;
 
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class StringUtilsTest {
 
@@ -70,11 +66,4 @@ public class StringUtilsTest {
 		
 	}
 
-    @Test
-    public void testTree() throws IOException {
-        List<Object> list = Arrays.asList("a", "b", Arrays.asList("c", "d"), "e");
-        StringUtils.tree(new PrintWriter(System.out), 1, list);
-        fail();
-    }
-	
 }

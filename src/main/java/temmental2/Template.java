@@ -267,21 +267,23 @@ public class Template {
 
 	
 	static Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException {
-		
+
+        Map<String, Object> newModel = new HashMap<String, Object>(model);
+
 		if (value instanceof String || value instanceof Number)
 			return value;
 
 		if (value instanceof Identifier) {
-			return ((Identifier) value).writeObject(functions, model, messages);
+			return ((Identifier) value).writeObject(functions, newModel, messages);
 		}
 		
 		if (value instanceof Text) {
-			return ((Text) value).writeObject(functions, model, messages);
+			return ((Text) value).writeObject(functions, newModel, messages);
 		}
 		
 		if (value instanceof Function) {
 			Function function = ((Function) value); 
-			Object result = function.writeObject(functions, model, messages);
+			Object result = function.writeObject(functions, newModel, messages);
 			if (result != null && result instanceof Transform) {
 				throw new TemplateException("Unable to apply function '%s' at position '%s'. This function expects one or more parameters. It receives no parameter.",	function.getIdentifier(), function.cursor.getPosition());
 			} 
@@ -289,11 +291,11 @@ public class Template {
 		}
 		
 		if (value instanceof Message) {
-			return ((Message) value).writeObject(functions, model, messages);
+			return ((Message) value).writeObject(functions, newModel, messages);
 		}
 		
         if (value instanceof Command) {
-            return ((Command) value).writeObject(functions, model, messages);
+            return ((Command) value).writeObject(functions, newModel, messages);
         }
 
 		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());

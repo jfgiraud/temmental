@@ -272,10 +272,10 @@ public class Stack {
 		for (int i=depth(); i>0; i--) {
 			out.write(i + ": ");
             Object o = value(i);
-            if (o instanceof Element) {
-                out.write(((Element) o).repr(0, true));
-            } else {
+            if (o instanceof String) {
                 out.write(viewWhiteSpaces(String.valueOf(o)));
+            } else {
+                out.write(String.valueOf(o));
             }
             out.write('\n');
 		}

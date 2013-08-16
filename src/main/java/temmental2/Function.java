@@ -25,7 +25,7 @@ class Function extends Element {
 		return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
 	}
 
-	@Override
+    @Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		Object result = function.writeObject(functions, model, messages);
 		

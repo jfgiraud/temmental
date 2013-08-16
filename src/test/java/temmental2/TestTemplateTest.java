@@ -98,11 +98,11 @@ public class TestTemplateTest extends TestCase {
         Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
         List<Map<String, Object>> elements = createList(
                 createModel("elem", 1),
-                createModel("elem", 1),
-                createModel("elem", 1)
+                createModel("elem", 2),
+                createModel("elem", 3)
         );
-        model = createModel("l", elements);
-        assertEquals("zzz", template.formatForTest("~$l#iter~<~$elem~>~#iter~", model));
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before<1><2><3>before", template.formatForTest("~$elem~~$l#iter~<~$elem~>~#iter~~$elem~", model));
     }
 
 }

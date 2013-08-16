@@ -25,6 +25,7 @@ public class Command extends Element {
         this(keyword, cursor, null);
     }
 
+    @Override
     public String repr(int d, boolean displayPosition) {
         String buffer = "@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n";
         if (element instanceof Element) {
@@ -51,7 +52,7 @@ public class Command extends Element {
     }
 
     @Override
-    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+    Object  writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
         System.out.println(model);
         throw new TemplateException("jjj");
     }
