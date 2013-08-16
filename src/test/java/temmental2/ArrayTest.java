@@ -1,11 +1,10 @@
 package temmental2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Test;
 
 import java.util.List;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class ArrayTest  extends AbstractTestElement {
 

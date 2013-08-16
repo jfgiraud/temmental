@@ -1,8 +1,6 @@
 package temmental2;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static temmental2.StringUtils.viewWhiteSpaces;
 
@@ -13,15 +11,18 @@ public class Command extends Element {
     private List<Object> betweenTags;
     private boolean opening;
 
-    public Command(Keyword keyword, Cursor cursor, Element element) {
+    public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
+        if (! Arrays.asList("for").contains(keyword.getKeyword())) {
+            throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
+        }
         this.keyword = keyword;
         this.element = element;
         this.betweenTags = new ArrayList<Object>();
         this.opening = (element != null);
     }
 
-    public Command(Keyword keyword, Cursor cursor) {
+    public Command(Keyword keyword, Cursor cursor) throws TemplateException {
         this(keyword, cursor, null);
     }
 
@@ -52,9 +53,34 @@ public class Command extends Element {
     }
 
     @Override
-    Object  writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        System.out.println(model);
-        throw new TemplateException("jjj");
+    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+        if (keyword.getKeyword().equals("for")) {
+            Object result = element.writeObject(functions, model, messages);
+            if (! (result instanceof Iterable)) {
+                throw new TemplateException("Command 'for' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
+            }
+            Iterator it = ((Iterable) result).iterator();
+            while (it.hasNext()) {
+                Object c = it.next();
+                if (! (c instanceof Map)) {
+                    throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+                }
+                Map m = new HashMap();
+                m.putAll(model);
+                m.putAll((Map) c);
+                for (Object item : betweenTags) {
+                    if (item instanceof Element) {
+
+                    } else {
+
+                    }
+                }
+            }
+            System.out.println(model);
+            return "xxx";
+        } else {
+            throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
+        }
     }
 
     @Override

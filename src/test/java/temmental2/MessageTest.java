@@ -1,10 +1,8 @@
 package temmental2;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class MessageTest extends AbstractTestElement {
 
@@ -14,7 +12,7 @@ public class MessageTest extends AbstractTestElement {
 		
 		populateProperty("message", "hello mister");
 		
-		assertEquals("hello mister", message.writeObject(null, null, messages));
+		assertEquals("hello mister", message.writeObject( null, null, messages));
 	}
 	
 	@Test

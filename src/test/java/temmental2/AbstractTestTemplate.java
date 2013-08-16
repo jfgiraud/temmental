@@ -38,7 +38,7 @@ public abstract class AbstractTestTemplate {
         return new Keyword(name, new Cursor(position));
     }
 
-    protected Command command(Keyword keyword, String position, Element element) {
+    protected Command command(Keyword keyword, String position, Element element) throws TemplateException {
         return new Command(keyword, new Cursor(position), element);
     }
 

@@ -102,7 +102,7 @@ public class TestTemplateTest extends TestCase {
                 createModel("elem", 3)
         );
         model = createModel("l", elements, "elem", "before");
-        assertEquals("before<1><2><3>before", template.formatForTest("~$elem~~$l#iter~<~$elem~>~#iter~~$elem~", model));
+        assertEquals("before<1><2><3>before", template.formatForTest("~$elem~~$l#for~<~$elem~>~#for~~$elem~", model));
     }
 
 }
