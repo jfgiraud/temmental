@@ -1,5 +1,6 @@
 package temmental2;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ class Message extends Element {
 	}
 
 	@Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		String key = (String) messageIdentifier.writeObject(functions, model, messages);
 
 		List args = create_parameters_after_process(parameters, functions, model, messages);

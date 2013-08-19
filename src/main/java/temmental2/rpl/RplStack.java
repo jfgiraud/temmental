@@ -1,15 +1,11 @@
 package temmental2.rpl;
 
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import temmental2.Stack;
 import temmental2.StackException;
 import temmental2.StringUtils;
+
+import java.io.StringWriter;
+import java.util.*;
 
 
 
@@ -67,24 +63,24 @@ public class RplStack extends Stack {
 	
 	public void add() {
 		_assert_number("ADD", 1, 2);
-        push(Operations.add((Number) pop(), (Number) pop()));
+		push(Operations.add((Number) pop(), (Number) pop()));
 	}
 	
 	public void mul() {
 		_assert_number("MUL", 1, 2);
-        push(Operations.mul((Number) pop(), (Number) pop()));
+		push(Operations.mul((Number) pop(), (Number) pop()));
 	}
 
 	public void sub() {
 		_assert_number("SUB", 1, 2);
 		swap();
-        push(Operations.sub((Number) pop(), (Number) pop()));
+		push(Operations.sub((Number) pop(), (Number) pop()));
 	}
 
 	public void div() {
 		_assert_number("DIV", 1, 2);
 		swap();
-        push(Operations.div((Number) pop(), (Number) pop()));
+		push(Operations.div((Number) pop(), (Number) pop()));
 	}
 
 	public void eq() {
@@ -160,7 +156,7 @@ public class RplStack extends Stack {
 	private boolean istrue(Number n) {
 		return (new Operations.NumberComparator()).compare(n, 0) != 0;
 	}
-	
+
 	public void and() {
 		_assert_boolean("AND", 1, 2);
 		Boolean a = (Boolean) pop();
@@ -373,6 +369,13 @@ public class RplStack extends Stack {
 		_assert_string("LSTRIP", 1);
 		push(StringUtils.lstrip(((String) pop())));
 	}
+
+    public void concat() {
+        _assert_string("CONCAT", 1, 2);
+        String b = (String) pop();
+        String a = (String) pop();
+        push(a.concat(b));
+    }
 	
 	public void rstrip() {
 		_assert_string("RSTRIP", 1);

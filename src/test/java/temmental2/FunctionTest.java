@@ -32,7 +32,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionQuote() throws TemplateException {
+	public void testFunctionQuote() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 		
 		populateTransform("upper", tupper);
@@ -42,7 +42,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionQuoteWithMethod() throws TemplateException {
+	public void testFunctionQuoteWithMethod() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 		
 		populateTransform("upper", mupper);
@@ -52,7 +52,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionVarRequiredAndFound() throws TemplateException {
+	public void testFunctionVarRequiredAndFound() throws TemplateException, IOException {
 		Function f = function(identifier("$f", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 		
 		populateTransform("upper", tupper);
@@ -64,7 +64,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionVarRequiredAndNotFound_AnExceptionIsThrown() throws TemplateException {
+	public void testFunctionVarRequiredAndNotFound_AnExceptionIsThrown() throws TemplateException, IOException {
 		Function f = function(identifier("$f", "-:l1:c2"), identifier("$text", "-:l1:c1"));
 		
 		populateTransform("upper", tupper);
@@ -81,7 +81,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionVarNotFoundButOptional() throws TemplateException {
+	public void testFunctionVarNotFoundButOptional() throws TemplateException, IOException {
 		Function f = function(identifier("$f", "-:l1:c2"), 
 				function(identifier("$g?", "-:l1:c2"), identifier("$text", "-:l1:c2")));
 		
@@ -95,7 +95,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionNoInput() throws TemplateException {
+	public void testFunctionNoInput() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), identifier("$text?", "-:l1:c2"));
 		
 		populateTransform("upper", tupper);
@@ -104,7 +104,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionChain() throws TemplateException {
+	public void testFunctionChain() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), 
 				function(identifier("'quote", "-:l1:c2"), identifier("$text", "-:l1:c2")));
 		
@@ -116,7 +116,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionChainMethod1() throws TemplateException {
+	public void testFunctionChainMethod1() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), 
 				function(identifier("'quote", "-:l1:c2"), identifier("$text", "-:l1:c2")));
 		
@@ -128,7 +128,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionChainMethod2() throws TemplateException {
+	public void testFunctionChainMethod2() throws TemplateException, IOException {
 		Function f = function(identifier("'quote", "-:l1:c2"), 
 				function(identifier("$f", "-:l1:c2"), identifier("$text", "-:l1:c2")));
 		
@@ -172,7 +172,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionCharAtMethodNoParameter() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionCharAtMethodNoParameter() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Function f = function(identifier("'charat", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 		
 		Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
@@ -190,7 +190,7 @@ public class FunctionTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionSubstringTransformNoParameter() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionSubstringTransformNoParameter() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Function f = function(identifier("'substr", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 		
 		Transform tsubstr = new Transform<Integer[], Transform>() {

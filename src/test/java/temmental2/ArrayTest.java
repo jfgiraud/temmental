@@ -2,6 +2,7 @@ package temmental2;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class ArrayTest  extends AbstractTestElement {
 
 	@Test
-	public void testArray() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testArray() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		
 		Transform<List<Integer>, Integer> add = new Transform<List<Integer>, Integer>() {
 			public Integer apply(List<Integer> values) throws TemplateException {

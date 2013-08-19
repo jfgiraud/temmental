@@ -1,5 +1,8 @@
 package temmental2;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.*;
 
 import static temmental2.StringUtils.viewWhiteSpaces;
@@ -47,13 +50,13 @@ public class Command extends Element {
         return buffer;
     }
 
+
     @Override
     String getIdentifier() {
         return keyword.toString();
     }
 
-    @Override
-    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+    Object writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         if (keyword.getKeyword().equals("for")) {
             Object result = element.writeObject(functions, model, messages);
             if (! (result instanceof Iterable)) {
@@ -70,9 +73,12 @@ public class Command extends Element {
                 m.putAll((Map) c);
                 for (Object item : betweenTags) {
                     if (item instanceof Element) {
-
+                        Object o = ((Element) item).writeObject(functions, m, messages);
+                        if (o != null) {
+                            out.write(o.toString());
+                        }
                     } else {
-
+                        out.write(String.valueOf(item));
                     }
                 }
             }
@@ -81,6 +87,14 @@ public class Command extends Element {
         } else {
             throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
         }
+    }
+
+
+    @Override
+    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+        StringWriter sw = new StringWriter();
+        writeObject(sw, functions, model, messages);
+        return sw.toString();
     }
 
     @Override

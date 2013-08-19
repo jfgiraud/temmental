@@ -1,5 +1,6 @@
 package temmental2;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ class Array extends Element {
 	}
 
 	@Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		return create_parameters_after_process(parameters, functions, model, messages);
 	}
 

@@ -1,5 +1,6 @@
 package temmental2;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -26,7 +27,7 @@ class Function extends Element {
 	}
 
     @Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		Object result = function.writeObject(functions, model, messages);
 		
 		String o = (String) result;

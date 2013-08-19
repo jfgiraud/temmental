@@ -266,21 +266,22 @@ public class Template {
 	}
 
 	
-	static Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException {
+	static Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException, IOException {
 
         Map<String, Object> newModel = new HashMap<String, Object>(model);
 
-		if (value instanceof String || value instanceof Number)
+		if (value instanceof String || value instanceof Number) {
 			return value;
+        }
 
 		if (value instanceof Identifier) {
 			return ((Identifier) value).writeObject(functions, newModel, messages);
 		}
-		
+
 		if (value instanceof Text) {
 			return ((Text) value).writeObject(functions, newModel, messages);
 		}
-		
+
 		if (value instanceof Function) {
 			Function function = ((Function) value); 
 			Object result = function.writeObject(functions, newModel, messages);
@@ -289,26 +290,26 @@ public class Template {
 			} 
 			return result;
 		}
-		
+
 		if (value instanceof Message) {
 			return ((Message) value).writeObject(functions, newModel, messages);
 		}
-		
+
         if (value instanceof Command) {
             return ((Command) value).writeObject(functions, newModel, messages);
         }
 
-		throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
+        throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
 	}
 	
 	private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
 		Stack stack = sections.get(sectionName);
 		for (int i=stack.depth(); i>0; i--) {
-			Object o = writeObject(functions, model, messages, stack.value(i));
-			if (o != null) {
-				out.write(o.toString());
-			}
-		}
+            Object o = writeObject(functions, model, messages, stack.value(i));
+            if (o != null) {
+                out.write(o.toString());
+            }
+        }
 	}
 
     public void printStructure(PrintStream out) throws IOException {

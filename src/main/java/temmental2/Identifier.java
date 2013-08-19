@@ -1,5 +1,6 @@
 package temmental2;
 
+import java.io.Writer;
 import java.util.Map;
 
 class Identifier extends Element {
@@ -28,16 +29,16 @@ class Identifier extends Element {
 		return oc.identifier.equals(identifier) && oc.cursor.equals(cursor);
 	}
 
-	@Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		if (identifier.startsWith("'")) {
-			return identifier.substring(1);
-		} else if (identifier.startsWith("$")) {
-			return getInModel(model);
-		} else {
-			throw new TemplateException("Unsupported case #eval for '%s'", identifier);
-		}
-	}
+    @Override
+    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+        if (identifier.startsWith("'")) {
+            return identifier.substring(1);
+        } else if (identifier.startsWith("$")) {
+            return getInModel(model);
+        } else {
+            throw new TemplateException("Unsupported case #eval for '%s'", identifier);
+        }
+    }
 
 	boolean isRequired() {
 		return identifier != null && (identifier.startsWith("'") || ! identifier.endsWith("?"));
@@ -47,5 +48,5 @@ class Identifier extends Element {
 	String getIdentifier() {
 		return identifier;
 	}
-	
+
 }

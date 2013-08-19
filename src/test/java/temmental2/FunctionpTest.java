@@ -2,6 +2,7 @@ package temmental2;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -11,7 +12,7 @@ import static org.junit.Assert.fail;
 public class FunctionpTest extends AbstractTestElement {
 
 	@Test
-	public void testFunctionCharAtTransform() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionCharAtTransform() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Functionp f = functionp(identifier("'charat", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
 		
 		Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
@@ -25,7 +26,7 @@ public class FunctionpTest extends AbstractTestElement {
 	
 	
 	@Test
-	public void testFunctionCharAtMethod() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionCharAtMethod() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Functionp f = functionp(identifier("'charat", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
 		
 		Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
@@ -38,7 +39,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionCharAtMethodInvalidInput() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionCharAtMethodInvalidInput() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Functionp f = functionp(identifier("'charat", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
 		
 		Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
@@ -58,7 +59,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionCharAtMethodWrongNumberOfParameter() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionCharAtMethodWrongNumberOfParameter() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Functionp f = functionp(identifier("'charat", "-:l1:c2"), list(3, 3), identifier("$text", "-:l1:c2"));
 		
 		Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
@@ -76,7 +77,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionCharAtMethodInvalidInitParameterType() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionCharAtMethodInvalidInitParameterType() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Functionp f = functionp(identifier("'charat", "-:l1:c2"), list("z"), identifier("$text", "-:l1:c2"));
 		
 		Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
@@ -94,7 +95,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionSubstrMethod() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testFunctionSubstrMethod() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Method msubstr = String.class.getDeclaredMethod("substring", int.class, int.class);
@@ -107,7 +108,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionSubstrTransform() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testFunctionSubstrTransform() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
@@ -127,7 +128,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionSubstrTransformBadInitParameterType() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testFunctionSubstrTransformBadInitParameterType() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list("2", "5"), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
@@ -153,7 +154,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionSubstrTransformBadInputType() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testFunctionSubstrTransformBadInputType() throws TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
@@ -179,7 +180,7 @@ public class FunctionpTest extends AbstractTestElement {
 	}
 	
 	@Test
-	public void testFunctionIsDigit() throws TemplateException, NoSuchMethodException, SecurityException {
+	public void testFunctionIsDigit() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		Functionp f = functionp(identifier("'indexOf", "-:l1:c2"), list('m'), identifier("$text", "-:l1:c2"));
 		
 		Method indexOf = String.class.getDeclaredMethod("indexOf", int.class);

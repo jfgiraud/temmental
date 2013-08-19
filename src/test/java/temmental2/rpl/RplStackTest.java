@@ -1,6 +1,7 @@
 package temmental2.rpl;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import temmental2.StackException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,10 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Test;
-
-import temmental2.StackException;
-import temmental2.rpl.RplStack;
+import static org.junit.Assert.*;
 
 public class RplStackTest {
 
@@ -140,6 +138,8 @@ public class RplStackTest {
 //	    assertStackOp(list("Lorem Ipsum"), null, list("lorem ipsum"), "camelize");
 	    assertStackOp(list(11), null, list("LOREM IPSUM"), "length");
 	    
+	    assertStackOp(list("loremipsum"), null, list("lorem", "ipsum"), "concat");
+
 	    assertStackOp(list(true), null, list("LOREM IPSUM", "LOREM"), "startswith");
 	    assertStackOp(list(false), null, list("LOREM IPSUM", "LORM"), "startswith");
 	    

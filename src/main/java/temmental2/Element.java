@@ -1,5 +1,6 @@
 package temmental2;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ abstract class Element {
 	
 	abstract String getIdentifier();
 	
-	abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException;
+	abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException;
 	
 	Object getInModel(Map<String, Object> map) throws TemplateException {
 		String varname = getIdentifier();
@@ -44,7 +45,7 @@ abstract class Element {
 		return varname != null && (varname.startsWith("'") || ! varname.endsWith("?"));
 	}
 	
-	List<Object> create_parameters_after_process(List<Object> parameters, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+	List<Object> create_parameters_after_process(List<Object> parameters, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		List<Object> args = new ArrayList<Object>();
         for (int i = 0; i < parameters.size(); i++) {
         	Object parameter = parameters.get(i);
