@@ -1,7 +1,6 @@
 package temmental2;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 
@@ -56,7 +55,7 @@ public class Command extends Element {
         return keyword.toString();
     }
 
-    Object writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+    void writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         if (keyword.getKeyword().equals("for")) {
             Object result = element.writeObject(functions, model, messages);
             if (! (result instanceof Iterable)) {
@@ -72,7 +71,9 @@ public class Command extends Element {
                 m.putAll(model);
                 m.putAll((Map) c);
                 for (Object item : betweenTags) {
-                    if (item instanceof Element) {
+                    if (item instanceof Command) {
+                        ((Command) item).writeObject(out, functions, m, messages);
+                    } else if (item instanceof Element) {
                         Object o = ((Element) item).writeObject(functions, m, messages);
                         if (o != null) {
                             out.write(o.toString());
@@ -82,8 +83,6 @@ public class Command extends Element {
                     }
                 }
             }
-            System.out.println(model);
-            return "xxx";
         } else {
             throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
         }
@@ -92,9 +91,10 @@ public class Command extends Element {
 
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-        StringWriter sw = new StringWriter();
+        /*StringWriter sw = new StringWriter();
         writeObject(sw, functions, model, messages);
-        return sw.toString();
+        return sw.toString();*/
+        throw new TemplateException("writeObject without out parameter should not be called for Command");
     }
 
     @Override

@@ -266,20 +266,29 @@ public class Template {
 	}
 
 	
-	static Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException, IOException {
+	static void writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException, IOException {
 
         Map<String, Object> newModel = new HashMap<String, Object>(model);
 
 		if (value instanceof String || value instanceof Number) {
-			return value;
+			out.write(value.toString());
+            return ;
         }
 
 		if (value instanceof Identifier) {
-			return ((Identifier) value).writeObject(functions, newModel, messages);
+            Object o = ((Identifier) value).writeObject(functions, newModel, messages);
+            if (o != null) {
+                out.write(o.toString());
+            }
+            return ;
 		}
 
 		if (value instanceof Text) {
-			return ((Text) value).writeObject(functions, newModel, messages);
+            Object o = ((Text) value).writeObject(functions, newModel, messages);
+            if (o != null) {
+                out.write(o.toString());
+            }
+            return ;
 		}
 
 		if (value instanceof Function) {
@@ -287,16 +296,25 @@ public class Template {
 			Object result = function.writeObject(functions, newModel, messages);
 			if (result != null && result instanceof Transform) {
 				throw new TemplateException("Unable to apply function '%s' at position '%s'. This function expects one or more parameters. It receives no parameter.",	function.getIdentifier(), function.cursor.getPosition());
-			} 
-			return result;
+			}
+
+            if (result != null) {
+                out.write(result.toString());
+            }
+            return ;
 		}
 
 		if (value instanceof Message) {
-			return ((Message) value).writeObject(functions, newModel, messages);
+            Object result = ((Message) value).writeObject(functions, newModel, messages);
+            if (result != null) {
+                out.write(result.toString());
+            }
+            return ;
 		}
 
         if (value instanceof Command) {
-            return ((Command) value).writeObject(functions, newModel, messages);
+            ((Command) value).writeObject(out, functions, newModel, messages);
+            return ;
         }
 
         throw new TemplateException("Unsupported operation for class '%s'", value.getClass().getName());
@@ -305,10 +323,7 @@ public class Template {
 	private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
 		Stack stack = sections.get(sectionName);
 		for (int i=stack.depth(); i>0; i--) {
-            Object o = writeObject(functions, model, messages, stack.value(i));
-            if (o != null) {
-                out.write(o.toString());
-            }
+            writeObject(out, functions, model, messages, stack.value(i));
         }
 	}
 

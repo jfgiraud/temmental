@@ -1,10 +1,10 @@
 package temmental2.rpl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import temmental2.Reader;
 import temmental2.StackException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StartCmd  extends Reader implements Command {
 
@@ -55,19 +55,6 @@ public class StartCmd  extends Reader implements Command {
 				i = Operations.add(i, (Number) stack.pop());
 			}
 		}
-		// TODO Auto-generated method stub
-		/*
-        elif self.step:
-            stack._assert_enough_elements(2, 'start')
-            stack._assert_number([1, 2], 'start')
-            stop = stack.pop()
-            start = stack.pop()
-            i = start
-            while i <= stop:
-                push_operations(stack, self.loopst, False, True)
-                stack._assert_enough_elements(1, 'start')
-                stack._assert_number([1], 'start')
-                i = i + stack.pop()
-	*/}
+	}
 
 }

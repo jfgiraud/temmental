@@ -109,5 +109,30 @@ public class MessageTest extends AbstractTestElement {
 		
 		assertNull(message.writeObject(null, model, messages));
 	}
+
+    @Test
+    public void testMessageWithRequiredParameterNotPresent() throws TemplateException, IOException {
+        Message message = message(identifier("'message", "-:l1:c1"),
+                list(identifier("$firstname", "-:l1:c2"), identifier("$lastname", "-:l1:c3")));
+
+        populateProperty("message", "hello {0} {1}");
+
+        populateModel("firstname", "John");
+
+        assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
+    }
+
+    @Test
+    public void testMessageWithRequiredParameterNullValue() throws TemplateException, IOException {
+        Message message = message(identifier("'message", "-:l1:c1"),
+                list(identifier("$firstname", "-:l1:c2"), identifier("$lastname", "-:l1:c3")));
+
+        populateProperty("message", "hello {0} {1}");
+
+        populateModel("firstname", "John");
+        populateModel("lastname", null);
+
+        assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
+    }
 	
 }

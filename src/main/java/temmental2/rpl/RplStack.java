@@ -211,16 +211,15 @@ public class RplStack extends Stack {
 	
 	public void eval() { 
 		Object x = pop();
-		if (x instanceof String) {
+		if (x instanceof String || x instanceof Number) {
 			push(x);
 		} else if (x instanceof Function) {
 			((Function) x).apply(this);
 		} else if (x instanceof Prog) {
 			((Prog) x).apply(this, null, false, true);
 		} else {
-			throw new RuntimeException("zzz");
-		}
-		// TODO Auto-generated method stub
+            throw new RuntimeException("eval doesn't support type '" + x.getClass().getCanonicalName() + "'");
+        }
 	}
 	
 	void _assert_enough_elements(String caller, int n) {

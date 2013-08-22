@@ -58,17 +58,14 @@ public class RplStackTest {
 			assertEquals(e.getElements(), i.getElements());
 			assertEquals(r, ret);
 		} catch (IllegalAccessException e1) {
-			e1.printStackTrace();
-			fail("IllegalAccessException");
+			fail("IllegalAccessException " + e1.getMessage());
 		} catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
-			fail("IllegalArgumentException");
+			fail("IllegalArgumentException " + e1.getMessage());
 		} catch (InvocationTargetException e1) {
-			e1.printStackTrace();
 			if (ret != null) {
 				assertEquals(((Exception) ret).getMessage(),  e1.getCause().getMessage());
 			} else {
-				fail("IllegalArgumentException");
+				fail("IllegalArgumentException " + e1.getMessage());
 			}
 		}
 
@@ -124,6 +121,7 @@ public class RplStackTest {
 		
 		
 		assertStackOp(list("a"), null, list(true,"a"), "ift");
+        assertStackOp(list(123), null, list(true,123), "ift");
 	    assertStackOp(list(), null, list(false,"a"), "ift");
 	    assertStackOp(list("a", "b"), new StackException("IFT Error: Bad Argument Type"), list("a","b"), "ift");
 

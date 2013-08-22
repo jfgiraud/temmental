@@ -61,8 +61,32 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.", 
 				"~$msg[]:$function<,$arg>~");
 	}
-	
-	@Test
+
+    @Test
+    public void testErrorNoParameterAfterCommaAndBeforeAngleBracket() throws IOException, TemplateException {
+        assertParseThrowsException("No parameter before '>' at position '-:l1:c24'.",
+                "~$msg[]:$function<$arg,>~");
+    }
+
+    @Test
+    public void testErrorNoParameterAfterCommaAndBeforeSquareBracket() throws IOException, TemplateException {
+        assertParseThrowsException("No parameter before ']' at position '-:l1:c12'.",
+                "~$msg[$arg,]~");
+    }
+
+    @Test
+    public void testErrorNoParameterAfterCommaAndBeforeBracket() throws IOException, TemplateException {
+        assertParseThrowsException("No parameter before ')' at position '-:l1:c8'.",
+                "~($arg,)~");
+    }
+
+    @Test
+    public void testErrorNoParameterAfterCommaAndBeforeCurlyBracket() throws IOException, TemplateException {
+        assertParseThrowsException("BracketTok } not supported at position '-:l1:c8'!",
+                "~{$arg,}~");
+    }
+
+    @Test
 	public void testErrorInvalidBracket() throws IOException, TemplateException {
 		assertParseThrowsException("Corresponding bracket for ')' at position '-:l1:c23' is invalid (found '<' at position '-:l1:c18').", 
 				"~$msg[]:$function<$arg)~");

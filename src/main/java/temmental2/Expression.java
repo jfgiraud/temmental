@@ -65,7 +65,7 @@ class Expression {
 								other.getBracket(), other.getPosition());
 					}
 					out.remove(out.depth());
-					if (commas != out.depth() -1) {
+					if (commas == 0 && commas != out.depth() - 1) {
 						if (b.getBracket() == '>') {
 							throw new TemplateException("Empty init list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
 						} else if (b.getBracket() != ']'){
@@ -76,7 +76,7 @@ class Expression {
 					if (b.getBracket() == '>') {
                         out.printStack(System.out);
 						if (commas != out.depth() - 1) {
-							throw new TemplateException("Too much commas!"); //TODO
+							throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
 						}
 						out.tolist(out.depth());
 						List initParameters = (List) out.pop();
@@ -86,7 +86,7 @@ class Expression {
 						commas = (Integer) oldCommas.pop();
 					} else if (b.getBracket() == ']') { 
 						if ((out.depth() != 0) && (commas != out.depth() - 1)) {
-							throw new TemplateException("Too much commas!"); //TODO
+                            throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
 						}
 						out.tolist(out.depth());
 						List msgParameters = (List) out.pop();
@@ -96,13 +96,13 @@ class Expression {
 						commas = (Integer) oldCommas.pop();
 					} else if (b.getBracket() == ')') {
 						if (commas != out.depth() - 1) {
-							throw new TemplateException("Too much commas!"); //TODO
+                            throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
 						}
 						out.tolist(out.depth());
 						out.push(new Array((List<Object>) out.pop(), other.cursor));
 						commas = (Integer) oldCommas.pop();
 					} else {
-						throw new TemplateException("BracketTok %c not supported!", b.getBracket()); //TODO
+						throw new TemplateException("BracketTok %c not supported at position '%s'!", b.getBracket(), b.getPosition());
 					}
 				}
 			} else if (token instanceof ToApplyTok) {

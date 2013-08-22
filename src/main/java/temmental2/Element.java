@@ -20,8 +20,6 @@ abstract class Element {
 	Object getInModel(Map<String, Object> map) throws TemplateException {
 		String varname = getIdentifier();
 		varname = varname.substring(1);
-		boolean force = varname.endsWith("!");
-		varname = varname.replace("!", "");
 		boolean optional = ! isRequired(varname);
 		if (optional) {
 			varname = varname.substring(0, varname.length()-1);
@@ -31,9 +29,7 @@ abstract class Element {
 				return null;
 			}
 		} else {
-			if (! map.containsKey(varname)) {
-				if (force)
-					return null;
+			if (! map.containsKey(varname) || map.get(varname) == null) {
 				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, cursor.getPosition());
 			} else {
 				return map.get(varname);
@@ -50,19 +46,21 @@ abstract class Element {
         for (int i = 0; i < parameters.size(); i++) {
         	Object parameter = parameters.get(i);
         	Object afterProcess;
-        	if (parameter == null) {
-        		throw new TemplateException("Unable to apply function: null argument"); //FIXME
-        	}
+        	/*if (parameter == null) {
+        		throw new TemplateException("Unable to apply function: parameter #%d is null", i);     //FIXME
+        	} */
         	if (parameter instanceof Element) {
         		afterProcess = ((Element) parameter).writeObject(functions, model, messages);
         	} else {
         		afterProcess = parameter;
         	}
         	if (afterProcess == null) {
-        		if (((Element) parameter).isRequired(((Element) parameter).getIdentifier())) {
+                Element pElem = (Element) parameter;
+        		if (isRequired(pElem.getIdentifier())) {
         			// FIXME pas top le test
-        			throw new TemplateException("Unable to apply function: null argument"+parameter.getClass().getName()); //FIXME
-        		} else {
+        			throw new TemplateException("Unable to apply function: null argument '%s[%s]' at position '%s'.",
+                        pElem.getIdentifier(), (parameters.size() > 1 ? "\u2026" : ""), cursor.getPosition());
+                } else {
         			return null;
         		}
         	}
