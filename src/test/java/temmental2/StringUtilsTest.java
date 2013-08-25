@@ -34,6 +34,16 @@ public class StringUtilsTest {
 	public void testStrip() {
 		assertEquals("a word", StringUtils.strip("\t a word\t "));
 	}
+
+    @Test
+    public void testUpperize() {
+        assertEquals("ÍNTÈRNÁTÎÖNÀLÏZÂÇÏÔN WITH ACCENTS", StringUtils.upperize("ÍntèrnáTîönàlïzâÇïôn with accents"));
+    }
+
+    @Test
+    public void testLowerize() {
+        assertEquals("íntèrnátîönàlïzâçïôn with accents", StringUtils.lowerize("ÍntèrnáTîönàlïzâÇïôn with accents"));
+    }
 	
 	@Test
 	public void testCapitalize() {
@@ -42,9 +52,30 @@ public class StringUtilsTest {
 	
 	@Test
 	public void testTitle() {
-		assertEquals("Íntèrnátîönàlïzâçïôn With Accents", StringUtils.titlelize("ÍntèrnáTîönàlïzâÇïôn with accents"));
+		assertEquals("Íntèrnátîönàlïzâçïôn With Accents", StringUtils.titleize("ÍntèrnáTîönàlïzâÇïôn with accents"));
 	}
-	
+
+    @Test
+    public void testCamelize() {
+        assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn with accents"));
+        assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn_with_accents"));
+    }
+
+    @Test
+    public void testUnaccentify() {
+        assertEquals("InternaTionalizaCion with accents", StringUtils.unaccentify("ÍntèrnáTîönàlïzâÇïôn with accents"));
+    }
+
+    @Test
+    public void testConstantify() {
+        assertEquals("INTERNATIONALIZACION_WITH_ACCENTS", StringUtils.constantify("Íntèrn-áTîönà_lïzâÇïôn  with\taccents[]"));
+    }
+
+    @Test
+    public void testSlugify() {
+        assertEquals("le-tae-xte-ci-dess-ousaeur", StringUtils.slugify("le t~\"à&e   xte ci-dess_ous[]â€"));
+    }
+
 	@Test
 	public void testReverse() {
 		assertEquals(".desrever eb ot txet ehT", StringUtils.reverse("The text to be reversed."));

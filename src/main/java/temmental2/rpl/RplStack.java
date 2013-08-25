@@ -347,7 +347,7 @@ public class RplStack extends Stack {
 	
 	public void title() {
 		_assert_string("TITLE", 1);
-		push(StringUtils.titlelize(((String) pop())));
+		push(StringUtils.titleize(((String) pop())));
 	}
 	
 	public void startswith() {
