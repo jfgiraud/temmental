@@ -53,12 +53,27 @@ public class StringUtilsTest {
 	@Test
 	public void testTitle() {
 		assertEquals("Íntèrnátîönàlïzâçïôn With Accents", StringUtils.titleize("ÍntèrnáTîönàlïzâÇïôn with accents"));
+        assertEquals("The Titleize String Method", StringUtils.titleize("the titleize string method"));
+        assertEquals("The Titleize String  Method", StringUtils.titleize("the titleize string  method"));
+        assertEquals("", StringUtils.titleize(""));
+        assertEquals("Let'S Have Some Fun", StringUtils.titleize("let's have some fun"));
+        assertEquals("A-Dash-Separated-String", StringUtils.titleize("a-dash-separated-string"));
+        assertEquals("A-Dash-Separated-String", StringUtils.titleize("A-DASH-SEPARATED-STRING"));
+        assertEquals("123", StringUtils.titleize("123"));
 	}
 
     @Test
     public void testCamelize() {
         assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn with accents"));
         assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn_with_accents"));
+
+        assertEquals("TheCamelizeStringMethod", StringUtils.camelize("the_camelize_string_method"));
+
+        assertEquals("TheCamelizeStringMethod", StringUtils.camelize("-the-camelize-string-method"));
+        assertEquals("TheCamelizeStringMethod", StringUtils.camelize("the camelize string method"));
+        assertEquals("TheCamelizeStringMethod", StringUtils.camelize(" the camelize string method"));
+        assertEquals("TheCamelizeStringMethod", StringUtils.camelize("the camelize string method"));
+        assertEquals("", StringUtils.camelize(""));
     }
 
     @Test

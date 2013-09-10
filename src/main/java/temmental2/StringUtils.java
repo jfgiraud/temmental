@@ -78,9 +78,7 @@ public class StringUtils {
 	}
 	
 	public static String titleize(String s) {
-
-		final String ACTIONABLE_DELIMITERS = " '-/"; // these cause the character following
-		// to be capitalized
+		final String ACTIONABLE_DELIMITERS = " '-/"; // these cause the character following to be capitalized
 
 		StringBuilder sb = new StringBuilder();
 		boolean capNext = true;
@@ -169,7 +167,7 @@ public class StringUtils {
     }
 
     public static String camelize(String s) {
-        String[] strings = s.toLowerCase().split("[\\s_]");
+        String[] strings = s.toLowerCase().split("[\\s_\\-]");
         for (int i = 0; i < strings.length; i++){
             strings[i] = StringUtils.capitalize(strings[i]);
         }

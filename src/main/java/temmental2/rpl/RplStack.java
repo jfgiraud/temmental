@@ -56,33 +56,32 @@ public class RplStack extends Stack {
 		l_variables.remove(l_variables.size()-1);
 	}
 
-	
-	private List list(Object ... objects) {
-		return Arrays.asList(objects);
-	}
-	
 	public void add() {
 		_assert_number("ADD", 1, 2);
 		push(Operations.add((Number) pop(), (Number) pop()));
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void mul() {
 		_assert_number("MUL", 1, 2);
 		push(Operations.mul((Number) pop(), (Number) pop()));
 	}
 
+    @SuppressWarnings("unused")
 	public void sub() {
 		_assert_number("SUB", 1, 2);
 		swap();
 		push(Operations.sub((Number) pop(), (Number) pop()));
 	}
 
+    @SuppressWarnings("unused")
 	public void div() {
 		_assert_number("DIV", 1, 2);
 		swap();
 		push(Operations.div((Number) pop(), (Number) pop()));
 	}
 
+    @SuppressWarnings("unused")
 	public void eq() {
 		_assert_enough_elements("==", 2);
 		Object a=pop();
@@ -95,9 +94,10 @@ public class RplStack extends Stack {
 	}
 	
 	private void push_bool(boolean b) {
-		push(b /*? 1 : 0*/);
+		push(b);
 	}
 
+    @SuppressWarnings("unused")
 	public void ne() {
 		_assert_enough_elements("!=", 2);
 		Object a=pop();
@@ -108,7 +108,8 @@ public class RplStack extends Stack {
 			push_bool(! a.equals(b));
 		}
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void lt() {
 		_assert_enough_elements("<", 2);
 		Object a=pop();
@@ -119,7 +120,8 @@ public class RplStack extends Stack {
 			throw new AssertionError("< Error: Bad Argument Types");
 		}
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void gt() {
 		_assert_enough_elements(">", 2);
 		Object a=pop();
@@ -131,6 +133,7 @@ public class RplStack extends Stack {
 		}
 	}
 
+    @SuppressWarnings("unused")
 	public void le() {
 		_assert_enough_elements("<=", 2);
 		Object a=pop();
@@ -142,6 +145,7 @@ public class RplStack extends Stack {
 		}
 	}
 
+    @SuppressWarnings("unused")
 	public void ge() {
 		_assert_enough_elements(">=", 2);
 		Object a=pop();
@@ -151,10 +155,6 @@ public class RplStack extends Stack {
 		} else {
 			throw new AssertionError(">= Error: Bad Argument Types");
 		}
-	}
-	
-	private boolean istrue(Number n) {
-		return (new Operations.NumberComparator()).compare(n, 0) != 0;
 	}
 
 	public void and() {
@@ -170,7 +170,8 @@ public class RplStack extends Stack {
 		Boolean b = (Boolean) pop();
 		push_bool(a || b);
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void xor() {
 		_assert_boolean("XOR", 1, 2);
 		Boolean a = (Boolean) pop();
@@ -183,8 +184,8 @@ public class RplStack extends Stack {
 		Boolean a = (Boolean) pop();
 		push_bool(! a);
 	}
-	
-	
+
+    @SuppressWarnings("unused")
 	public void ift() {
 		_assert_enough_elements("IFT", 2);
 		_assert_boolean("IFT", 2);
@@ -195,6 +196,7 @@ public class RplStack extends Stack {
 			drop();
 	}
 
+    @SuppressWarnings("unused")
 	public void ifte() {
 		_assert_enough_elements("IFTE", 3);
 		_assert_boolean("IFTE", 3);
@@ -208,7 +210,8 @@ public class RplStack extends Stack {
 			eval();
 		}
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void eval() { 
 		Object x = pop();
 		if (x instanceof String || x instanceof Number) {
@@ -329,58 +332,68 @@ public class RplStack extends Stack {
 	public void length() {
 		push(((String) pop()).length());		
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void upper() {
 		_assert_string("UPPER", 1);
 		push(((String) pop()).toUpperCase());		
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void lower() {
 		_assert_string("LOWER", 1);
 		push(((String) pop()).toLowerCase());		
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void capitalize() {
 		_assert_string("CAPITALIZE", 1);
 		push(StringUtils.capitalize(((String) pop())));
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void title() {
 		_assert_string("TITLE", 1);
 		push(StringUtils.titleize(((String) pop())));
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void startswith() {
 		_assert_string("STARTSWITH", 1);
 		String pref = ((String) pop());
 		String text = ((String) pop());
 		push( text.startsWith(pref) );
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void endswith() {
 		_assert_string("ENDSWITH", 1);
 		String suffix = ((String) pop());
 		String text = ((String) pop());
 		push( text.endsWith(suffix) );
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void lstrip() {
 		_assert_string("LSTRIP", 1);
 		push(StringUtils.lstrip(((String) pop())));
 	}
 
+    @SuppressWarnings("unused")
     public void concat() {
         _assert_string("CONCAT", 1, 2);
         String b = (String) pop();
         String a = (String) pop();
         push(a.concat(b));
     }
-	
+
+    @SuppressWarnings("unused")
 	public void rstrip() {
 		_assert_string("RSTRIP", 1);
 		push(StringUtils.rstrip(((String) pop())));
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void strip() {
 		_assert_string("STRIP", 1);
 		push(StringUtils.strip(((String) pop())));
@@ -398,7 +411,8 @@ public class RplStack extends Stack {
         String text = (String) pop();
         push(text.replace(what, by));
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void split() {
 		if (depth()>=3 && value() instanceof Integer) {
 			Integer max = (Integer) pop();
@@ -425,7 +439,8 @@ public class RplStack extends Stack {
 			throw new StackException("SPLIT Error: Bad Argument Type");
 		}
 	}
-	
+
+    @SuppressWarnings("unused")
 	public void rsplit() {
 		if (depth()>=3 && value() instanceof Integer) {
 			Integer max = (Integer) pop();
