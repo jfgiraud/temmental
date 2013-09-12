@@ -135,13 +135,14 @@ public class Reader {
 						 "over", "pick", "pick3", "roll", "rolld", "rot", "unrot", "keep", "pop", "push", "remove", "swap", 
 						 "value", "insert", "empty", "clear", "unpick", "tolist", "get", 
 						 "upper", "lower", "capitalize", "title",
-                         "length", "startswith", "endswith", "reverse", "replace", "strip",
-						 "lstrip", "rstrip", "split", "rsplit",
+                         "length", "startswith", "endswith", "reverse", "replace",
+                         "strip", "lstrip", "rstrip",
+                         "split", "rsplit",
 						 "add", "sub", "mul", "div", 
 						 "eq", "ne", "lt", "le", "gt", "ge", 
 						 "ift", "ifte", 
-						 "+", "-", "*", "/", "+", "==", "!=", "<", ">", "<=", ">=", 
-						 "eval", 
+						 "+", "-", "*", "/", "+", "==", "!=", "<", ">", "<=", ">=",
+						 "eval",
 						 "and", "or", "not", "xor").contains(token)) {
 					Map<String,String> associations = new HashMap<String,String>();
                     associations.put("+", "add");
