@@ -14,7 +14,7 @@ public class MessageTest extends AbstractTestElement {
 		
 		populateProperty("message", "hello mister");
 		
-		assertEquals("hello mister", message.writeObject(null, null, messages));
+		assertEquals("hello mister", message.writeObject(transforms, model, messages));
 	}
 	
 	@Test
@@ -26,7 +26,7 @@ public class MessageTest extends AbstractTestElement {
 	
 	private void assertWriteObjectThrowsAnException(String expected, Message message) throws IOException {
 		try {
-			message.writeObject(null, model, messages);
+			message.writeObject(transforms, model, messages);
 			fail("An exception must be raised.");
 		} catch (TemplateException e) {
 			assertEquals(expected, e.getMessage());
@@ -134,5 +134,51 @@ public class MessageTest extends AbstractTestElement {
 
         assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
     }
-	
+
+    @Test
+    public void testMessageWithRequiredParameterNullValueAfterProcess1() throws TemplateException, IOException {
+        Message message = message(identifier("'message", "-:l1:c1"),
+                list(identifier("$firstname", "-:l1:c2"),
+                        function(identifier("'z", "-:l1:c4"),
+                                identifier("$lastname", "-:l1:c3"))
+                        ));
+
+        populateProperty("message", "hello {0} {1}");
+
+        Transform<Integer,Integer> toNull = new Transform<Integer, Integer>() {
+            public Integer apply(Integer value) throws TemplateException {
+                return null;
+            }
+        };
+        populateTransform("z", toNull);
+
+        populateModel("firstname", "John");
+        populateModel("lastname", null);
+
+        assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
+    }
+
+    @Test
+    public void testMessageWithRequiredParameterNullValueAfterProcess2() throws TemplateException, IOException {
+        Message message = message(identifier("'message", "-:l1:c1"),
+                list(identifier("$firstname", "-:l1:c2"),
+                        function(identifier("'z", p(1,11)),
+                                identifier("$lastname", "-:l1:c3"))
+                ));
+
+        populateProperty("message", "hello {0} {1}");
+
+        Transform<String,String> toNull = new Transform<String, String>() {
+            public String apply(String value) throws TemplateException {
+                return null;
+            }
+        };
+        populateTransform("z", toNull);
+
+        populateModel("firstname", "John");
+        populateModel("lastname", "Doe");
+
+        assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
+    }
+
 }

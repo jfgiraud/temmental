@@ -132,8 +132,9 @@ public class RplStackTest {
 	    assertStackOp(list("LOREM IPSUM"), null, list("lorem ipsum"), "upper");
 	    assertStackOp(list("lorem ipsum"), null, list("LOREM IPSUM"), "lower");
 	    assertStackOp(list("Hello the world. bye"), null, list("hello the world. BYE"), "capitalize");
-	    assertStackOp(list("Hello The World. Bye"), null, list("hello the world. BYE"), "title");
-//	    assertStackOp(list("Lorem Ipsum"), null, list("lorem ipsum"), "camelize");
+        assertStackOp(list("Hello The World. Bye"), null, list("hello the world. BYE"), "title");
+
+
 	    assertStackOp(list(11), null, list("LOREM IPSUM"), "length");
 	    
 	    assertStackOp(list("loremipsum"), null, list("lorem", "ipsum"), "concat");
@@ -162,7 +163,7 @@ public class RplStackTest {
 	    assertStackOp(list(list("lorem ipsum dolores", "est")), null, list("lorem ipsum dolores est"), "rsplit", " ", 1);
 	    assertStackOp(list(list("lorem ipsum dolores", "est")), null, list("lorem ipsum dolores est", " ", 1), "rsplit");
 	    
-	    
+	    //     http://api.rubyonrails.org/classes/String.html#method-i-camelcase
 	    
 	    /*""", "",  "", "", , 
 		  "split", "rsplit",*/ 

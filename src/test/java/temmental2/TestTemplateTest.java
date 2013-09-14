@@ -94,7 +94,7 @@ public class TestTemplateTest extends TestCase {
         assertEquals(expectedModel, models.get(0));
     }
 
-    public void testCommand() throws IOException, TemplateException {
+    public void testCommandFor() throws IOException, TemplateException {
         Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
         List<Map<String, Object>> elements = createList(
                 createModel("elem", 1),
@@ -105,4 +105,19 @@ public class TestTemplateTest extends TestCase {
         assertEquals("before<1><2><3>before", template.formatForTest("~$elem~~$l#for~<~$elem~>~#for~~$elem~", model));
     }
 
+    public void testCommandTrue() throws IOException, TemplateException {
+        Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+        model = createModel("cond", true, "name", "jeff");
+        assertEquals("hello jeff", template.formatForTest("~$cond#true~hello ~$name~~#true~", model));
+        model = createModel("cond", false, "name", "jeff");
+        assertEquals("", template.formatForTest("~$cond#true~hello ~$name~~#true~", model));
+    }
+
+    public void testCommandFalse() throws IOException, TemplateException {
+        Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+        model = createModel("cond", true, "name", "jeff");
+        assertEquals("", template.formatForTest("~$cond#false~hello ~$name~~#false~", model));
+        model = createModel("cond", false, "name", "jeff");
+        assertEquals("hello jeff", template.formatForTest("~$cond#false~hello ~$name~~#false~", model));
+    }
 }

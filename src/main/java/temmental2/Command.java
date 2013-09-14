@@ -15,7 +15,7 @@ public class Command extends Element {
 
     public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
-        if (! Arrays.asList("for").contains(keyword.getKeyword())) {
+        if (! Arrays.asList("for", "true", "false").contains(keyword.getKeyword())) {
             throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
         this.keyword = keyword;
@@ -57,34 +57,62 @@ public class Command extends Element {
 
     void writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         if (keyword.getKeyword().equals("for")) {
-            Object result = element.writeObject(functions, model, messages);
-            if (! (result instanceof Iterable)) {
-                throw new TemplateException("Command 'for' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
-            }
-            Iterator it = ((Iterable) result).iterator();
-            while (it.hasNext()) {
-                Object c = it.next();
-                if (! (c instanceof Map)) {
-                    throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
-                }
-                Map m = new HashMap();
-                m.putAll(model);
-                m.putAll((Map) c);
-                for (Object item : betweenTags) {
-                    if (item instanceof Command) {
-                        ((Command) item).writeObject(out, functions, m, messages);
-                    } else if (item instanceof Element) {
-                        Object o = ((Element) item).writeObject(functions, m, messages);
-                        if (o != null) {
-                            out.write(o.toString());
-                        }
-                    } else {
-                        out.write(String.valueOf(item));
-                    }
-                }
-            }
+            writeObjectFor(out, functions, model, messages);
+        } else if (keyword.getKeyword().equals("true")) {
+            writeObjectIf(out, functions, model, messages, false);
+        } else if (keyword.getKeyword().equals("false")) {
+            writeObjectIf(out, functions, model, messages, true);
         } else {
             throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
+        }
+    }
+
+    private void writeObjectIf(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, boolean invert) throws TemplateException, IOException {
+        Object result = element.writeObject(functions, model, messages);
+        if (! (result instanceof Boolean)) {
+            throw new TemplateException("Command '%s' requires a boolean input at position '%s'", invert ? "false" : "true", keyword.getCursor().getPosition());
+        }
+        boolean b = (Boolean) result;
+        if (invert) {
+            b = ! b;
+        }
+        if (b) {
+            Map m = new HashMap();
+            m.putAll(model);
+            writeObjectBetweenTags(out, functions, messages, m);
+        }
+    }
+
+    private void writeObjectFor(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+        Object result = element.writeObject(functions, model, messages);
+        if (! (result instanceof Iterable)) {
+            throw new TemplateException("Command 'for' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
+        }
+        Iterator it = ((Iterable) result).iterator();
+        while (it.hasNext()) {
+            Object c = it.next();
+            if (! (c instanceof Map)) {
+                throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+            }
+            Map m = new HashMap();
+            m.putAll(model);
+            m.putAll((Map) c);
+            writeObjectBetweenTags(out, functions, messages, m);
+        }
+    }
+
+    private void writeObjectBetweenTags(Writer out, Map<String, Object> functions, TemplateMessages messages, Map m) throws TemplateException, IOException {
+        for (Object item : betweenTags) {
+            if (item instanceof Command) {
+                ((Command) item).writeObject(out, functions, m, messages);
+            } else if (item instanceof Element) {
+                Object o = ((Element) item).writeObject(functions, m, messages);
+                if (o != null) {
+                    out.write(o.toString());
+                }
+            } else {
+                out.write(String.valueOf(item));
+            }
         }
     }
 

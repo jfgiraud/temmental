@@ -134,13 +134,15 @@ public class Reader {
 				 } else if (Arrays.asList( "depth", "drop", "drop2", "dropn", "dup", "dup2", "dupdup", "dupn", "ndupn", "nip", 
 						 "over", "pick", "pick3", "roll", "rolld", "rot", "unrot", "keep", "pop", "push", "remove", "swap", 
 						 "value", "insert", "empty", "clear", "unpick", "tolist", "get", 
-						 "upper", "lower", "capitalize", "length", "startswith", "endswith", "reverse", "replace", "strip", 
-						 "lstrip", "rstrip", "title", "split", "rsplit", 
+						 "upper", "lower", "capitalize", "title",
+                         "length", "startswith", "endswith", "reverse", "replace",
+                         "strip", "lstrip", "rstrip",
+                         "split", "rsplit",
 						 "add", "sub", "mul", "div", 
 						 "eq", "ne", "lt", "le", "gt", "ge", 
 						 "ift", "ifte", 
-						 "+", "-", "*", "/", "+", "==", "!=", "<", ">", "<=", ">=", 
-						 "eval", 
+						 "+", "-", "*", "/", "+", "==", "!=", "<", ">", "<=", ">=",
+						 "eval",
 						 "and", "or", "not", "xor").contains(token)) {
 					Map<String,String> associations = new HashMap<String,String>();
                     associations.put("+", "add");

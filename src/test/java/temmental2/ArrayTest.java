@@ -76,4 +76,5 @@ public class ArrayTest  extends AbstractTestElement {
             assertEquals("expectedMessage", e.getMessage());
         }
     }
+
 }
