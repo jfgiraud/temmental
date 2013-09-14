@@ -57,7 +57,7 @@ public class StringUtilsTest {
 
     @Test
     public void testCamelize() {
-        assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn with accents"));
+        assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn  with\taccents"));
         assertEquals("ÍntèrnátîönàlïzâçïônWithAccents", StringUtils.camelize("ÍntèrnáTîönàlïzâÇïôn_with_accents"));
     }
 

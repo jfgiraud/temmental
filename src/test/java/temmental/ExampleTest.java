@@ -5,8 +5,10 @@ import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static temmental.TemplateUtils.convert;
 
@@ -968,6 +970,25 @@ public class ExampleTest extends TestCase {
         */
     	String t[] = new String[] { "t"};
     	assertTrue(t.getClass().isArray());
+    }
+
+    public String unaccent(String s) {
+        String normalized = Normalizer.normalize(s, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        //return normalized.replaceAll("[^\\p{ASCII}]", "");
+    }
+
+    public String deAccent(String str) {
+        String nfdNormalizedString = Normalizer.normalize(str, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(nfdNormalizedString).replaceAll("");
+    }
+
+    public void testX() {
+        for (int i=161;i<=591; i++) {
+            System.out.println(String.format("\"\\u%04x\", \"%s\", // %c", i, deAccent(String.format("%c", i)), i));
+        }
+
     }
 
 }
