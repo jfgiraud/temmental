@@ -178,7 +178,7 @@ public class MessageTest extends AbstractTestElement {
         populateModel("firstname", "John");
         populateModel("lastname", "Doe");
 
-        assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
+        assertWriteObjectThrowsAnException("Unable to render ''message[\u2026]' at position '-:l1:c1'. Parameter '#1' is null!", message);
     }
 
 }

@@ -58,8 +58,8 @@ abstract class Element {
                 Element pElem = (Element) parameter;
         		if (isRequired(pElem.getIdentifier())) {
         			// FIXME pas top le test
-        			throw new TemplateException("Unable to apply function: null argument '%s[%s]' at position '%s'.",
-                        pElem.getIdentifier(), (parameters.size() > 1 ? "\u2026" : ""), cursor.getPosition());
+        			throw new TemplateException("Unable to render '%s[%s]' at position '%s'. Parameter '#%d' is null!",
+                        getIdentifier(), (parameters.size() > 1 ? "\u2026" : ""), cursor.getPosition(), i);
                 } else {
         			return null;
         		}
