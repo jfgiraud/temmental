@@ -201,7 +201,11 @@ public class MessageTest extends AbstractTestElement {
         populateModel("firstname", "John");
         populateModel("lastname", "Doe");
 
+<<<<<<< HEAD
         assertWriteObjectThrowsAnException("Unable to render ''message[…]' at position '-:l1:c1'. Required parameter #2 is null.", message);
+=======
+        assertWriteObjectThrowsAnException("Unable to render ''message[\u2026]' at position '-:l1:c1'. Parameter '#1' is null!", message);
+>>>>>>> 3e8ec0517fcb6b84e3b387dab13cbd362703c24f
     }
 
 }
