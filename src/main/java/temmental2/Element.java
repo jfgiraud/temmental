@@ -58,15 +58,8 @@ abstract class Element {
         	}
         	if (afterProcess == null) {
                 Element pElem = (Element) parameter;
-<<<<<<< HEAD
                 if (pElem instanceof Identifier && ! isRequired(pElem.getIdentifier())) {
                     return null;
-=======
-        		if (isRequired(pElem.getIdentifier())) {
-        			// FIXME pas top le test
-        			throw new TemplateException("Unable to render '%s[%s]' at position '%s'. Parameter '#%d' is null!",
-                        getIdentifier(), (parameters.size() > 1 ? "\u2026" : ""), cursor.getPosition(), i);
->>>>>>> 3e8ec0517fcb6b84e3b387dab13cbd362703c24f
                 } else {
                     throw new TemplateException("Unable to render '%s' at position '%s'. Required parameter #%d is null.",
                         getIdentifierForErrorMessage(), cursor.getPosition(), i+1);
