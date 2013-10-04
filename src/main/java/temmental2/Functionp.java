@@ -158,4 +158,9 @@ class Functionp extends Function {
         return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Functionp(" + function + "," + initParameters + "," + input + ")";
     }
 
+    @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier() + "[\u2026]";
+    }
+
 }

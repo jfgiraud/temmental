@@ -58,4 +58,8 @@ class Message extends Element {
 		return messageIdentifier.getIdentifier();
 	}
 
+    @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier() + "[\u2026]";
+    }
 }

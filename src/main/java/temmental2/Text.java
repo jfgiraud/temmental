@@ -31,6 +31,11 @@ class Text extends Element {
 	}
 
     @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier();
+    }
+
+    @Override
     public String repr(int d, boolean displayPosition) {
         return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Text(" + viewWhiteSpaces(expr) + ")";
     }

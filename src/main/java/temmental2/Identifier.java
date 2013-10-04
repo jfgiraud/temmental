@@ -1,6 +1,5 @@
 package temmental2;
 
-import java.io.Writer;
 import java.util.Map;
 
 class Identifier extends Element {
@@ -40,7 +39,12 @@ class Identifier extends Element {
         }
     }
 
-	boolean isRequired() {
+    @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier();
+    }
+
+    boolean isRequired() {
 		return identifier != null && (identifier.startsWith("'") || ! identifier.endsWith("?"));
 	}
 	

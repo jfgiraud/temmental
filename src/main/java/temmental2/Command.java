@@ -55,6 +55,11 @@ public class Command extends Element {
         return keyword.toString();
     }
 
+    @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier();
+    }
+
     void writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         if (keyword.getKeyword().equals("for")) {
             writeObjectFor(out, functions, model, messages);

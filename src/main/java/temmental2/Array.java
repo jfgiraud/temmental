@@ -18,7 +18,12 @@ class Array extends Element {
 		throw new RuntimeException("Should not be called!");
 	}
 
-	@Override
+    @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier();
+    }
+
+    @Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		return create_parameters_after_process(parameters, functions, model, messages);
 	}

@@ -28,7 +28,12 @@ class Char extends Element {
 		throw new RuntimeException("Characters have no identifier!");
 	}
 
-	@Override
+    @Override
+    public String getIdentifierForErrorMessage() {
+        return getIdentifier();
+    }
+
+    @Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		return expr;
 	}

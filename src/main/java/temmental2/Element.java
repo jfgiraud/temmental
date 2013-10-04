@@ -40,7 +40,9 @@ abstract class Element {
 	static boolean isRequired(String varname) {
 		return varname != null && (varname.startsWith("'") || ! varname.endsWith("?"));
 	}
-	
+
+    public abstract String getIdentifierForErrorMessage();
+
 	List<Object> create_parameters_after_process(List<Object> parameters, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		List<Object> args = new ArrayList<Object>();
         for (int i = 0; i < parameters.size(); i++) {
@@ -56,13 +58,12 @@ abstract class Element {
         	}
         	if (afterProcess == null) {
                 Element pElem = (Element) parameter;
-        		if (isRequired(pElem.getIdentifier())) {
-        			// FIXME pas top le test
-        			throw new TemplateException("Unable to apply function: null argument '%s[%s]' at position '%s'.",
-                        pElem.getIdentifier(), (parameters.size() > 1 ? "\u2026" : ""), cursor.getPosition());
+                if (pElem instanceof Identifier && ! isRequired(pElem.getIdentifier())) {
+                    return null;
                 } else {
-        			return null;
-        		}
+                    throw new TemplateException("Unable to render '%s' at position '%s'. Required parameter #%d is null.",
+                        getIdentifierForErrorMessage(), cursor.getPosition(), i+1);
+                }
         	}
         	args.add(afterProcess);
         }
