@@ -108,15 +108,19 @@ public class Command extends Element {
 
     private void writeObjectBetweenTags(Writer out, Map<String, Object> functions, TemplateMessages messages, Map m) throws TemplateException, IOException {
         for (Object item : betweenTags) {
-            if (item instanceof Command) {
-                ((Command) item).writeObject(out, functions, m, messages);
-            } else if (item instanceof Element) {
-                Object o = ((Element) item).writeObject(functions, m, messages);
-                if (o != null) {
-                    out.write(o.toString());
+            try {
+                if (item instanceof Command) {
+                    ((Command) item).writeObject(out, functions, m, messages);
+                } else if (item instanceof Element) {
+                    Object o = ((Element) item).writeObject(functions, m, messages);
+                    if (o != null) {
+                        out.write(o.toString());
+                    }
+                } else {
+                    out.write(String.valueOf(item));
                 }
-            } else {
-                out.write(String.valueOf(item));
+            } catch (TemplateIgnoreRenderingException e) {
+
             }
         }
     }

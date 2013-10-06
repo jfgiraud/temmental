@@ -33,36 +33,37 @@ class Function extends Element {
 
     @Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-		Object result = function.writeObject(functions, model, messages);
-		
-		String o = (String) result;
 
-		Object fp = functions.get(o);
-				
-		if (fp == null && function.isRequired()) {
-			throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
-		} else if (fp == null) {
-			return null;
-		}
+        Object result = function.writeObject(functions, model, messages);
 
-		Object arg = ((input instanceof Element) 
-						? ((Element) input).writeObject(functions, model, messages)
-						: input);
+        String o = (String) result;
 
-		if (arg == null) {
-			return null;
-		}
+        Object fp = functions.get(o);
 
-		if (fp instanceof Method) {
-			Method method = ((Method) fp);
-			return callMethod(method, o, arg, null);
-		} else if (fp instanceof Transform) {
-			Method method = getApplyMethod((Transform) fp);
-			return callMethod(method, o, fp, arg);
-		} else {
-			throw new TemplateException("Invalid transform function type '%s'.", fp.getClass().getCanonicalName());
-		}
-		
+        if (fp == null && function.isRequired()) {
+            throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
+        } else if (fp == null) {
+            return null;
+        }
+
+        Object arg = ((input instanceof Element)
+                        ? ((Element) input).writeObject(functions, model, messages)
+                        : input);
+
+        if (arg == null) {
+            return null;
+        }
+
+        if (fp instanceof Method) {
+            Method method = ((Method) fp);
+            return callMethod(method, o, arg, null);
+        } else if (fp instanceof Transform) {
+            Method method = getApplyMethod((Transform) fp);
+            return callMethod(method, o, fp, arg);
+        } else {
+            throw new TemplateException("Invalid transform function type '%s'.", fp.getClass().getCanonicalName());
+        }
+
 	}
 
 	protected Object callMethod(Method method, String o, Object obj, Object params)

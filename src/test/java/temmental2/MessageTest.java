@@ -33,6 +33,15 @@ public class MessageTest extends AbstractTestElement {
 		}
 	}
 
+    private void assertWriteObjectThrowsIgnoreRenderingException(String expected, Message message) throws IOException {
+        try {
+            message.writeObject(transforms, model, messages);
+            fail("An exception must be raised.");
+        } catch (TemplateException e) {
+            assertEquals(expected, e.getMessage());
+        }
+    }
+
 	@Test
 	public void testMessageKeyOptionalPresent() throws TemplateException, IOException {
 		Message message = message(identifier("$message?", "-:l1:c1"), 
@@ -56,8 +65,13 @@ public class MessageTest extends AbstractTestElement {
 		
 		populateModel("firstname", "John");
 		populateModel("lastname", "Doe");
-		
-		assertNull(message.writeObject(null, model, messages));
+
+        try {
+		    message.writeObject(null, model, messages);
+            fail("An exception must be raised.");
+        } catch (TemplateIgnoreRenderingException e) {
+            assertEquals("Ignore rendering because key 'message' is not present or has null value in the model map at position '-:l1:c1'.", e.getMessage());
+        }
 	}
 	
 	@Test
@@ -106,8 +120,13 @@ public class MessageTest extends AbstractTestElement {
 		populateProperty("message", "hello {0} {1}");
 		
 		populateModel("lastname", "Doe");
-		
-		assertNull(message.writeObject(null, model, messages));
+
+        try {
+		    message.writeObject(null, model, messages);
+            fail("An exception must be raised.");
+        } catch (TemplateIgnoreRenderingException e) {
+            assertEquals("Ignore rendering because key 'firstname' is not present or has null value in the model map at position '-:l1:c2'.", e.getMessage());
+        }
 	}
 
     @Test
@@ -177,7 +196,7 @@ public class MessageTest extends AbstractTestElement {
 
         populateModel("firstname", "John");
 
-        assertWriteObjectThrowsAnException("Key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
+        assertWriteObjectThrowsIgnoreRenderingException("Ignore rendering because key 'lastname' is not present or has null value in the model map at position '-:l1:c3'.", message);
     }
 
 

@@ -3,6 +3,7 @@ package temmental2;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class IdentifierTest extends AbstractTestElement {
 
@@ -35,8 +36,13 @@ public class IdentifierTest extends AbstractTestElement {
 	@Test
 	public void testIdentifierOptionalNotPresent() throws TemplateException {
 		Identifier variable = new Identifier("$variable?", new Cursor("-:l1:c1"));
-		
-		assertNull(variable.writeObject(null, model, null));
+
+        try {
+            variable.writeObject(null, model, null);
+            fail("An exception must be raised.");
+        } catch (TemplateIgnoreRenderingException e) {
+            assertEquals("Ignore rendering because key 'variable' is not present or has null value in the model map at position '-:l1:c1'.", e.getMessage());
+        }
 	}
 
 	private void assertInvalidSyntaxThrowsAnException(String expected, String expr) {

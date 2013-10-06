@@ -1,13 +1,15 @@
 package temmental2;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import static org.junit.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class FunctionXTest extends AbstractTestElement {
 	
@@ -40,11 +42,24 @@ public class FunctionXTest extends AbstractTestElement {
 		try {
 			template.printFile(out, model);
 			fail("An exception must be raised.");
-		} catch (TemplateException e) {
+		} catch (TemplateIgnoreRenderingException e) {
+            fail("Catch bad exception type: TemplateIgnoreRenderingException");
+        } catch (TemplateException e) {
 			assertEquals(expected, e.getMessage());
 		}
 	}
-	
+
+    private void assertWriteThrowsIgnoreRenderingException(String expected) throws IOException, TemplateException {
+        StringWriter out = new StringWriter();
+        try {
+            template.printFile(out, model);
+            fail("An exception must be raised.");
+        } catch (TemplateIgnoreRenderingException e) {
+            assertEquals(expected, e.getMessage());
+        } catch (TemplateException e) {
+            fail("Catch bad exception type: TemplateException");
+        }
+    }
 	
 
 	private void parse(String string) throws IOException, TemplateException {
@@ -253,7 +268,7 @@ public class FunctionXTest extends AbstractTestElement {
 		parse("~$text:$f?~");
 		populateModel("text", "It is an example!");
 		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
-		assertWriteEquals("");
+		assertWriteThrowsIgnoreRenderingException("Ignore rendering because key 'f' is not present or has null value in the model map at position '-:l1:c8'.");
 	}
 	
 	@Test

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class FunctionTest extends AbstractTestElement {
 
@@ -90,8 +91,13 @@ public class FunctionTest extends AbstractTestElement {
 		
 		populateModel("f", "upper");
 		populateModel("text", "Something...");
-		
-		assertNull(f.writeObject(transforms, model, null));
+
+        try {
+		    f.writeObject(transforms, model, null);
+            fail("An exception must be raised.");
+        } catch (TemplateException e) {
+            assertEquals("Ignore rendering because key 'g' is not present or has null value in the model map at position '-:l1:c2'.", e.getMessage());
+        }
 	}
 	
 	@Test
@@ -99,10 +105,15 @@ public class FunctionTest extends AbstractTestElement {
 		Function f = function(identifier("'upper", "-:l1:c2"), identifier("$text?", "-:l1:c2"));
 		
 		populateTransform("upper", tupper);
-		
-		assertNull(f.writeObject(transforms, model, null));
+
+        try {
+            f.writeObject(transforms, model, null);
+            fail("An exception must be raised.");
+        } catch (TemplateException e) {
+            assertEquals("Ignore rendering because key 'text' is not present or has null value in the model map at position '-:l1:c2'.", e.getMessage());
+        }
 	}
-	
+
 	@Test
 	public void testFunctionChain() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), 

@@ -24,7 +24,7 @@ class Functionp extends Function {
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
 		String o = (String) function.writeObject(functions, model, messages);
 
-		Object fp = functions.get(o);
+        Object fp = functions.get(o);
 				
 		if (fp == null && function.isRequired()) {
 			throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());

@@ -26,7 +26,7 @@ abstract class Element {
 			if (map.containsKey(varname)) {
 				return map.get(varname);
 			} else {
-				return null;
+				throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varname, cursor.getPosition());
 			}
 		} else {
 			if (! map.containsKey(varname) || map.get(varname) == null) {
@@ -58,12 +58,8 @@ abstract class Element {
         	}
         	if (afterProcess == null) {
                 Element pElem = (Element) parameter;
-                if (pElem instanceof Identifier && ! isRequired(pElem.getIdentifier())) {
-                    return null;
-                } else {
-                    throw new TemplateException("Unable to render '%s' at position '%s'. Required parameter #%d is null.",
-                        getIdentifierForErrorMessage(), cursor.getPosition(), i+1);
-                }
+                throw new TemplateException("Unable to render '%s' at position '%s'. Required parameter #%d is null.",
+                    getIdentifierForErrorMessage(), cursor.getPosition(), i+1);
         	}
         	args.add(afterProcess);
         }
