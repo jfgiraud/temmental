@@ -10,7 +10,7 @@ class Identifier extends Element {
 		super(cursor);
 		this.identifier = expr;
 		
-		boolean valid = (expr.matches("'\\w+") || expr.matches("\\$\\w+(\\?)?"));
+		boolean valid = (expr.matches("'\\w+") || expr.matches("\\$\\w+(\\?|!)?"));
 		if (! valid) {
 			throw new TemplateException("Invalid identifier syntax for '%s' at position '%s'.", expr, cursor.getPosition());
 		} 
@@ -45,9 +45,9 @@ class Identifier extends Element {
     }
 
     boolean isRequired() {
-		return identifier != null && (identifier.startsWith("'") || ! identifier.endsWith("?"));
+		return identifier != null && (identifier.startsWith("'") || (! identifier.endsWith("?") && ! identifier.endsWith("!")));
 	}
-	
+
 	@Override
 	String getIdentifier() {
 		return identifier;

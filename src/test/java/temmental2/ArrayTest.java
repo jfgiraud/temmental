@@ -73,7 +73,8 @@ public class ArrayTest  extends AbstractTestElement {
             assertEquals(13, f.writeObject(transforms, model, null));
             fail("An exception must be raised.");
         } catch (Exception e) {
-            assertEquals("expectedMessage", e.getMessage());
+            e.printStackTrace();
+            assertEquals("Unable to render array at position '-:l1:c2'. Required parameter #2 is null.", e.getMessage());
         }
     }
 

@@ -270,7 +270,15 @@ public class FunctionXTest extends AbstractTestElement {
 		populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
 		assertWriteThrowsIgnoreRenderingException("Ignore rendering because key 'f' is not present or has null value in the model map at position '-:l1:c8'.");
 	}
-	
+
+    @Test
+    public void testADynamicFunctionCanBeOptional_CaseUnknown2() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
+        parse("~$text:$f!~");
+        populateModel("text", "It is an example!");
+        populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
+        assertWriteEquals("It is an example!");
+    }
+
 	@Test
 	public void testWhenARequiredDynamicFunctionIsNotFoundAnExceptionIsRaised() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
 		parse("~$text:$f~");
@@ -289,5 +297,34 @@ public class FunctionXTest extends AbstractTestElement {
 		populateModel("b2", 5);
 		assertWriteEquals("lorem");
 	}
-	
+
+    @Test
+    public void testSubstr_ParamUnknown() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        parse("~$text:'substr<$b1,$b2>~");
+        Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
+        populateTransform("substr", func);
+        populateModel("text", "lorem ipsum");
+        populateModel("b1", 5);
+        assertWriteThrowsException("Key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+    }
+
+    @Test
+    public void testSubstr_ParamOptional() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        parse("~$text:'substr<$b1,$b2?>~");
+        Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
+        populateTransform("substr", func);
+        populateModel("text", "lorem ipsum");
+        populateModel("b1", 5);
+        assertWriteThrowsIgnoreRenderingException("Ignore rendering because key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+    }
+
+    @Test
+    public void testSubstr_ParamOptional2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        parse("~$text:'substr<$b1,$b2!>~");
+        Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
+        populateTransform("substr", func);
+        populateModel("text", "lorem ipsum");
+        populateModel("b1", 5);
+        assertWriteEquals("Ignore rendering because key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+    }
 }

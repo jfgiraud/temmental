@@ -22,10 +22,13 @@ abstract class Element {
 		varname = varname.substring(1);
 		boolean optional = ! isRequired(varname);
 		if (optional) {
+            boolean forceempty = varname.endsWith("!");
 			varname = varname.substring(0, varname.length()-1);
 			if (map.containsKey(varname)) {
 				return map.get(varname);
-			} else {
+			} else if (forceempty) {
+                return "";
+            } else {
 				throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varname, cursor.getPosition());
 			}
 		} else {
@@ -36,9 +39,9 @@ abstract class Element {
 			}
 		}
 	}
-	
+
 	static boolean isRequired(String varname) {
-		return varname != null && (varname.startsWith("'") || ! varname.endsWith("?"));
+		return varname != null && (varname.startsWith("'") || (! varname.endsWith("?") && ! varname.endsWith("!")));
 	}
 
     public abstract String getIdentifierForErrorMessage();
@@ -57,9 +60,13 @@ abstract class Element {
         		afterProcess = parameter;
         	}
         	if (afterProcess == null) {
-                Element pElem = (Element) parameter;
-                throw new TemplateException("Unable to render '%s' at position '%s'. Required parameter #%d is null.",
-                    getIdentifierForErrorMessage(), cursor.getPosition(), i+1);
+                if (this instanceof Array) {
+                    throw new TemplateException("Unable to render array at position '%s'. Required parameter #%d is null.",
+                            cursor.getPosition(), i+1);
+                } else {
+                    throw new TemplateException("Unable to render '%s' at position '%s'. Required parameter #%d is null.",
+                        getIdentifierForErrorMessage(), cursor.getPosition(), i+1);
+                }
         	}
         	args.add(afterProcess);
         }

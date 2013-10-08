@@ -45,6 +45,13 @@ public class IdentifierTest extends AbstractTestElement {
         }
 	}
 
+    @Test
+    public void testIdentifierOptionalNotPresent2() throws TemplateException {
+        Identifier variable = new Identifier("$variable!", new Cursor("-:l1:c1"));
+
+        assertEquals("", variable.writeObject(null, model, null));
+    }
+
 	private void assertInvalidSyntaxThrowsAnException(String expected, String expr) {
 		try {
 			new Identifier(expr, new Cursor("-:l1:c1"));

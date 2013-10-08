@@ -31,9 +31,14 @@ class Function extends Element {
 		return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
 	}
 
+    private static final Transform IDT = new Transform<Object, Object>() {
+        public Object apply(Object value) throws TemplateException {
+            return value;
+        }
+    };
+
     @Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-
         Object result = function.writeObject(functions, model, messages);
 
         String o = (String) result;
@@ -42,8 +47,10 @@ class Function extends Element {
 
         if (fp == null && function.isRequired()) {
             throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
-        } else if (fp == null) {
-            return null;
+        } else if (fp == null && function.getIdentifier().endsWith("?")) {
+            throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
+        } else if (fp == null && function.getIdentifier().endsWith("!")) {
+            fp = IDT;
         }
 
         Object arg = ((input instanceof Element)
