@@ -191,5 +191,45 @@ public class FunctionpTest extends AbstractTestElement {
 		
 		assertEquals(2, f.writeObject(transforms, model, null));
 	}
-	
+
+    @Test
+    public void testDynamicFunctionCharAtTransform() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
+        Functionp f = functionp(identifier("$fp", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
+
+        Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
+
+        populateTransform("charat", mcharat);
+
+        populateModel("fp", "charat");
+        populateModel("text", "Something...");
+
+        assertEquals('m', f.writeObject(transforms, model, null));
+    }
+
+    @Test
+    public void testDynamicFunctionCharAtTransform2() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
+        Functionp f = functionp(identifier("$fp?", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
+
+        Method mcharat = String.class.getDeclaredMethod("charAt", int.class);
+
+        populateTransform("charat", mcharat);
+
+        populateModel("text", "Something...");
+
+        try {
+            f.writeObject(transforms, model, null);
+            fail("An exception must be raised");
+        } catch (TemplateException e) {
+            assertEquals("Ignore rendering because key 'fp' is not present or has null value in the model map at position '-:l1:c2'.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDynamicFunctionCharAtTransform3() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
+        Functionp f = functionp(identifier("$fp!", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
+
+        populateModel("text", "Something...");
+
+        assertEquals("Something...", f.writeObject(transforms, model, null));
+    }
 }

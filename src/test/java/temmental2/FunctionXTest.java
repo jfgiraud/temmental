@@ -8,8 +8,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class FunctionXTest extends AbstractTestElement {
 	
@@ -326,5 +325,18 @@ public class FunctionXTest extends AbstractTestElement {
         populateModel("text", "lorem ipsum");
         populateModel("b1", 5);
         assertWriteEquals("Ignore rendering because key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+    }
+
+    @Test
+    public void testFoo() throws NoSuchMethodException {
+        assertTrue(isAssignable(int.class, int.class));
+        assertTrue(isAssignable(Integer.class, Integer.class));
+        assertTrue(isAssignable(int.class, Integer.class));
+        assertTrue(isAssignable(Integer.class, int.class));
+        assertFalse(isAssignable(Integer.class, String.class));
+    }
+
+    private boolean isAssignable(Class a, Class b) {
+        return a.isAssignableFrom(b);
     }
 }

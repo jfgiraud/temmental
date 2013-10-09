@@ -26,12 +26,14 @@ class Functionp extends Function {
 
         Object fp = functions.get(o);
 				
-		if (fp == null && function.isRequired()) {
-			throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
-		} else if (fp == null) {
-			return null;
-		}
-		
+        if (fp == null && function.isRequired()) {
+            throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
+        } else if (fp == null && function.getIdentifier().endsWith("?")) {
+            throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
+        } else if (fp == null && function.getIdentifier().endsWith("!")) {
+            fp = IDT;
+        }
+
 		Object arg = ((input instanceof Element) 
 						? ((Element) input).writeObject(functions, model, messages)
 						: input);
@@ -44,8 +46,10 @@ class Functionp extends Function {
 		if (initParametersProcessed == null) {
 			return null;
 		}
-		
-		if (fp instanceof Transform) {
+
+        if (fp == IDT) {
+            return arg;
+        } else if (fp instanceof Transform) {
 			Method method = getApplyMethod((Transform) fp);
 			
 			List<Object> wrap = new ArrayList<Object>();
@@ -95,10 +99,12 @@ class Functionp extends Function {
 		} catch (InvocationTargetException e) {
 			occured = e;
 		}
-
-		for (int i=0; i<initParametersProcessed.size(); i++) {
-			Object tmpVlue = initParametersProcessed.get(i);
-			if (! ((Class<?>)method.getParameterTypes()[i]).isAssignableFrom(((Class<?>)tmpVlue.getClass()))) {
+        for (int i=0; i<initParametersProcessed.size(); i++) {
+            System.out.println("" + i + " <" + initParametersProcessed.get(i) + ">");
+        }
+        for (int i=0; i<initParametersProcessed.size(); i++) {
+            Object tmpVlue = initParametersProcessed.get(i);
+            if (! (method.getParameterTypes()[i]).isAssignableFrom(tmpVlue.getClass())) {
 				throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s for parameter #%d. It receives %s.", 
 						getIdentifier(),
 						cursor.getPosition(),

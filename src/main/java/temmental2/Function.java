@@ -31,7 +31,7 @@ class Function extends Element {
 		return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
 	}
 
-    private static final Transform IDT = new Transform<Object, Object>() {
+    protected static final Transform IDT = new Transform<Object, Object>() {
         public Object apply(Object value) throws TemplateException {
             return value;
         }
