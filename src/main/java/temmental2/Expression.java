@@ -263,7 +263,7 @@ class Expression {
 		}
 	}
 
-	private static Object evalToken(String expr, Cursor cursor, boolean allowKeyword) throws TemplateException {
+	public static Object evalToken(String expr, Cursor cursor, boolean allowKeyword) throws TemplateException {
 		if (expr.startsWith("\"")) {
 			if (! expr.endsWith("\"")) {
 				throw new TemplateException("Sentence not closed at position '%s').", cursor.getPosition());

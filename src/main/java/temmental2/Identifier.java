@@ -8,13 +8,27 @@ class Identifier extends Element {
 	
 	Identifier(String expr, Cursor cursor) throws TemplateException {
 		super(cursor);
-		this.identifier = expr;
-		
-		boolean valid = (expr.matches("'\\w+") || expr.matches("\\$\\w+(\\?|!)?"));
-		if (! valid) {
-			throw new TemplateException("Invalid identifier syntax for '%s' at position '%s'.", expr, cursor.getPosition());
-		} 
+
+        if (! expr.contains("!")) {
+            this.identifier = expr;
+            checkExprValid(expr);
+        } else {
+            String[] exprs = expr.split("!", 2);
+            this.identifier = exprs[0]+"!";
+            checkExprValid(exprs[0]+"!");
+            if (! exprs[1].equals("")) {
+                Expression.evalToken(exprs[1], cursor.clone(), false);
+            }
+        }
 	}
+
+    private void checkExprValid(String expr) throws TemplateException {
+        boolean valid = (expr.matches("'\\w+") || expr.matches("\\$\\w+(\\?|!)?"));
+        if (! valid) {
+            throw new TemplateException("Invalid identifier syntax for '%s' at position '%s'.", expr, cursor.getPosition());
+        }
+    }
+
 	
 	@Override
 	public String repr(int d, boolean displayPostion) {

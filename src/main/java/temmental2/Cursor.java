@@ -18,7 +18,7 @@ class Cursor {
 		this.file = file;
 		this.line = line;
 		this.column = column;
-		this.linesLength = linesLength;
+		this.linesLength = (linesLength == null ? new Stack() : linesLength);
 	}
 	
 	Cursor(String position) {

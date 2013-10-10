@@ -67,9 +67,15 @@ public class IdentifierTest extends AbstractTestElement {
 
         assertEquals("hello mister", variable.writeObject(null, model, null));
     }
+    @Test
+    public void testIdentifierOptionalNotPresentWithSettedDefaultValueString() throws TemplateException {
+        Identifier variable = new Identifier("$variable!\"some thing\"", new Cursor("-:l1:c1"));
+
+        assertEquals("hello mister", variable.writeObject(null, model, null));
+    }
 
     @Test
-    public void testIdentifierOptionalNotPresentWithSettedDefaultValue() throws TemplateException {
+    public void testIdentifierOptionalNotPresentWithSettedDefaultValueInt() throws TemplateException {
         Identifier variable = new Identifier("$variable!123", new Cursor("-:l1:c1"));
 
         assertEquals(123, variable.writeObject(null, model, null));
