@@ -100,11 +100,8 @@ class Functionp extends Function {
 			occured = e;
 		}
         for (int i=0; i<initParametersProcessed.size(); i++) {
-            System.out.println("" + i + " <" + initParametersProcessed.get(i) + ">");
-        }
-        for (int i=0; i<initParametersProcessed.size(); i++) {
             Object tmpVlue = initParametersProcessed.get(i);
-            if (! (method.getParameterTypes()[i]).isAssignableFrom(tmpVlue.getClass())) {
+            if (! isAssignable(method.getParameterTypes()[i], tmpVlue.getClass())) {
 				throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s for parameter #%d. It receives %s.", 
 						getIdentifier(),
 						cursor.getPosition(),
@@ -117,6 +114,30 @@ class Functionp extends Function {
 		
 		throw new TemplateException(occured, "Unable to determine reason.");
 	}
+
+    static final Map<Class,Class> builtInMap;
+    static {
+        builtInMap = new HashMap<Class, Class>();
+        builtInMap.put(int.class, Integer.class );
+        builtInMap.put(long.class, Long.class );
+        builtInMap.put(double.class, Double.class );
+        builtInMap.put(float.class, Float.class );
+        builtInMap.put(boolean.class, Boolean.class );
+        builtInMap.put(char.class, Character.class );
+        builtInMap.put(byte.class, Byte.class );
+        builtInMap.put(short.class, Short.class );
+    }
+
+    protected static boolean isAssignable(Class a, Class b) {
+        if (a.isPrimitive() ^ b.isPrimitive()) {
+            Class primitive = (a.isPrimitive() ? a : b);
+            Class boxType   = (a.isPrimitive() ? b : a);
+            Class primitiveBoxed = builtInMap.get(primitive);
+            return isAssignable(primitiveBoxed, boxType);
+        } else {
+            return a.isAssignableFrom(b);
+        }
+    }
 	
 	private static Object asArray(Collection<Object> parameters, Class<?> typeIn) {
 		if (typeIn == null) {

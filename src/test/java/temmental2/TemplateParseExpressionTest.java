@@ -297,6 +297,15 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 			array(p(1,2), identifier("$b1", p(1, 3)),identifier("$b2", p(1, 7)))));
 				
 	}
+
+    @Test
+    public void testVariableWithDefaultValue() throws IOException, TemplateException {
+        parseExpression("~$variable!\"some thing\"~");
+
+        assertTokensEquals(identifier("$variable", p(1, 2)));
+
+        assertElementEquals(identifier("$variable", p(1, 2)));
+    }
 	
 	protected void parseExpression(String s) throws IOException, TemplateException {
 		if (displayRule) {
