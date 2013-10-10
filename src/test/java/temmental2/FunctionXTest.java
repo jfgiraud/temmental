@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -328,15 +330,37 @@ public class FunctionXTest extends AbstractTestElement {
     }
 
     @Test
-    public void testFoo() throws NoSuchMethodException {
+    public void testFoo() throws NoSuchMethodException, NoSuchFieldException {
         assertTrue(isAssignable(int.class, int.class));
         assertTrue(isAssignable(Integer.class, Integer.class));
         assertTrue(isAssignable(int.class, Integer.class));
         assertTrue(isAssignable(Integer.class, int.class));
+        assertTrue(isAssignable(String.class, String.class));
         assertFalse(isAssignable(Integer.class, String.class));
+        assertFalse(isAssignable(Integer.class, Long.class));
     }
 
-    private boolean isAssignable(Class a, Class b) {
-        return a.isAssignableFrom(b);
+    static final Map<Class,Class> builtInMap;
+    static {
+        builtInMap = new HashMap<Class, Class>();
+        builtInMap.put(int.class, Integer.class );
+        builtInMap.put(long.class, Long.class );
+        builtInMap.put(double.class, Double.class );
+        builtInMap.put(float.class, Float.class );
+        builtInMap.put(boolean.class, Boolean.class );
+        builtInMap.put(char.class, Character.class );
+        builtInMap.put(byte.class, Byte.class );
+        builtInMap.put(short.class, Short.class );
+    }
+
+    private boolean isAssignable(Class a, Class b) throws NoSuchFieldException {
+        if (a.isPrimitive() ^ b.isPrimitive()) {
+            Class primitive = (a.isPrimitive() ? a : b);
+            Class boxType   = (a.isPrimitive() ? b : a);
+            Class primitiveBoxed = builtInMap.get(primitive);
+            return isAssignable(primitiveBoxed, boxType);
+        } else {
+            return a.isAssignableFrom(b);
+        }
     }
 }
