@@ -309,17 +309,25 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 	}
 
     @Test
-    public void testVariableWithDefaultValue() throws IOException, TemplateException {
+    public void testVariableWithDefaultValueString() throws IOException, TemplateException {
         parseExpression("~$variable!\"some thing\"~");
 
-        assertTokensEquals(identifier("$variable!", p(1, 2)));
+        assertTokensEquals(identifier("$variable!", p(1, 2), text("some thing", p(1,12))));
 
-        assertElementEquals(identifier("$variable!", p(1, 2)));
-
-        fail("assert default value");
+        assertElementEquals(identifier("$variable!", p(1, 2), text("some thing", p(1,12))));
     }
-	
-	protected void parseExpression(String s) throws IOException, TemplateException {
+
+    @Test
+    public void testVariableWithDefaultValueIdentifier() throws IOException, TemplateException {
+        parseExpression("~$variable!$variable2?~");
+
+        assertTokensEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+
+        assertElementEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+    }
+
+
+    protected void parseExpression(String s) throws IOException, TemplateException {
 		if (displayRule) {
 			displayRule(s);
 		}
@@ -336,9 +344,9 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 	}
 
 	protected void assertTokensEquals(Object ... expectedTokens) throws IOException {
-		assertEquals(expectedTokens.length, tokens.depth());
+        assertEquals(expectedTokens.length, tokens.depth());
 		for (int i=0; i<expectedTokens.length; i++) {
-			assertEquals("Invalid element #" + (i+1), expectedTokens[expectedTokens.length-i-1], tokens.value(i+1));
+            assertEquals("Invalid element #" + (i+1), expectedTokens[expectedTokens.length-i-1], tokens.value(i+1));
 		}
 	}
 

@@ -18,24 +18,24 @@ abstract class Element {
 	abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException;
 	
 	Object getInModel(Map<String, Object> map) throws TemplateException {
-		String varname = getIdentifier();
-		varname = varname.substring(1);
-		boolean optional = ! isRequired(varname);
+		String varName = getIdentifier();
+		varName = varName.substring(1);
+		boolean optional = ! isRequired(varName);
 		if (optional) {
-            boolean forceempty = varname.endsWith("!");
-			varname = varname.substring(0, varname.length()-1);
-			if (map.containsKey(varname)) {
-				return map.get(varname);
-			} else if (forceempty) {
-                return "";
+            boolean forceDefault = varName.endsWith("!");
+			varName = varName.substring(0, varName.length()-1);
+			if (map.containsKey(varName)) {
+				return map.get(varName);
+			} else if (forceDefault) {
+                return null;
             } else {
-				throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varname, cursor.getPosition());
+				throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varName, cursor.getPosition());
 			}
 		} else {
-			if (! map.containsKey(varname) || map.get(varname) == null) {
-				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varname, cursor.getPosition());
+			if (! map.containsKey(varName) || map.get(varName) == null) {
+				throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varName, cursor.getPosition());
 			} else {
-				return map.get(varname);
+				return map.get(varName);
 			}
 		}
 	}

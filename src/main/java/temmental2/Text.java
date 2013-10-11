@@ -37,6 +37,8 @@ class Text extends Element {
 
     @Override
     public String repr(int d, boolean displayPosition) {
+        /*d=0;
+        displayPosition=true;*/
         return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Text(" + viewWhiteSpaces(expr) + ")";
     }
 

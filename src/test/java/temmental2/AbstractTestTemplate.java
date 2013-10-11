@@ -30,6 +30,10 @@ public abstract class AbstractTestTemplate {
 		return new BracketTok(name, new Cursor(position));
 	}
 
+    protected Identifier identifier(String name, String position, Object defaultValue) throws TemplateException {
+        return new Identifier(name, new Cursor(position), defaultValue);
+    }
+
 	protected Identifier identifier(String name, String position) throws TemplateException {
 		return new Identifier(name, new Cursor(position));
 	}
