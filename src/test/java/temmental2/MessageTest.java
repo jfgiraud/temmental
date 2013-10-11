@@ -223,4 +223,19 @@ public class MessageTest extends AbstractTestElement {
         assertWriteObjectThrowsAnException("Unable to render ''message[\u2026]' at position '-:l1:c1'. Required parameter #2 is null.", message);
     }
 
+    @Test
+    public void testIdentifierMessageCanHaveDefaultValue() throws IOException, TemplateException {
+        Message message = message(identifier("$message!", "-:l1:c1", "default"),
+                list(identifier("$firstname", "-:l1:c2"), identifier("$lastname", "-:l1:c3")));
+
+        populateProperty("default", "hello {0} {1}");
+
+        populateModel("firstname", "John");
+        populateModel("lastname", "Doe");
+
+        assertEquals("hello John Doe", message.writeObject(null, model, messages));
+    }
+
+
+
 }

@@ -74,7 +74,6 @@ class Expression {
 					}
 					
 					if (b.getBracket() == '>') {
-                        out.printStack(System.out);
 						if (commas != out.depth() - 1) {
 							throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
 						}

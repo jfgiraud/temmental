@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 
 public class TemplateParseExpressionTest extends AbstractTestTemplate {
@@ -325,7 +324,6 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
         assertElementEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
     }
-
 
     protected void parseExpression(String s) throws IOException, TemplateException {
 		if (displayRule) {
