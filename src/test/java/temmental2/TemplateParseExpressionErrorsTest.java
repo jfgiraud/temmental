@@ -93,12 +93,12 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 	}
 
     @Test
-    public void testFilterCannotBeMessage() throws IOException, TemplateException {
+    public void testFilterCanNotBeMessage() throws IOException, TemplateException {
         assertParseThrowsException("xxxx", "~$variable:$f[$b]~");
     }
 
     @Test
-    public void testMessageCanNotHaveDefaultValue() throws IOException, TemplateException {
+    public void testDefaultValueMustBeAfterIdentifier() throws IOException, TemplateException {
         assertParseThrowsException("xxxx", "~$variable[$b]!123~");
     }
 

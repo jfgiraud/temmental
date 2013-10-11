@@ -236,6 +236,32 @@ public class MessageTest extends AbstractTestElement {
         assertEquals("hello John Doe", message.writeObject(null, model, messages));
     }
 
+    @Test
+    public void testIdentifierMessageCanHaveDefaultValue2() throws IOException, TemplateException {
+        Message message = message(identifier("$message!", "-:l1:c1", identifier("$def", "-:l1:c4")),
+                list(identifier("$firstname", "-:l1:c2"), identifier("$lastname", "-:l1:c3")));
+
+        populateProperty("default", "hello {0} {1}");
+
+        populateModel("def", "default");
+        populateModel("firstname", "John");
+        populateModel("lastname", "Doe");
+
+        assertEquals("hello John Doe", message.writeObject(null, model, messages));
+    }
+    @Test
+    public void testIdentifierMessageCanHaveDefaultValue3() throws IOException, TemplateException {
+        Message message = message(identifier("$message!", "-:l1:c1", identifier("'def", "-:l1:c4")),
+                list(identifier("$firstname", "-:l1:c2"), identifier("$lastname", "-:l1:c3")));
+
+        populateProperty("default", "hello {0} {1}");
+
+        populateModel("def", "default");
+        populateModel("firstname", "John");
+        populateModel("lastname", "Doe");
+
+        assertEquals("hello John Doe", message.writeObject(null, model, messages));
+    }
 
 
 }

@@ -229,9 +229,10 @@ class Expression {
 			sr.close();
 		}
 		String expr = word.toString();
+        System.out.println("###"+expr);
 		if (! expr.equals("")) {
 			stack.push(evalToken(expr, cursor.clone(), afterHash));
-		} else {
+        } else {
 			behaviourOnEmptyToken(0, stack, cursor);
 		}
 		

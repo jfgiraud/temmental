@@ -325,6 +325,24 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
         assertElementEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
     }
 
+    @Test
+    public void testMessageWithDefaultKey() throws IOException, TemplateException {
+        parseExpression("~$variable!'prop[]~");
+
+        assertTokensEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+
+        assertElementEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+    }
+
+    @Test
+    public void testMessageWithDefaultKey2() throws IOException, TemplateException {
+        parseExpression("~$variable!\"prop\"[]~");
+
+        assertTokensEquals(identifier("$variable!", p(1, 2), "prop"));
+
+        assertElementEquals(identifier("$variable!", p(1, 2), "prop"));
+    }
+
     protected void parseExpression(String s) throws IOException, TemplateException {
 		if (displayRule) {
 			displayRule(s);
