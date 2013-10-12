@@ -21,10 +21,11 @@ public class DefaultFunction extends Identifier {
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
         try {
-            return super.writeObject(functions, model, messages);
+            return ((Element) input).writeObject(functions, model, messages);
         } catch (TemplateIgnoreRenderingException e) {
             throw e;
         } catch (TemplateException e) {
+            //e.printStackTrace();
             if (defaultValue == null && input instanceof Function) {
                 Object o = ((Function) input).input;
                 if (o instanceof Element) {

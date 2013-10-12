@@ -30,7 +30,7 @@ public abstract class AbstractTestTemplate {
 		return new BracketTok(name, new Cursor(position));
 	}
 
-    protected DefaultFunction or(Identifier e, Object d) throws TemplateException {
+    protected DefaultFunction or(Element e, Object d) throws TemplateException {
         return new DefaultFunction(e, d);
     }
 

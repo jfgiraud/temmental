@@ -374,6 +374,19 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
                         , list()));
     }
 
+    @Test
+    public void testToRename() throws IOException, TemplateException {
+        parseExpression("~$variable[$b]!123~");
+
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                bracket('[', p(1, 11)),
+                identifier("$b", p(1, 12)),
+                bracket(']', p(1, 14)),
+                todefault(p(1, 15)),
+                123
+        );
+    }
+
     protected void parseExpression(String s) throws IOException, TemplateException {
 		if (displayRule) {
 			displayRule(s);

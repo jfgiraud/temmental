@@ -34,14 +34,20 @@ public class DefaultFunctionTest extends AbstractTestElement {
         assertEquals("something...", f.writeObject(null, model, null));
     }
 
-    /*
     @Test
-    public void testIdentifierOptionalNotPresentWithDefaultValue() throws TemplateException {
-        Identifier variable = new Identifier("$variable", new Cursor("-:l1:c1"), "");
+    public void testMessage() throws TemplateException, IOException {
+        // 'msg[$p1]!123
+        DefaultFunction f = new DefaultFunction(
+                message(identifier("'msg", p(1,1)), list(identifier("$p1", p(1,2)))),
+                123
+        );
 
-        assertEquals("", variable.writeObject(null, model, null));
+        assertEquals(123, f.writeObject(null, model, null));
     }
 
+
+
+    /*
     @Test
     public void testIdentifierOptionalPresentWithDefaultValue() throws TemplateException {
         Identifier variable = new Identifier("$variable", new Cursor("-:l1:c1"), "some thing");

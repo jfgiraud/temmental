@@ -98,11 +98,6 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
     }
 
     @Test
-    public void testDefaultValueMustBeAfterIdentifier() throws IOException, TemplateException {
-        assertParseThrowsException("xxxx", "~$variable[$b]!123~");
-    }
-
-    @Test
 	public void testErrorXXX() throws IOException, TemplateException {
 		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.", 
 				"~($variable)@{ upper }:$function~");

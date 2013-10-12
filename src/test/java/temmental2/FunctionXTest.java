@@ -29,7 +29,27 @@ public class FunctionXTest extends AbstractTestElement {
 		populateModel("suffix", "!");
 		assertWriteEquals("hello world!");
 	}
-	
+
+    @Test
+    public void testTestMessageWithGlobalDefaultValue() throws IOException, TemplateException {
+        parse("~'msg[$p1]!\"text\"~");
+        assertWriteEquals("text");
+    }
+
+    @Test
+    public void testTestMessageWithDefaultValue() throws IOException, TemplateException {
+        parse("~'msg[$p1!\"unknown\"]~");
+        populateProperty("msg", "Hello {0}");
+        assertWriteEquals("Hello unknown");
+    }
+
+    @Test
+    public void testTestMessageWithDefaultValue2() throws IOException, TemplateException {
+        parse("~'msg[$p1!]~");
+        populateProperty("msg", "Hello {0}");
+        assertWriteEquals("Hello unknown");
+    }
+
 	private void assertWriteEquals(String expected) throws IOException, TemplateException {
 		StringWriter out = new StringWriter();
 		template.printFile(out, model);
