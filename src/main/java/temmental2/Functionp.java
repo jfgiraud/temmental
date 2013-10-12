@@ -29,8 +29,6 @@ class Functionp extends Function {
             throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
         } else if (fp == null && function.getIdentifier().endsWith("?")) {
             throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
-        } else if (fp == null && ! function.isRequired()) {
-            fp = IDT;
         }
 
 		Object arg = ((input instanceof Element) 
@@ -46,9 +44,7 @@ class Functionp extends Function {
 			return null;
 		}
 
-        if (fp == IDT) {
-            return arg;
-        } else if (fp instanceof Transform) {
+        if (fp instanceof Transform) {
 			Method method = getApplyMethod((Transform) fp);
 			
 			List<Object> wrap = new ArrayList<Object>();

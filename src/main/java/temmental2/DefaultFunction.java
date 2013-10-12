@@ -4,10 +4,12 @@ import java.util.Map;
 
 public class DefaultFunction extends Identifier {
 
+    private final Object input;
     private final Object defaultValue;
 
-    public DefaultFunction(Identifier input, Object defaultValue) throws TemplateException {
+    public DefaultFunction(Element input, Object defaultValue) throws TemplateException {
         super(input.getIdentifier(), input.cursor);
+        this.input = input;
         this.defaultValue = defaultValue;
     }
 
@@ -23,7 +25,16 @@ public class DefaultFunction extends Identifier {
         } catch (TemplateIgnoreRenderingException e) {
             throw e;
         } catch (TemplateException e) {
-            if (defaultValue instanceof Element) {
+            if (defaultValue == null && input instanceof Function) {
+                Object o = ((Function) input).input;
+                if (o instanceof Element) {
+                    return ((Element) o).writeObject(functions, model, messages);
+                } else {
+                    return o;
+                }
+            } else if (defaultValue == null) {
+                return "";
+            } else if (defaultValue instanceof Element) {
                 return ((Element) defaultValue).writeObject(functions, model, messages);
             } else {
                 return defaultValue;

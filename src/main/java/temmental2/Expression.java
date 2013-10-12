@@ -24,7 +24,7 @@ class Expression {
 	public Object parse() throws IOException, TemplateException {
 		Stack tokens = parseToTokens();
 		tokens.reverse();
-        //tokens.printStack(System.out);
+        tokens.printStack(System.out);
 		return interpretTokens(tokens);
 	}
 	
@@ -110,8 +110,10 @@ class Expression {
 				Object input = out.pop();
 				out.push(new Function(filter, input));
 			} else if (token instanceof ToDefaultTok) {
-                Object defaultValue = (tokens.empty() ? "" : tokens.pop());
-                Identifier input = (Identifier) out.pop();
+                //System.out.println("=tok====");tokens.printStack(System.out);
+                //System.out.println("=out====");out.printStack(System.out);
+                Object defaultValue = (! tokens.empty() ? tokens.pop() : null);
+                Element input = (Element) out.pop();
                 out.push(new DefaultFunction(input, defaultValue));
             } else if (token instanceof CommaTok) {
 				commas += 1;
@@ -128,6 +130,7 @@ class Expression {
             }
         }
 		if (out.depth() > 1) {
+            out.printStack(System.out);
 			throw new TemplateException("Too much objects in the stack!");
 		} else if (out.empty()) {
 			throw new TemplateException("Not enough object in the stack!");

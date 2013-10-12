@@ -30,12 +30,6 @@ class Function extends Element {
 		return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
 	}
 
-    protected static final Transform IDT = new Transform<Object, Object>() {
-        public Object apply(Object value) throws TemplateException {
-            return value;
-        }
-    };
-
     @Override
 	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
         Object result = function.writeObject(functions, model, messages);
@@ -51,7 +45,7 @@ class Function extends Element {
         } else if (fp == null && function.getIdentifier().endsWith("?")) {
             throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
         } else if (fp == null && ! function.isRequired()) {
-            fp = IDT;
+           // fp = IDT;
         }
 
         Object arg = ((input instanceof Element)

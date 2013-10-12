@@ -6,7 +6,7 @@ public class ToDefaultTok {
     private Cursor cursor;
 
     ToDefaultTok(Cursor cursor) {
-        this.expr = ":";
+        this.expr = "!";
         this.cursor = cursor.clone();
     }
 

@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -321,12 +319,12 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testSubstr_ParamOptional2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        parse("~$text:'substr<$b1,$b2!>~");
+        parse("~$text:'substr<$b1,$b2!8>~");
         Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
         populateTransform("substr", func);
         populateModel("text", "lorem ipsum");
         populateModel("b1", 5);
-        assertWriteEquals("Ignore rendering because key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+        assertWriteEquals(" ip");
     }
 
     @Test

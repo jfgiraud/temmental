@@ -38,7 +38,6 @@ class Identifier extends Element {
 
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        System.out.println(getIdentifier());
         if (identifier.startsWith("'")) {
             return identifier.substring(1);
         } else if (identifier.startsWith("$")) {

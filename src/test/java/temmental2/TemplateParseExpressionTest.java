@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
 public class TemplateParseExpressionTest extends AbstractTestTemplate {
@@ -308,6 +307,16 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 				
 	}
 
+    @Test
+    public void testVariableWithDefaultValueNumber() throws IOException, TemplateException {
+        parseExpression("~$variable!123~");
+
+        assertTokensEquals(identifier("$variable", p(1, 2)), todefault(p(1, 11)), 123);
+
+        assertElementEquals(
+                or(identifier("$variable", p(1, 2)),
+                        123));
+    }
 
     @Test
     public void testVariableWithDefaultValueString() throws IOException, TemplateException {
