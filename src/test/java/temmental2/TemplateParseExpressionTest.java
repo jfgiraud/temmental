@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
 public class TemplateParseExpressionTest extends AbstractTestTemplate {
@@ -307,40 +308,61 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 				
 	}
 
+
     @Test
     public void testVariableWithDefaultValueString() throws IOException, TemplateException {
         parseExpression("~$variable!\"some thing\"~");
 
-        assertTokensEquals(identifier("$variable!", p(1, 2), text("some thing", p(1,12))));
+        assertTokensEquals(identifier("$variable", p(1, 2)), todefault(p(1, 11)), text("some thing", p(1,12)));
 
-        assertElementEquals(identifier("$variable!", p(1, 2), text("some thing", p(1,12))));
+        assertElementEquals(
+                or(identifier("$variable", p(1, 2)),
+                        text("some thing", p(1,12))));
     }
 
     @Test
     public void testVariableWithDefaultValueIdentifier() throws IOException, TemplateException {
         parseExpression("~$variable!$variable2?~");
 
-        assertTokensEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                todefault(p(1, 11)),
+                identifier("$variable2?", p(1,12)));
 
-        assertElementEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+        assertElementEquals(or(
+                identifier("$variable", p(1, 2)),
+                identifier("$variable2?", p(1,12))));
     }
 
     @Test
     public void testMessageWithDefaultKey() throws IOException, TemplateException {
         parseExpression("~$variable!'prop[]~");
 
-        assertTokensEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                todefault(p(1, 11)),
+                identifier("'prop", p(1,12)),
+                bracket('[', p(1, 17)),
+                bracket(']', p(1, 18))
+                );
 
-        assertElementEquals(identifier("$variable!", p(1, 2), identifier("$variable2?", p(1,12))));
+        assertElementEquals(
+                message(or(identifier("$variable", p(1, 2)), identifier("'prop", p(1, 12)))
+                        , list()));
     }
 
     @Test
     public void testMessageWithDefaultKey2() throws IOException, TemplateException {
         parseExpression("~$variable!\"prop\"[]~");
 
-        assertTokensEquals(identifier("$variable!", p(1, 2), "prop"));
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                todefault(p(1, 11)),
+                text("prop", p(1,12)),
+                bracket('[', p(1, 18)),
+                bracket(']', p(1, 19))
+        );
 
-        assertElementEquals(identifier("$variable!", p(1, 2), "prop"));
+        assertElementEquals(
+                message(or(identifier("$variable", p(1, 2)), text("prop", p(1, 12)))
+                        , list()));
     }
 
     protected void parseExpression(String s) throws IOException, TemplateException {

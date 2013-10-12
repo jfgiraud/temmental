@@ -127,7 +127,7 @@ public class Command extends Element {
 
 
     @Override
-    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
         /*StringWriter sw = new StringWriter();
         writeObject(sw, functions, model, messages);
         return sw.toString();*/

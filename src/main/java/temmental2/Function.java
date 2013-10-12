@@ -1,6 +1,5 @@
 package temmental2;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -38,10 +37,12 @@ class Function extends Element {
     };
 
     @Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
         Object result = function.writeObject(functions, model, messages);
 
         String o = (String) result;
+
+        System.out.println(o);
 
         Object fp = functions.get(o);
 
@@ -49,7 +50,7 @@ class Function extends Element {
             throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
         } else if (fp == null && function.getIdentifier().endsWith("?")) {
             throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
-        } else if (fp == null && function.getIdentifier().endsWith("!")) {
+        } else if (fp == null && ! function.isRequired()) {
             fp = IDT;
         }
 

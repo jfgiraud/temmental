@@ -30,8 +30,8 @@ public abstract class AbstractTestTemplate {
 		return new BracketTok(name, new Cursor(position));
 	}
 
-    protected Identifier identifier(String name, String position, Object defaultValue) throws TemplateException {
-        return new Identifier(name, new Cursor(position), defaultValue);
+    protected DefaultFunction or(Identifier e, Object d) throws TemplateException {
+        return new DefaultFunction(e, d);
     }
 
 	protected Identifier identifier(String name, String position) throws TemplateException {
@@ -61,6 +61,10 @@ public abstract class AbstractTestTemplate {
 	protected ToApplyTok toapply(String position) {
 		return new ToApplyTok(new Cursor(position));
 	}
+
+    protected ToDefaultTok todefault(String position) {
+        return new ToDefaultTok(new Cursor(position));
+    }
 
     protected CommandTok tocommand(String position) {
         return new CommandTok(new Cursor(position));

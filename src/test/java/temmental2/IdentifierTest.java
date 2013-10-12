@@ -45,42 +45,6 @@ public class IdentifierTest extends AbstractTestElement {
         }
 	}
 
-    @Test
-    public void testIdentifierOptionalNotPresent2() throws TemplateException {
-        Identifier variable = new Identifier("$variable!", new Cursor("-:l1:c1"));
-
-        assertEquals("", variable.writeObject(null, model, null));
-    }
-
-    @Test
-    public void testIdentifierOptionalNotPresentWithDefaultValue() throws TemplateException {
-        Identifier variable = new Identifier("$variable!", new Cursor("-:l1:c1"));
-
-        assertEquals("", variable.writeObject(null, model, null));
-    }
-
-    @Test
-    public void testIdentifierOptionalPresentWithDefaultValue() throws TemplateException {
-        Identifier variable = new Identifier("$variable!\"some thing\"", new Cursor("-:l1:c1"));
-
-        populateModel("variable", "hello mister");
-
-        assertEquals("hello mister", variable.writeObject(null, model, null));
-    }
-    @Test
-    public void testIdentifierOptionalNotPresentWithSettedDefaultValueString() throws TemplateException {
-        Identifier variable = new Identifier("$variable!\"some thing\"", new Cursor("-:l1:c1"));
-
-        assertEquals("some thing", variable.writeObject(null, model, null));
-    }
-
-    @Test
-    public void testIdentifierOptionalNotPresentWithSettedDefaultValueInt() throws TemplateException {
-        Identifier variable = new Identifier("$variable!123", new Cursor("-:l1:c1"));
-
-        assertEquals(123, variable.writeObject(null, model, null));
-    }
-
 	private void assertInvalidSyntaxThrowsAnException(String expected, String expr) {
 		try {
 			new Identifier(expr, new Cursor("-:l1:c1"));

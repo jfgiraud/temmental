@@ -100,33 +100,6 @@ public class FunctionTest extends AbstractTestElement {
         }
 	}
 
-    @Test
-    public void testFunctionVarNotFoundButOptional2() throws TemplateException, IOException {
-        Function f = function(identifier("$f", "-:l1:c2"),
-                function(identifier("$g!", "-:l1:c2"), identifier("$text", "-:l1:c2")));
-
-        populateTransform("upper", tupper);
-        populateTransform("quote", tquote);
-
-        populateModel("f", "upper");
-        populateModel("text", "Something...");
-
-        assertEquals("SOMETHING...", f.writeObject(transforms, model, null));
-
-
-    }
-
-    @Test
-    public void testFunctionVarNotFoundButOptional3() throws TemplateException, IOException {
-        Function f = function(identifier("$f!", "-:l1:c2"), identifier("$text", "-:l1:c2"));
-
-        populateModel("text", "Something...");
-
-        assertEquals("Something...", f.writeObject(transforms, model, null));
-
-
-    }
-
 	@Test
 	public void testFunctionNoInput() throws TemplateException, IOException {
 		Function f = function(identifier("'upper", "-:l1:c2"), identifier("$text?", "-:l1:c2"));

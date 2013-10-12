@@ -1,6 +1,5 @@
 package temmental2;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,26 +7,38 @@ import java.util.Map;
 abstract class Element {
 
 	protected Cursor cursor;
-	
-	Element(Cursor cursor) {
+
+    Element(Cursor cursor) {
 		this.cursor = cursor.clone();
 	}
 	
 	abstract String getIdentifier();
 	
-	abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException;
-	
+	abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException;
+
+     /*
+        if (defaultValue instanceof Identifier) {
+            return ((Element) defaultValue).getInModel(map);
+        } else if (defaultValue instanceof Char) {
+            return ((Char) defaultValue).writeObject(null, map, null);
+        } else if (defaultValue instanceof Text) {
+            return ((Text) defaultValue).writeObject(null, map, null);
+        } else if (defaultValue instanceof Element) {
+            throw new TemplateException("Invalid default value at position '%s'. Only identifiers and java type are allowed!", cursor.getPosition());
+        }
+        return defaultValue;
+    }  */
+
 	Object getInModel(Map<String, Object> map) throws TemplateException {
 		String varName = getIdentifier();
 		varName = varName.substring(1);
-		boolean optional = ! isRequired(varName);
+        boolean optional = ! isRequired();
 		if (optional) {
-            boolean forceDefault = varName.endsWith("!");
-			varName = varName.substring(0, varName.length()-1);
+            if (varName.endsWith("?")) {
+			    varName = varName.substring(0, varName.length()-1);
+            }
 			if (map.containsKey(varName)) {
 				return map.get(varName);
-			} else if (forceDefault) {
-                return null;
             } else {
 				throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varName, cursor.getPosition());
 			}
@@ -40,13 +51,14 @@ abstract class Element {
 		}
 	}
 
-	static boolean isRequired(String varname) {
-		return varname != null && (varname.startsWith("'") || (! varname.endsWith("?") && ! varname.endsWith("!")));
-	}
+    boolean isRequired() {
+        String identifier = getIdentifier();
+        return identifier != null && (identifier.startsWith("'") || ! identifier.endsWith("?"));
+    }
 
     public abstract String getIdentifierForErrorMessage();
 
-	List<Object> create_parameters_after_process(List<Object> parameters, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+	List<Object> create_parameters_after_process(List<Object> parameters, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		List<Object> args = new ArrayList<Object>();
         for (int i = 0; i < parameters.size(); i++) {
         	Object parameter = parameters.get(i);
@@ -87,4 +99,13 @@ abstract class Element {
 
     public abstract String repr(int d, boolean displayPosition);
 
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (o instanceof Element) {
+            Element oc = (Element) o;
+            return oc.cursor.equals(cursor);
+        }
+        return false;
+    }
 }

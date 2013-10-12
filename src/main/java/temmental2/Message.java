@@ -1,6 +1,5 @@
 package temmental2;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ class Message extends Element {
 	}
 
 	@Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
 		String key = (String) messageIdentifier.writeObject(functions, model, messages);
 
 		List args = create_parameters_after_process(parameters, functions, model, messages);
@@ -44,7 +43,7 @@ class Message extends Element {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null)
+		if (o == null || ! super.equals(o))
 			return false;
 		if (o instanceof Message) {
 			Message oc = (Message) o;

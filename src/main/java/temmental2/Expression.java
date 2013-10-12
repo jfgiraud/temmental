@@ -24,6 +24,7 @@ class Expression {
 	public Object parse() throws IOException, TemplateException {
 		Stack tokens = parseToTokens();
 		tokens.reverse();
+        //tokens.printStack(System.out);
 		return interpretTokens(tokens);
 	}
 	
@@ -108,7 +109,11 @@ class Expression {
 				Identifier filter = (Identifier) tokens.pop();
 				Object input = out.pop();
 				out.push(new Function(filter, input));
-			} else if (token instanceof CommaTok) {
+			} else if (token instanceof ToDefaultTok) {
+                Object defaultValue = (tokens.empty() ? "" : tokens.pop());
+                Identifier input = (Identifier) out.pop();
+                out.push(new DefaultFunction(input, defaultValue));
+            } else if (token instanceof CommaTok) {
 				commas += 1;
 			} else if (token instanceof CommandTok) {
                 Keyword keyword = (Keyword) tokens.pop();
@@ -183,7 +188,17 @@ class Expression {
 					word = new StringWriter();
 					stack.push(new ToApplyTok(cursor.clone().move1l()));
                     afterHash = false;
-				} else if (! inSQ && ! inDQ && BracketTok.isBracket(currentChar)) {
+				} else if (! inSQ && ! inDQ && currentChar == '!') {
+                    String expr = word.toString();
+                    if (! expr.equals("")) {
+                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
+                    } else {
+                        behaviourOnEmptyToken(currentChar, stack, cursor);
+                    }
+                    word = new StringWriter();
+                    stack.push(new ToDefaultTok(cursor.clone().move1l()));
+                    afterHash = false;
+                } else if (! inSQ && ! inDQ && BracketTok.isBracket(currentChar)) {
 					String expr = word.toString();
 					if (! expr.equals("")) {
 						stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
@@ -229,7 +244,6 @@ class Expression {
 			sr.close();
 		}
 		String expr = word.toString();
-        System.out.println("###"+expr);
 		if (! expr.equals("")) {
 			stack.push(evalToken(expr, cursor.clone(), afterHash));
         } else {

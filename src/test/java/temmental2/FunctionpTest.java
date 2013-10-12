@@ -224,12 +224,4 @@ public class FunctionpTest extends AbstractTestElement {
         }
     }
 
-    @Test
-    public void testDynamicFunctionCharAtTransform3() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
-        Functionp f = functionp(identifier("$fp!", "-:l1:c2"), list(2), identifier("$text", "-:l1:c2"));
-
-        populateModel("text", "Something...");
-
-        assertEquals("Something...", f.writeObject(transforms, model, null));
-    }
 }
