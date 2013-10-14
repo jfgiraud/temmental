@@ -47,7 +47,7 @@ public class FunctionXTest extends AbstractTestElement {
     public void testTestMessageWithDefaultValue2() throws IOException, TemplateException {
         parse("~'msg[$p1!]~");
         populateProperty("msg", "Hello {0}");
-        assertWriteEquals("Hello unknown");
+        assertWriteEquals("Hello ");
     }
 
 	private void assertWriteEquals(String expected) throws IOException, TemplateException {
@@ -292,10 +292,10 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testADynamicFunctionCanBeOptional_CaseUnknown2() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-        parse("~$text:$f!~");
+        parse("~$text:$f!:'upper~");
         populateModel("text", "It is an example!");
         populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
-        assertWriteEquals("It is an example!");
+        assertWriteEquals("IT IS AN EXAMPLE!");
     }
 
 	@Test
