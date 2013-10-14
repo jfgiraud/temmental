@@ -48,7 +48,8 @@ class Expression {
 		Stack out = new Stack();
 		while (tokens.depth()>=1) {
 			Object token = tokens.pop();
-			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Identifier) {
+			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Boolean
+                    || token instanceof Identifier) {
 				out.push(token);
 			} else if (token instanceof BracketTok) {
 				BracketTok b = (BracketTok) token;
@@ -115,15 +116,23 @@ class Expression {
                 Object defaultValue = null;
                 if (! tokens.empty()) {
                     Object nextToken = tokens.value();
-                    if (nextToken instanceof Char || nextToken instanceof Text || nextToken instanceof Number || nextToken instanceof Identifier) {
+                    if (nextToken instanceof Char || nextToken instanceof Text || nextToken instanceof Number
+                            || nextToken instanceof Boolean
+                            || nextToken instanceof Identifier) {
                         defaultValue = tokens.pop();
                     }
                 }
+                //System.out.println(defaultValue);
+                //System.out.println(defaultValue.getClass().getCanonicalName());
+
                 Element input = (Element) out.pop();
                 out.push(new DefaultFunction(input, defaultValue));
             } else if (token instanceof CommaTok) {
 				commas += 1;
 			} else if (token instanceof CommandTok) {
+                //System.out.println("=tok====");tokens.printStack(System.out);
+                //System.out.println("=out====");out.printStack(System.out);
+                //System.out.println("=oldout====");oldOut.printStack(System.out);
                 Keyword keyword = (Keyword) tokens.pop();
                 if (out.empty()) {
                     out.push(new Command(keyword, ((CommandTok) token).getCursor()));
@@ -315,8 +324,10 @@ class Expression {
 			return Float.parseFloat(expr);
 		} else if (allowKeyword) {
             return new Keyword(expr, cursor.clone().movel(expr, 0));
+        } else if (expr.matches("true|false")) {
+            return Boolean.parseBoolean(expr);
         }
-		return new Identifier(expr, cursor.clone().movel(expr, 0));
+        return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
 	
 }

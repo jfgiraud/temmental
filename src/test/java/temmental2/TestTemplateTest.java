@@ -19,6 +19,7 @@ public class TestTemplateTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        filters = new HashMap<String, Object>();
         TemplateRecorder.setRecording(true);
         out = new StringWriter();
     }
@@ -119,5 +120,19 @@ public class TestTemplateTest extends TestCase {
         assertEquals("", template.formatForTest("~$cond#false~hello ~$name~~#false~", model));
         model = createModel("cond", false, "name", "jeff");
         assertEquals("hello jeff", template.formatForTest("~$cond#false~hello ~$name~~#false~", model));
+    }
+
+    public void testCommandDefaultValue() throws IOException, TemplateException {
+        filters.put("id", new Transform<Object, Object>() {
+            public Object apply(Object value) throws TemplateException {
+                return value;
+            }
+        });
+        Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+        model = createModel("name", "jeff");
+
+        assertEquals("", template.formatForTest("~$cond!true#false~hello ~$name~~#false~", model));
+        model = createModel("name", "jeff");
+        assertEquals("hello jeff", template.formatForTest("~$cond!false#false~hello ~$name~~#false~", model));
     }
 }
