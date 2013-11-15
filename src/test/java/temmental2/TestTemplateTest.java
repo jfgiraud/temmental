@@ -53,8 +53,6 @@ public class TestTemplateTest extends TestCase {
 
     	Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
 
-        template.printStructure(System.out);
-
         List<Map<String, Object>> list = createList(
                 createModel("index", 0, "fruit", "orange"),
                 createModel("index", 1, "fruit", "apple"),

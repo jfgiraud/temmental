@@ -69,7 +69,7 @@ public class FunctionpTest extends AbstractTestElement {
 		populateModel("text", "Something...");
 		
 		try {
-			System.err.println(f.writeObject(transforms, model, null));
+			f.writeObject(transforms, model, null);
 			fail("An exception must be raised.");
 		} catch (TemplateException e) {
 			assertEquals("Unable to render '…:'charat' at position '-:l1:c2'. The function charat expects 1 init-parameter(s) but receives 2 init-parameter(s).", e.getMessage());

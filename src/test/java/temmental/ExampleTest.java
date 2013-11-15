@@ -442,7 +442,6 @@ public class ExampleTest extends TestCase {
         } catch (TemplateException e) {
             assertEquals("Unable to apply filter to render '~fruits:toModel#list~'.", e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace(System.err);
             fail(e.getMessage());
         }
     }
@@ -961,11 +960,6 @@ public class ExampleTest extends TestCase {
     }
     
     public void test_xxx() throws IOException, TemplateException {
-/*        Pattern p = Pattern.compile("file:([^;]*)");
-        Matcher m = p.matcher("totofile:tutu;file:titi");
-        if (m.find()) System.out.println(m.group(1));
-        if (m.find()) System.out.println(m.group(1));
-        */
     	String t[] = new String[] { "t"};
     	assertTrue(t.getClass().isArray());
     }

@@ -63,7 +63,18 @@ public class FunctionTest extends AbstractTestElement {
 		
 		assertEquals("SOMETHING...", f.writeObject(transforms, model, null));
 	}
-	
+
+    @Test
+    public void testFunctionInputText() throws TemplateException, IOException {
+        Function f = function(identifier("$f", "-:l1:c2"), text("lorem ipsum", "-:l1:c2"));
+
+        populateTransform("upper", tupper);
+
+        populateModel("f", "upper");
+
+        assertEquals("LOREM IPSUM", f.writeObject(transforms, model, null));
+    }
+
 	@Test
 	public void testFunctionVarRequiredAndNotFound_AnExceptionIsThrown() throws TemplateException, IOException {
 		Function f = function(identifier("$f", "-:l1:c2"), identifier("$text", "-:l1:c1"));

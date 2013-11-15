@@ -1,13 +1,12 @@
 package temmental2;
 
-class BracketTok {
+class BracketTok extends Token {
 
-	private char bracket;
-	Cursor cursor;
+    private final char bracket;
 
-	BracketTok(char bracket, Cursor cursor) {
-		this.bracket = bracket;
-		this.cursor = cursor.clone();
+    BracketTok(char bracket, Cursor cursor) {
+        super(bracket, cursor.clone());
+        this.bracket = bracket;
 	}
 	
 	public char neg() {
@@ -37,22 +36,6 @@ class BracketTok {
 
 	public boolean isOpening() {
 		return bracket == '(' || bracket == '[' || bracket == '<' || bracket == '{';
-	}
-	
-	@Override
-	public String toString() {
-		return "@" + cursor.getPosition() + "\tBracketTok(" + bracket +  ")" ;
-	}
-
-	public String getPosition() {
-		return cursor.getPosition();
-	}
-	
-	public boolean equals(Object o) {
-		if (o == null || ! (o instanceof BracketTok))
-			return false;
-		BracketTok oc = (BracketTok) o;
-		return oc.bracket == bracket && oc.cursor.equals(cursor);
 	}
 	
 }

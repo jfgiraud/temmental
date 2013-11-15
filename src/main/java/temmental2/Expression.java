@@ -48,8 +48,7 @@ class Expression {
 		Stack out = new Stack();
 		while (tokens.depth()>=1) {
 			Object token = tokens.pop();
-			if (token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Boolean
-                    || token instanceof Identifier) {
+			if (isLeafToken(token)) {
 				out.push(token);
 			} else if (token instanceof BracketTok) {
 				BracketTok b = (BracketTok) token;
@@ -62,47 +61,61 @@ class Expression {
 				} else {
 					BracketTok other = (BracketTok) out.value(out.depth());
 					if (other.getBracket() != b.neg()) {
-						throw new TemplateException("Corresponding bracket for '%c' at position '%s' is invalid (found '%c' at position '%s').", b.getBracket(), b.getPosition(),
-								other.getBracket(), other.getPosition());
+						throw new TemplateException("Corresponding bracket for '%c' at position '%s' is invalid (found '%c' at position '%s').", b.getBracket(), b.getCursor().getPosition(),
+								other.getBracket(), other.getCursor().getPosition());
 					}
 					out.remove(out.depth());
 					if (commas == 0 && commas != out.depth() - 1) {
 						if (b.getBracket() == '>') {
-							throw new TemplateException("Empty init list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
+							throw new TemplateException("Empty init list parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
 						} else if (b.getBracket() != ']'){
-							throw new TemplateException("Empty list parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
+							throw new TemplateException("Empty list parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
 						}
 					}
 					
 					if (b.getBracket() == '>') {
 						if (commas != out.depth() - 1) {
-							throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
+							throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
 						}
 						out.tolist(out.depth());
 						List initParameters = (List) out.pop();
 						out = (Stack) oldOut.pop();
+                        if (! (out.value() instanceof  Function)) {
+                            throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
+                                    "Expects '%s' token but receives '%s' token.",
+                                    b.getBracket(), b.getCursor().getPosition(),
+                                    Function.class.getCanonicalName(),
+                                    out.value().getClass().getCanonicalName());
+                        }
 						Function func = (Function) out.pop();
 						out.push(new Functionp(func, initParameters));
 						commas = (Integer) oldCommas.pop();
 					} else if (b.getBracket() == ']') { 
 						if ((out.depth() != 0) && (commas != out.depth() - 1)) {
-                            throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
+                            throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
 						}
 						out.tolist(out.depth());
 						List msgParameters = (List) out.pop();
 						out = (Stack) oldOut.pop();
+                        if (! (out.value() instanceof  Identifier)) {
+                            throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
+                                    "Expects '%s' token but receives '%s' token.",
+                                    b.getBracket(), b.getCursor().getPosition(),
+                                    Identifier.class.getCanonicalName(),
+                                    out.value().getClass().getCanonicalName());
+                        }
 						Identifier messageIdentifier = (Identifier) out.pop();
 						out.push(new Message(messageIdentifier, msgParameters));
 						commas = (Integer) oldCommas.pop();
 					} else if (b.getBracket() == ')') {
 						if (commas != out.depth() - 1) {
-                            throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getPosition());
+                            throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
 						}
 						out.tolist(out.depth());
-						out.push(new Array((List<Object>) out.pop(), other.cursor));
+						out.push(new Array((List<Object>) out.pop(), other.getCursor()));
 						commas = (Integer) oldCommas.pop();
 					} else {
-						throw new TemplateException("BracketTok %c not supported at position '%s'!", b.getBracket(), b.getPosition());
+						throw new TemplateException("BracketTok %c not supported at position '%s'!", b.getBracket(), b.getCursor().getPosition());
 					}
 				}
 			} else if (token instanceof ToApplyTok) {
@@ -116,9 +129,7 @@ class Expression {
                 Object defaultValue = null;
                 if (! tokens.empty()) {
                     Object nextToken = tokens.value();
-                    if (nextToken instanceof Char || nextToken instanceof Text || nextToken instanceof Number
-                            || nextToken instanceof Boolean
-                            || nextToken instanceof Identifier) {
+                    if (isLeafToken(nextToken)) {
                         defaultValue = tokens.pop();
                     }
                 }
@@ -151,9 +162,13 @@ class Expression {
 			throw new TemplateException("Not enough object in the stack!");
 		}
 		return out.pop();
-	}	
-	
-	Stack parseToTokens() throws IOException, TemplateException {
+	}
+
+    private boolean isLeafToken(Object token) {
+        return token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Boolean || token instanceof Identifier;
+    }
+
+    Stack parseToTokens() throws IOException, TemplateException {
         Stack stack = new Stack();
 		String expression = expr;
 		Cursor cursor = this.cursor.clone();
@@ -291,7 +306,7 @@ class Expression {
 				throw new TemplateException("No parameter before ':' at position '%s'.", cursor.getPosition(-1));
 			}
 		} else if (currentChar == '[' || currentChar == '<') {
-			throw new TemplateException("No function before '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
+			throw new TemplateException("No identifier before '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
 		}
 	}
 

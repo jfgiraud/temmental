@@ -1,19 +1,15 @@
 package temmental2.rpl;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import temmental2.StackException;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.Test;
-
-import temmental2.StackException;
-import temmental2.rpl.RplStack;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class RplTest {
 	
@@ -120,7 +116,8 @@ public class RplTest {
 		 assertStackOp(list(4), list(3), "1 add"); 
 		 assertStackOp(list(4), list(3), "1 +");
 		 assertStackOp(list(3, 1, 2), list(3), "1 2");
-		
+         assertStackOp(list(3, true), list(3), "true");
+
 		 assertStackOp(list(3, 1, "hello"), list(3), "1 \"hello\"");
 		 assertStackOp(list(3, 1, "hello"), list(3), "1 \"hello\" eval");
 		 assertStackOp(list(3, 1), list(3), "1 eval");

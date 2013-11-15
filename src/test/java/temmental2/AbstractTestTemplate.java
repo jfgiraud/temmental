@@ -112,10 +112,12 @@ public abstract class AbstractTestTemplate {
 				swl.append(' ');
 			}
 		}
+        /*
 		System.out.println(s);
 		System.out.println(swu.toString());
 		System.out.println(swd.toString());
 		System.out.println(swl.toString());
+		*/
 	}
 
 }

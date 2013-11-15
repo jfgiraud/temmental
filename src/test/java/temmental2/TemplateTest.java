@@ -164,7 +164,6 @@ public class TemplateTest extends AbstractTestTemplate {
 			parse(pattern);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
 			assertEquals(expectedMessage, e.getMessage());
 		}
 	}}

@@ -52,7 +52,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
 	@Test
 	public void testErrorNoFunctionIdentifier() throws IOException, TemplateException {
-		assertParseThrowsException("No function before '<' at position '-:l1:c9'.", 
+		assertParseThrowsException("No identifier before '<' at position '-:l1:c9'.",
 				"~$msg[]:<$arg>~");
 	}
 	
@@ -94,13 +94,25 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
     @Test
     public void testFilterCanNotBeMessage() throws IOException, TemplateException {
-        assertParseThrowsException("xxxx", "~$variable:$f[$b]~");
+        assertParseThrowsException("Invalid syntax on closing bracket ']' at position '-:l1:c17'. Expects 'temmental2.Identifier' token but receives 'temmental2.Function' token.",
+                "~$variable:$f[$b]~");
+    }
+
+    @Test
+    public void testFunctionExpectInput() throws IOException, TemplateException {
+        assertParseThrowsException("Invalid syntax on closing bracket '>' at position '-:l1:c7'. Expects 'temmental2.Function' token but receives 'temmental2.Identifier' token.",
+                "~$f<$b>~");
+    }
+
+    @Test
+    public void testFunctionExpectRequiredInput() throws IOException, TemplateException {
+        assertParseThrowsException("No identifier before ':' at position '-:l1:c2'.", "~:$f<$b>~");
     }
 
     @Test
 	public void testErrorXXX() throws IOException, TemplateException {
 		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.", 
-				"~($variable)@{ upper }:$function~");
+				"~($variable)@z{ upper }:$function~");
 	}
 	
 	@Test
@@ -119,6 +131,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 			template.parseString(pattern, true);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
+            e.printStackTrace();
 			assertEquals(expectedMessage, e.getMessage());
 		}
 	}

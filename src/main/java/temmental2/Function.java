@@ -36,8 +36,6 @@ class Function extends Element {
 
         String o = (String) result;
 
-        System.out.println(o);
-
         Object fp = functions.get(o);
 
         if (fp == null && function.isRequired()) {
