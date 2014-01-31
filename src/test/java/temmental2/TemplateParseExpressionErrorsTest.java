@@ -112,7 +112,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
     @Test
 	public void testErrorXXX() throws IOException, TemplateException {
 		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.", 
-				"~($variable)@z{ upper }:$function~");
+				"~($variable)@{ upper { lower \"z\" } }:$function~");
 	}
 	
 	@Test

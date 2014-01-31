@@ -187,6 +187,7 @@ class Expression {
 		StringWriter word = new StringWriter();
 		boolean inDQ = false;
 		boolean inSQ = false;
+        boolean isProg = false;
 		boolean escape = false;
         boolean afterHash = false;
 		try {
@@ -232,14 +233,16 @@ class Expression {
                     stack.push(new ToDefaultTok(cursor.clone().move1l()));
                     afterHash = false;
                 } else if (! inSQ && ! inDQ && BracketTok.isBracket(currentChar)) {
-					String expr = word.toString();
+                    //if (!stack.empty())
+                    //    stack.printStack(System.out);
+                    String expr = word.toString();
 					if (! expr.equals("")) {
 						stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
 					} else {
 						behaviourOnEmptyToken(currentChar, stack, cursor);
 					}
 					word = new StringWriter();
-					stack.push(new BracketTok((char) currentChar, cursor.clone().move1l()));
+					stack.push(new BracketTok(currentChar, cursor.clone().move1l()));
                     afterHash = false;
 				} else if (! inSQ && ! inDQ && currentChar == ',') {
 					String expr = word.toString();
@@ -329,7 +332,9 @@ class Expression {
 				throw new TemplateException("Invalid length for char at position '%s').", cursor.getPosition());
 			} 
 			return new Char(t.charAt(0), c);
-		} else if (expr.matches("(-)?\\d+[lL]")) {
+		} else if (expr.equals("@")) {
+            return new StackProg(cursor);
+        } else if (expr.matches("(-)?\\d+[lL]")) {
 			return Long.parseLong(expr.substring(0, expr.length()-1));
 		} else if (expr.matches("(-)?\\d+")) {
 			return Integer.parseInt(expr);
@@ -344,5 +349,5 @@ class Expression {
         }
         return new Identifier(expr, cursor.clone().movel(expr, 0));
 	}
-	
+
 }

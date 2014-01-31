@@ -2,17 +2,17 @@ package temmental2;
 
 public class Token {
 
-    private char expr;
+    private int expr;
     private Cursor cursor;
 
-    Token(char token, Cursor cursor) {
+    Token(int token, Cursor cursor) {
         this.expr = token;
         this.cursor = cursor.clone();
     }
 
     @Override
     public String toString() {
-        return String.format("@%s\ttoken(%c)", cursor.getPosition(), expr);
+        return String.format("@%s\ttoken(%d)", cursor.getPosition(), expr);
     }
 
     public boolean equals(Object o) {
