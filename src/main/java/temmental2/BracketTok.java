@@ -2,8 +2,8 @@ package temmental2;
 
 class BracketTok extends Token {
 
-    private static final int[] OPENING_BRACKETS = { '(', '{', '<', '[' };
-    private static final int[] CLOSING_BRACKETS = { ')', '}', '>', ']' };
+    private static final int[] OPENING_BRACKETS = { '(', '<', '[' };
+    private static final int[] CLOSING_BRACKETS = { ')', '>', ']' };
 
     private final int bracket;
 

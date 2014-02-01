@@ -332,9 +332,7 @@ class Expression {
 				throw new TemplateException("Invalid length for char at position '%s').", cursor.getPosition());
 			} 
 			return new Char(t.charAt(0), c);
-		} else if (expr.equals("@")) {
-            return new StackProg(cursor);
-        } else if (expr.matches("(-)?\\d+[lL]")) {
+		} else if (expr.matches("(-)?\\d+[lL]")) {
 			return Long.parseLong(expr.substring(0, expr.length()-1));
 		} else if (expr.matches("(-)?\\d+")) {
 			return Integer.parseInt(expr);

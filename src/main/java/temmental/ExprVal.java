@@ -40,7 +40,7 @@ abstract class ExprVal {
     protected boolean isArobase() {
         return tag_or_key != null && tag_or_key.contains("@");
     }
-    
+
     String getTagOrKey() {
         return tag_or_key != null ? tag_or_key.replace("?", "").replace("'", "").replace("@", "") : null;
     }

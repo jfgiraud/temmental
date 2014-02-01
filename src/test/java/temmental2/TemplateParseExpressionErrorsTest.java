@@ -81,12 +81,6 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
     }
 
     @Test
-    public void testErrorNoParameterAfterCommaAndBeforeCurlyBracket() throws IOException, TemplateException {
-        assertParseThrowsException("BracketTok } not supported at position '-:l1:c8'!",
-                "~{$arg,}~");
-    }
-
-    @Test
 	public void testErrorInvalidBracket() throws IOException, TemplateException {
 		assertParseThrowsException("Corresponding bracket for ')' at position '-:l1:c23' is invalid (found '<' at position '-:l1:c18').", 
 				"~$msg[]:$function<$arg)~");
@@ -109,12 +103,6 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
         assertParseThrowsException("No identifier before ':' at position '-:l1:c2'.", "~:$f<$b>~");
     }
 
-    @Test
-	public void testErrorXXX() throws IOException, TemplateException {
-		assertParseThrowsException("No parameter before ',' at position '-:l1:c19'.", 
-				"~($variable)@{ upper { lower \"z\" } }:$function~");
-	}
-	
 	@Test
 	public void testComplexMessage2() throws IOException, TemplateException {
 		assertParseThrowsException("Invalid length for char at position '-:l1:c54').",
@@ -131,7 +119,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 			template.parseString(pattern, true);
 			fail("An exception must be raised.");
 		} catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
 			assertEquals(expectedMessage, e.getMessage());
 		}
 	}
