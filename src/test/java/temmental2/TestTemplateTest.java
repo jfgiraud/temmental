@@ -20,6 +20,8 @@ public class TestTemplateTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         filters = new HashMap<String, Object>();
+        properties = new Properties();
+        properties.put("hello", "Bonjour");
         TemplateRecorder.setRecording(true);
         out = new StringWriter();
     }
@@ -45,8 +47,8 @@ public class TestTemplateTest extends TestCase {
 
         TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental2/test-file.tpl");
         
-        Map<String, ? extends Object> model = record.getModelForFile();
-        assertEquals(expectedModel, model);
+        PrintCall call = record.getPrintCallForFile();
+        assertEquals(expectedModel, call.getModel());
     }
 
     public void testPrintSection() throws IOException, TemplateException {
@@ -75,22 +77,22 @@ public class TestTemplateTest extends TestCase {
         
         TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental2/test-sections.tpl");
         
-        List<Map<String, ? extends Object>> models = record.getModelsForSection("first");
+        List<PrintCall> calls = record.getPrintCallsForSection("first");
 
         HashMap<String, Object> expectedModel = new HashMap<String, Object>();
         expectedModel.put("firstname", "John");
         expectedModel.put("lastname", "Doe");
-        assertEquals(expectedModel, models.get(0));
+        assertEquals(expectedModel, calls.get(0).getModel());
 
         expectedModel = new HashMap<String, Object>();
         expectedModel.put("firstname", "Jane");
         expectedModel.put("lastname", "Doe");
-        assertEquals(expectedModel, models.get(1));
+        assertEquals(expectedModel, calls.get(1).getModel());
         
-        models = record.getModelsForSection("second");
+        calls = record.getPrintCallsForSection("second");
         expectedModel = new HashMap<String, Object>();
         expectedModel.put("fruits", list);
-        assertEquals(expectedModel, models.get(0));
+        assertEquals(expectedModel, calls.get(0).getModel());
     }
 
     public void testCommandFor() throws IOException, TemplateException {
@@ -122,7 +124,7 @@ public class TestTemplateTest extends TestCase {
 
     public void testCommandDefaultValue() throws IOException, TemplateException {
         filters.put("id", new Transform<Object, Object>() {
-            public Object apply(Object value) throws TemplateException {
+            public Object apply(Object value) {
                 return value;
             }
         });

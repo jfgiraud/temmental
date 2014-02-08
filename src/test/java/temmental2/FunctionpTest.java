@@ -112,9 +112,9 @@ public class FunctionpTest extends AbstractTestElement {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
-			public Transform<String,String> apply(final Integer[] values) throws TemplateException {
+			public Transform<String,String> apply(final Integer[] values) {
 				return new Transform<String, String>() {
-					public String apply(String value) throws TemplateException {
+					public String apply(String value) {
 						return value.substring(values[0], values[1]);
 					}
 				};
@@ -132,9 +132,9 @@ public class FunctionpTest extends AbstractTestElement {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list("2", "5"), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
-			public Transform<String,String> apply(final Integer[] values) throws TemplateException {
+			public Transform<String,String> apply(final Integer[] values) {
 				return new Transform<String, String>() {
-					public String apply(String value) throws TemplateException {
+					public String apply(String value) {
 						return value.substring(values[0], values[1]);
 					}
 				};
@@ -158,9 +158,9 @@ public class FunctionpTest extends AbstractTestElement {
 		Functionp f = functionp(identifier("'substr", "-:l1:c2"), list(2, 5), identifier("$text", "-:l1:c2"));
 		
 		Transform<Integer[], Transform<String, String>> tsubstr = new Transform<Integer[], Transform<String,String>>() {
-			public Transform<String,String> apply(final Integer[] values) throws TemplateException {
+			public Transform<String,String> apply(final Integer[] values) {
 				return new Transform<String, String>() {
-					public String apply(String value) throws TemplateException {
+					public String apply(String value) {
 						return value.substring(values[0], values[1]);
 					}
 				};

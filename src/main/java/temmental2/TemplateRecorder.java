@@ -11,8 +11,7 @@ public class TemplateRecorder {
 
     private static boolean recordStatus = false;
     private static Map<String, TemplateRecord> templateRecords = new HashMap<String, TemplateRecord>();
-    private static Map<String, TemplateMessages> templateDatas = new HashMap<String, TemplateMessages>();
-    
+
     TemplateRecorder() {
     }
     
@@ -32,7 +31,6 @@ public class TemplateRecorder {
      */
     public static void clear() {
         templateRecords.clear();
-        templateDatas.clear();
     }
     
     /**
@@ -47,10 +45,9 @@ public class TemplateRecorder {
         if (recordStatus) {
             if (! templateRecords.containsKey(template.getFilepath())) {
                 templateRecords.put(template.getFilepath(), new TemplateRecord());
-                templateDatas.put(template.getFilepath(), template.getMessages());
             }
             TemplateRecord templateCalls = templateRecords.get(template.getFilepath());
-            templateCalls.log(sectionName, model);
+            templateCalls.log(sectionName, model, template.getMessages());
         }
     }
 
@@ -63,14 +60,6 @@ public class TemplateRecorder {
         return templateRecords.get(filepath);
     }
 
-    /**
-     * Returns the messages corresponding to the given template
-     * @return the messages or <code>null</code> if the template has not been created. 
-     */
-    public static Set<String> getTemplateMessagesFilepaths() {
-        return templateDatas.keySet();
-    }
-    
     public static Set<String> getTemplateRecordFilepaths() {
     	return templateRecords.keySet();
     }

@@ -165,7 +165,7 @@ public class MessageTest extends AbstractTestElement {
         populateProperty("message", "hello {0} {1}");
 
         Transform<Integer,Integer> toNull = new Transform<Integer, Integer>() {
-            public Integer apply(Integer value) throws TemplateException {
+            public Integer apply(Integer value) {
                 return null;
             }
         };
@@ -188,7 +188,7 @@ public class MessageTest extends AbstractTestElement {
         populateProperty("message", "hello {0} {1}");
 
         Transform<Integer,Integer> toNull = new Transform<Integer, Integer>() {
-            public Integer apply(Integer value) throws TemplateException {
+            public Integer apply(Integer value) {
                 return null;
             }
         };
@@ -211,7 +211,7 @@ public class MessageTest extends AbstractTestElement {
         populateProperty("message", "hello {0} {1}");
 
         Transform<String,String> toNull = new Transform<String, String>() {
-            public String apply(String value) throws TemplateException {
+            public String apply(String value) {
                 return null;
             }
         };

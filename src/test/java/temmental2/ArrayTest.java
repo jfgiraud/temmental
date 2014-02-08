@@ -14,7 +14,7 @@ public class ArrayTest  extends AbstractTestElement {
 	public void testArray() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 		
 		Transform<List<Integer>, Integer> add = new Transform<List<Integer>, Integer>() {
-			public Integer apply(List<Integer> values) throws TemplateException {
+			public Integer apply(List<Integer> values) {
 				int s = 0;
 				for (int i : values) {
 					s += i;
@@ -39,7 +39,7 @@ public class ArrayTest  extends AbstractTestElement {
     public void testArrayNullValue() throws TemplateException, NoSuchMethodException, SecurityException, IOException {
 
         Transform<List<Integer>, Integer> add = new Transform<List<Integer>, Integer>() {
-            public Integer apply(List<Integer> values) throws TemplateException {
+            public Integer apply(List<Integer> values) {
                 int s = 0;
                 for (int i : values) {
                     s += i;
@@ -49,7 +49,7 @@ public class ArrayTest  extends AbstractTestElement {
         };
 
         Transform<Integer,Integer> toNull = new Transform<Integer, Integer>() {
-            public Integer apply(Integer value) throws TemplateException {
+            public Integer apply(Integer value) {
                 return null;
             }
         };

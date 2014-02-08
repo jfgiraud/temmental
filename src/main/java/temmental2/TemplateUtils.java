@@ -4,11 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 
 /**
@@ -104,6 +100,14 @@ public class TemplateUtils {
             model.put((String) map[2*i], map[2*i+1]);
         }
         return model;
+    }
+
+    public static <In, Out> List<Out> transform(final List<In> list, final Transform<In,Out> transform) {
+        ArrayList<Out> result = new ArrayList<Out>();
+        for (In item : list) {
+            result.add(transform.apply(item));
+        }
+        return result;
     }
 
     /**

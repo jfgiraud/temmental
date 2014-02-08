@@ -24,17 +24,18 @@ public class TemplateRecord {
 
     TemplateRecord() {
     }
-    
-    private Map<String, List<Map<String, ? extends Object>>> sections = new HashMap<String, List<Map<String,? extends Object>>>();
+
+    private Map<String, List<PrintCall>> sections = new HashMap<String, List<PrintCall>>();
+
     private List<String> printedSections = new ArrayList<String>();
 
-    void log(String sectionName, Map<String, ? extends Object> model) {
-        List<Map<String, ? extends Object>> section = sections.get(sectionName);
+    void log(String sectionName, Map<String, ? extends Object> model, TemplateMessages messages) {
+        List<PrintCall> section = sections.get(sectionName);
         if (section == null) {
-            section = new ArrayList<Map<String, ? extends Object>>();
+            section = new ArrayList<PrintCall>();
             sections.put(sectionName, section);         
         }
-        section.add(new HashMap<String, Object>(model));
+        section.add(new PrintCall(model, messages));
         printedSections.add(sectionName);
     }
 
@@ -43,8 +44,8 @@ public class TemplateRecord {
      * @param section the section name
      * @return the first model or <code>null</code> if the section has not been displayed
      */
-    public Map<String, ? extends Object> getModelForSection(String section) {
-        List<Map<String, ? extends Object>> modelsForSection = getModelsForSection(section);
+    public PrintCall getFirstPrintCallForSection(String section) {
+        List<PrintCall> modelsForSection = getPrintCallsForSection(section);
         return modelsForSection == null ? null : modelsForSection.get(0);
     }
 
@@ -52,8 +53,8 @@ public class TemplateRecord {
      * Returns the first model used on <code>printFile(out, section, model)</code> or <code>printFile(out, section)</code> calls.
      * @return the first model or <code>null</code> if the file has not been displayed
      */
-    public Map<String, ? extends Object> getModelForFile() {
-        List<Map<String, ? extends Object>> modelsForFile = getModelsForFile();
+    public PrintCall getPrintCallForFile() {
+        List<PrintCall> modelsForFile = getPrintCallsForFile();
         return modelsForFile == null ? null : modelsForFile.get(0);
     }
 
@@ -62,15 +63,15 @@ public class TemplateRecord {
      * @param section the section name
      * @return the first model or <code>null</code> if the section has not been displayed
      */
-    public List<Map<String, ? extends Object>> getModelsForSection(String section) {
+    public List<PrintCall> getPrintCallsForSection(String section) {
         return sections.get(section);
     }
-    
+
     /**
      * Returns the list of models used on <code>printFile(out, section, model)</code> or <code>printFile(out, section)</code> calls.
      * @return the first model or <code>null</code> if the file has not been displayed
      */
-    public List<Map<String, ? extends Object>> getModelsForFile() {
+    public List<PrintCall> getPrintCallsForFile() {
         return sections.get("__default_section");
     }
 

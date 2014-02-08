@@ -13,6 +13,6 @@ public interface Transform<In, Out> {
 	 * @param value the specified object
 	 * @return an object of <code>Out</code> type or <code>null</code> (in this case, the filter chains ends) 
 	 */
-    public abstract Out apply(In value) throws TemplateException;
+    public abstract Out apply(In value);
 	
 }
