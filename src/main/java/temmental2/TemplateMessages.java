@@ -123,7 +123,12 @@ class TemplateMessages {
             try {
                 return ResourceBundle.getBundle(resourcePath, locale);
             } catch (MissingResourceException e) {
-                throw new TemplateException("Can't find bundle for %s, locale %s", resourcePath, locale.toString());
+                TemplateException te = new TemplateException("Can't find bundle for %s, locale %s", resourcePath, locale.toString());
+                try {
+                    return ResourceBundle.getBundle(resourcePath, Locale.getDefault());
+                } catch (MissingResourceException e2) {
+                    throw te;
+                }
             }
         } else if (protocol.equals("file")) {
             List<String> tab = new ArrayList<String>();
