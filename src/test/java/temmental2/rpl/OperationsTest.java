@@ -32,12 +32,6 @@ public class OperationsTest {
 		assertResult(15.0, Operations.mul(5.0, 3));
 	}
 	
-//	@Test
-//	public void testSub() {
-//		assertResult(4, Operations.add(1, 3));
-//		assertResult(4L, Operations.add(1, 3L));
-//	}
-	
 	private void assertResult(Number expected, Number result) {
 		assertEquals(expected, result);
 		assertTrue(expected.getClass().equals(result.getClass()));

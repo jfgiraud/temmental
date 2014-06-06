@@ -50,6 +50,28 @@ public class FunctionXTest extends AbstractTestElement {
         assertWriteEquals("Hello ");
     }
 
+    @Test
+    public void testTestMessageWithDefaultValue3() throws IOException, TemplateException {
+        parse("~'msg[$p1]!\"text\"~");
+        populateProperty("msg", "Hello {0}");
+        assertWriteEquals("text");
+    }
+
+    @Test
+    public void testTestMessageWithDefaultValue4() throws IOException, TemplateException {
+        parse("~'msg[$p1]!\"text\"~");
+        populateModel("p1", "something");
+        assertWriteEquals("text");
+    }
+
+    @Test
+    public void testTestMessageWithDefaultValue5() throws IOException, TemplateException {
+        parse("~$msg!'default[$p1]~");
+        populateProperty("default", "Bonjour {0}");
+        populateModel("p1", "bidule");
+        assertWriteEquals("Bonjour bidule");
+    }
+
 	private void assertWriteEquals(String expected) throws IOException, TemplateException {
 		StringWriter out = new StringWriter();
 		template.printFile(out, model);
