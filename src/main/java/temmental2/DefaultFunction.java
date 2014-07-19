@@ -55,7 +55,7 @@ public class DefaultFunction extends Identifier {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || ! super.equals(o)) {
+        if (o == null || !super.equals(o)) {
             return false;
         }
         if (o instanceof DefaultFunction) {

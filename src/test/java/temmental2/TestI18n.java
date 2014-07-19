@@ -14,11 +14,11 @@ public class TestI18n extends TestCase {
     private static final Locale locale_es_AR = new Locale("es", "AR");
     private static final Locale locale_es_BO = new Locale("es", "BO");
     private static final Locale locale_fr_CA = new Locale("fr", "CA");
-    
+
     private Template template;
     private HashMap<String, Transform> filters;
     private HashMap<String, Object> model;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -26,7 +26,7 @@ public class TestI18n extends TestCase {
         model = new HashMap<String, Object>();
         TemplateRecorder.setRecording(true);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
@@ -39,7 +39,7 @@ public class TestI18n extends TestCase {
         template = new Template("src/test/resources/temmental2/test-file.tpl", filters, "classpath:temmental2." + file, locale);
         assertEquals(expected, template.formatForTest("~'hello[]~", model));
     }
-    
+
     private void assertNotFound(Locale locale, String file) throws IOException, TemplateException {
         try {
             template = new Template("test/resources/temmental2/test-file.tpl", filters, "file:src/test/resources/temmental2/" + file + ".properties", locale);
@@ -66,7 +66,7 @@ public class TestI18n extends TestCase {
         assertFoundAndEquals("hello en_GB", locale_en_GB, "test2");
         assertFoundAndEquals("hello (default)", locale_en_GB, "test3");
     }
-    
+
     public void test_en() throws IOException, TemplateException {
         assertFoundAndEquals("hello fr_FR", locale_en, "test");
         assertNotFound(locale_en, "test2");
@@ -78,13 +78,13 @@ public class TestI18n extends TestCase {
         assertNotFound(locale_es_AR, "test2");
         assertFoundAndEquals("hello (default)", locale_es_AR, "test3");
     }
-    
+
     public void test_es_bo() throws IOException, TemplateException {
         assertFoundAndEquals("hello es", locale_es_BO, "test");
         assertNotFound(locale_es_AR, "test2");
         assertFoundAndEquals("hello (default)", locale_es_BO, "test3");
     }
-    
+
     public void test_fr_CA() throws IOException, TemplateException {
         assertFoundAndEquals("hello fr_FR", locale_fr_CA, "test");
         assertNotFound(locale_fr_CA, "test2");

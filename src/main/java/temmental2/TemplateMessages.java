@@ -4,13 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Wrapper to ResourceBundle or Properties. It is used for internationalization. Instances are created on Template constructors calls.
@@ -19,8 +13,8 @@ class TemplateMessages {
 
     List<Object> messages;
     private Locale locale;
-    
-    TemplateMessages(Locale locale, Object ... resourcesContainers) throws FileNotFoundException, TemplateException, IOException {
+
+    TemplateMessages(Locale locale, Object... resourcesContainers) throws FileNotFoundException, TemplateException, IOException {
         this.locale = locale;
         this.messages = new ArrayList<Object>();
         for (Object rs : resourcesContainers) {
@@ -33,7 +27,7 @@ class TemplateMessages {
             }
         }
     }
-    
+
     TemplateMessages(String resourcePath, Locale locale) throws TemplateException, FileNotFoundException, IOException {
         this.locale = locale;
         this.messages = Arrays.asList(readResource(resourcePath, locale));
@@ -62,14 +56,15 @@ class TemplateMessages {
     }
 
     /**
-     * Tests if the specified key is known in messages. 
+     * Tests if the specified key is known in messages.
+     *
      * @param key possible key
-     * @return <code>true</code> if and only if the specified object is a key in this messages; <code>false</code> otherwise. 
+     * @return <code>true</code> if and only if the specified object is a key in this messages; <code>false</code> otherwise.
      */
     public boolean containsKey(String key) {
         for (int i = messages.size() - 1; i >= 0; i--) {
             Object messageContainer = messages.get(i);
-            if (messageContainer instanceof Properties && ((Properties) messageContainer).containsKey(key)) 
+            if (messageContainer instanceof Properties && ((Properties) messageContainer).containsKey(key))
                 return true;
             if (messageContainer instanceof ResourceBundle && containsKey((ResourceBundle) messageContainer, key)) {
                 return true;
@@ -77,7 +72,7 @@ class TemplateMessages {
         }
         return false;
     }
-    
+
     private boolean containsKey(ResourceBundle messageContainer, String key) {
         try {
             if (((ResourceBundle) messageContainer).getString(key) != null)
@@ -89,25 +84,27 @@ class TemplateMessages {
 
     /**
      * Searches the message with the specified key in messages. If the key is not found, returns <code>null</code>.
+     *
      * @param key the message key
      * @return the value in the messages with the specified key value.
      */
-    
+
     public String getString(String key) {
         for (int i = messages.size() - 1; i >= 0; i--) {
             Object messageContainer = messages.get(i);
-            if (messageContainer instanceof Properties && ((Properties) messageContainer).containsKey(key)) 
+            if (messageContainer instanceof Properties && ((Properties) messageContainer).containsKey(key))
                 return ((Properties) messageContainer).getProperty(key);
-            if (messageContainer instanceof ResourceBundle && containsKey((ResourceBundle) messageContainer, key)) 
+            if (messageContainer instanceof ResourceBundle && containsKey((ResourceBundle) messageContainer, key))
                 return ((ResourceBundle) messageContainer).getString(key);
-                
+
         }
         return null;
     }
 
     /**
      * Format the message with the specified key in messages with the specified parameters
-     * @param key the message key
+     *
+     * @param key        the message key
      * @param parameters the parameters
      * @return the formatted message
      * @see java.lang.String#format(String, Object...)
@@ -118,7 +115,7 @@ class TemplateMessages {
 
     private Object readResource(String resourcePath, Locale locale) throws TemplateException, FileNotFoundException, IOException {
         String protocol = resourcePath.substring(0, resourcePath.indexOf(":"));
-        resourcePath = resourcePath.substring(resourcePath.indexOf(":")+1);
+        resourcePath = resourcePath.substring(resourcePath.indexOf(":") + 1);
         if (protocol.equals("classpath")) {
             try {
                 return ResourceBundle.getBundle(resourcePath, locale);

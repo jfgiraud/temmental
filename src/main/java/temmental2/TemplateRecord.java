@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Record of all calls concerning a template (test case). 
- * 
+ * Record of all calls concerning a template (test case).
+ * <p/>
  * The calls to the following functions are recorded :
  * <ul>
  * <li><code>template.printSection(out, sectionName, model)</code></li>
@@ -15,9 +15,9 @@ import java.util.Map;
  * <li><code>template.printFile(out, sectionName)</code></li>
  * <li><code>template.printFile(out, sectionName, model)</code></li>
  * </ul>
- * 
+ * <p/>
  * These class permits to retrieve models used to display parts of the template.
- * 
+ *
  * @see TemplateRecorder#getTemplateRecordFor
  */
 public class TemplateRecord {
@@ -33,7 +33,7 @@ public class TemplateRecord {
         List<PrintCall> section = sections.get(sectionName);
         if (section == null) {
             section = new ArrayList<PrintCall>();
-            sections.put(sectionName, section);         
+            sections.put(sectionName, section);
         }
         section.add(new PrintCall(model, messages));
         printedSections.add(sectionName);
@@ -41,6 +41,7 @@ public class TemplateRecord {
 
     /**
      * Returns the first model used on <code>printSection(out, section, model)</code> or <code>printSection(out, section)</code> calls.
+     *
      * @param section the section name
      * @return the first model or <code>null</code> if the section has not been displayed
      */
@@ -51,6 +52,7 @@ public class TemplateRecord {
 
     /**
      * Returns the first model used on <code>printFile(out, section, model)</code> or <code>printFile(out, section)</code> calls.
+     *
      * @return the first model or <code>null</code> if the file has not been displayed
      */
     public PrintCall getPrintCallForFile() {
@@ -59,7 +61,8 @@ public class TemplateRecord {
     }
 
     /**
-     * Returns the list of models used on <code>printSection(out, section, model)</code> or <code>printSection(out, section)</code> calls.    
+     * Returns the list of models used on <code>printSection(out, section, model)</code> or <code>printSection(out, section)</code> calls.
+     *
      * @param section the section name
      * @return the first model or <code>null</code> if the section has not been displayed
      */
@@ -69,6 +72,7 @@ public class TemplateRecord {
 
     /**
      * Returns the list of models used on <code>printFile(out, section, model)</code> or <code>printFile(out, section)</code> calls.
+     *
      * @return the first model or <code>null</code> if the file has not been displayed
      */
     public List<PrintCall> getPrintCallsForFile() {
@@ -76,8 +80,9 @@ public class TemplateRecord {
     }
 
     /**
-     * Returns the list of printed section. 
-     * @return The ordered list of printed section. A section name can be present more than once. 
+     * Returns the list of printed section.
+     *
+     * @return The ordered list of printed section. A section name can be present more than once.
      */
     public List<String> getPrintedSections() {
         return printedSections;

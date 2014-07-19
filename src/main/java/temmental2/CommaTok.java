@@ -2,8 +2,8 @@ package temmental2;
 
 class CommaTok extends Token {
 
-	CommaTok(Cursor cursor) {
+    CommaTok(Cursor cursor) {
         super(',', cursor.clone());
-	}
-	
+    }
+
 }

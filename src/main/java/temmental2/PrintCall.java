@@ -12,7 +12,7 @@ public class PrintCall {
         this.messages = messages;
     }
 
-    public Map<String,? extends Object> getModel() {
+    public Map<String, ? extends Object> getModel() {
         return model;
     }
 }

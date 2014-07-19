@@ -15,7 +15,7 @@ public class Command extends Element {
 
     public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
-        if (! Arrays.asList("for", "true", "false").contains(keyword.getKeyword())) {
+        if (!Arrays.asList("for", "true", "false").contains(keyword.getKeyword())) {
             throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
         this.keyword = keyword;
@@ -37,14 +37,14 @@ public class Command extends Element {
             buffer += "   " + viewWhiteSpaces(String.valueOf(element));
         }
         buffer += "\n";
-        for (int i=0; i<betweenTags.size(); i++) {
+        for (int i = 0; i < betweenTags.size(); i++) {
             Object obj = betweenTags.get(i);
             if (obj instanceof Element) {
                 buffer += "   " + ((Element) obj).repr(d + 2, true);
             } else {
                 buffer += "   " + viewWhiteSpaces(String.valueOf(obj));
             }
-            buffer += ((i < betweenTags.size()-1) ? "\n" : "");
+            buffer += ((i < betweenTags.size() - 1) ? "\n" : "");
         }
         return buffer;
     }
@@ -74,12 +74,12 @@ public class Command extends Element {
 
     private void writeObjectIf(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, boolean invert) throws TemplateException, IOException {
         Object result = element.writeObject(functions, model, messages);
-        if (! (result instanceof Boolean)) {
+        if (!(result instanceof Boolean)) {
             throw new TemplateException("Command '%s' requires a boolean input at position '%s'", invert ? "false" : "true", keyword.getCursor().getPosition());
         }
         boolean b = (Boolean) result;
         if (invert) {
-            b = ! b;
+            b = !b;
         }
         if (b) {
             Map m = new HashMap();
@@ -90,13 +90,13 @@ public class Command extends Element {
 
     private void writeObjectFor(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         Object result = element.writeObject(functions, model, messages);
-        if (! (result instanceof Iterable)) {
+        if (!(result instanceof Iterable)) {
             throw new TemplateException("Command 'for' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
         }
         Iterator it = ((Iterable) result).iterator();
         while (it.hasNext()) {
             Object c = it.next();
-            if (! (c instanceof Map)) {
+            if (!(c instanceof Map)) {
                 throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
             }
             Map m = new HashMap();
@@ -149,7 +149,7 @@ public class Command extends Element {
         if (stack.empty()) {
             throw new TemplateException("Reach end of stack. No closing tag for command '%s' at position '%s'.", keyword.getKeyword(), cursor.getPosition());
         }
-        while (! stack.empty()) {
+        while (!stack.empty()) {
             Object line = stack.pop();
             if (line instanceof Command) {
                 Command cmd = (Command) line;
@@ -157,7 +157,7 @@ public class Command extends Element {
                     cmd.readUntilClosing(stack);
                     betweenTags.add(cmd);
                 } else {
-                    if (! cmd.keyword.getKeyword().equals(keyword.getKeyword())) {
+                    if (!cmd.keyword.getKeyword().equals(keyword.getKeyword())) {
                         throw new TemplateException("Mismatch closing tag for command '%s' at position '%s' (reach '%s' at position '%s').", keyword.getKeyword(), cursor.getPosition(), cmd.keyword.getKeyword(), cmd.cursor.getPosition());
                     } else {
                         return;

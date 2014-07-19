@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Recorder for template calls (test case).   
+ * Recorder for template calls (test case).
  */
 public class TemplateRecorder {
 
@@ -14,9 +14,10 @@ public class TemplateRecorder {
 
     TemplateRecorder() {
     }
-    
+
     /**
      * Start or Stop recording
+     *
      * @param status recording status. <code>true</code> to start recording, <code>false</code> to stop recording.
      */
     public static void setRecording(boolean status) {
@@ -32,9 +33,10 @@ public class TemplateRecorder {
     public static void clear() {
         templateRecords.clear();
     }
-    
+
     /**
      * Indicates if the calls are recorded
+     *
      * @return <code>true</code> if calls are recorded, <code>false</code> otherwise.
      */
     public static boolean isRecording() {
@@ -43,7 +45,7 @@ public class TemplateRecorder {
 
     static synchronized void log(Template template, String sectionName, Map<String, ? extends Object> model) {
         if (recordStatus) {
-            if (! templateRecords.containsKey(template.getFilepath())) {
+            if (!templateRecords.containsKey(template.getFilepath())) {
                 templateRecords.put(template.getFilepath(), new TemplateRecord());
             }
             TemplateRecord templateCalls = templateRecords.get(template.getFilepath());
@@ -53,15 +55,16 @@ public class TemplateRecorder {
 
     /**
      * Returns the record corresponding to the given template
+     *
      * @param filepath the path to the template file
-     * @return the record or <code>null</code> if the template has not been created. 
+     * @return the record or <code>null</code> if the template has not been created.
      */
     public static TemplateRecord getTemplateRecordFor(String filepath) {
         return templateRecords.get(filepath);
     }
 
     public static Set<String> getTemplateRecordFilepaths() {
-    	return templateRecords.keySet();
+        return templateRecords.keySet();
     }
 
 }

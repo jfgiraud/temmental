@@ -16,7 +16,7 @@ public class ToDefaultTok {
     }
 
     public boolean equals(Object o) {
-        if (o == null || ! (o instanceof ToDefaultTok))
+        if (o == null || !(o instanceof ToDefaultTok))
             return false;
         ToDefaultTok oc = (ToDefaultTok) o;
         return oc.expr.equals(expr) && oc.cursor.equals(cursor);

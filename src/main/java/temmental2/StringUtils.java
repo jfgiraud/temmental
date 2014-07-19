@@ -3,151 +3,153 @@ package temmental2;
 import java.util.*;
 
 public class StringUtils {
-	
-	public static int countOccurrences(String haystack, char needle) {
-	    int count = 0;
-	    for (int i=0; i < haystack.length(); i++) {
-	        if (haystack.charAt(i) == needle) {
-	             count++;
-	        }
-	    }
-	    return count;
-	}
-	
-	/**
-	 * Concatenate a list of words with intervening occurrences of sep.
-	 * @param sep the separator.
-	 * @param words the string list.
-	 * @return the resulting string.
-	 */
-	public static String join(String sep, List<String> words) {
-		StringBuffer s = new StringBuffer();
 
-		for (Iterator<String> iterator = words.iterator(); iterator.hasNext(); ) {
-			s.append(iterator.next());
-			if (iterator.hasNext()) {
-				s.append(sep);
-			}
-		}
+    public static int countOccurrences(String haystack, char needle) {
+        int count = 0;
+        for (int i = 0; i < haystack.length(); i++) {
+            if (haystack.charAt(i) == needle) {
+                count++;
+            }
+        }
+        return count;
+    }
 
-		return s.toString();
-	}
+    /**
+     * Concatenate a list of words with intervening occurrences of sep.
+     *
+     * @param sep   the separator.
+     * @param words the string list.
+     * @return the resulting string.
+     */
+    public static String join(String sep, List<String> words) {
+        StringBuffer s = new StringBuffer();
 
-	/**
-	 * Concatenate a list of <code>words</code> with intervening occurrences of <code>sep</code>.
-	 * @param sep the separator.
-	 * @param words the string list.
-	 * @return the resulting string.
-	 */
-	public static String join(String sep, String ... words) {
-		StringBuffer s = new StringBuffer();
+        for (Iterator<String> iterator = words.iterator(); iterator.hasNext(); ) {
+            s.append(iterator.next());
+            if (iterator.hasNext()) {
+                s.append(sep);
+            }
+        }
 
-		for (int i=0; i < words.length; i++) {
-			s.append(words[i]);
-			if (i < words.length-1) {
-				s.append(sep);
-			}
-		}
+        return s.toString();
+    }
 
-		return s.toString();
-	}
+    /**
+     * Concatenate a list of <code>words</code> with intervening occurrences of <code>sep</code>.
+     *
+     * @param sep   the separator.
+     * @param words the string list.
+     * @return the resulting string.
+     */
+    public static String join(String sep, String... words) {
+        StringBuffer s = new StringBuffer();
 
-	public static String capitalize(String s) {
-		if (s.length() == 0) 
-			return s;
-		else
-			return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
-	}
-	
-	public static String lstrip(String s) {
-		return s.replaceAll("^\\s+", "");
-	}
+        for (int i = 0; i < words.length; i++) {
+            s.append(words[i]);
+            if (i < words.length - 1) {
+                s.append(sep);
+            }
+        }
 
-	public static String rstrip(String s) {
-		return s.replaceAll("\\s+$", "");
-	}
+        return s.toString();
+    }
 
-	public static String strip(String s) {
-		s = s.replaceAll("^\\s+", "");
-		return s.replaceAll("\\s+$", "");
-	}
+    public static String capitalize(String s) {
+        if (s.length() == 0)
+            return s;
+        else
+            return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+    }
 
-	public static String reverse(String s) {
-		return new StringBuilder(s).reverse().toString();
-	}
-	
-	public static String titleize(String s) {
-		final String ACTIONABLE_DELIMITERS = " '-/"; // these cause the character following to be capitalized
+    public static String lstrip(String s) {
+        return s.replaceAll("^\\s+", "");
+    }
 
-		StringBuilder sb = new StringBuilder();
-		boolean capNext = true;
+    public static String rstrip(String s) {
+        return s.replaceAll("\\s+$", "");
+    }
 
-		for (char c : s.toCharArray()) {
-			c = (capNext)
-					? Character.toUpperCase(c)
-							: Character.toLowerCase(c);
-					sb.append(c);
-					capNext = (ACTIONABLE_DELIMITERS.indexOf((int) c) >= 0); // explicit cast not needed
-		}
-		return sb.toString();
-	}
+    public static String strip(String s) {
+        s = s.replaceAll("^\\s+", "");
+        return s.replaceAll("\\s+$", "");
+    }
 
-	public static String[] split(String string, String sep, int max) {
-		if (sep == null) {
-			List<String> v = new ArrayList<String>();
-			
-			StringBuilder sb = new StringBuilder();
-			boolean inWord = true;
-			
-			for (char c : string.toCharArray()) {
-				if (max == 0) {
-					sb.append(c);
-					continue;
-				}
-				if (inWord) {
-					if (Character.isWhitespace(c)) {
-						v.add(sb.toString());
-						sb = new StringBuilder();
-						inWord = false;
-					} else {
-						sb.append(c);
-					}
-				} else {
-					if (! Character.isWhitespace(c)) {
-						inWord = true;
-						max--;
-						sb.append(c);
-					} 
-				}
-			}
-			if (sb.toString().length() >= 1) {
-				v.add(sb.toString());
-			}
-			return v.toArray(new String[]{});
-		}
-		// abcdefghdedeuuis
-		// Hello*the*World!
-		// 012345678901234567
-		List<String> v = new ArrayList<String>();
-		int i = 0;
-		int n = 0;
-		while (i < string.length()) {
-			if (max >= 0 && n >= max) {
-				v.add(string.substring(i));
-				break;
-			}
-			int f = string.indexOf(sep, i);
-			if (f >= 0) {
-				v.add(string.substring(i, f));
-				i = f + sep.length();
-				n++;
-			} else {
-				v.add(string.substring(i));
-				break;
-			}
-		}
-		return v.toArray(new String[]{});
-	}
+    public static String reverse(String s) {
+        return new StringBuilder(s).reverse().toString();
+    }
+
+    public static String titleize(String s) {
+        final String ACTIONABLE_DELIMITERS = " '-/"; // these cause the character following to be capitalized
+
+        StringBuilder sb = new StringBuilder();
+        boolean capNext = true;
+
+        for (char c : s.toCharArray()) {
+            c = (capNext)
+                    ? Character.toUpperCase(c)
+                    : Character.toLowerCase(c);
+            sb.append(c);
+            capNext = (ACTIONABLE_DELIMITERS.indexOf((int) c) >= 0); // explicit cast not needed
+        }
+        return sb.toString();
+    }
+
+    public static String[] split(String string, String sep, int max) {
+        if (sep == null) {
+            List<String> v = new ArrayList<String>();
+
+            StringBuilder sb = new StringBuilder();
+            boolean inWord = true;
+
+            for (char c : string.toCharArray()) {
+                if (max == 0) {
+                    sb.append(c);
+                    continue;
+                }
+                if (inWord) {
+                    if (Character.isWhitespace(c)) {
+                        v.add(sb.toString());
+                        sb = new StringBuilder();
+                        inWord = false;
+                    } else {
+                        sb.append(c);
+                    }
+                } else {
+                    if (!Character.isWhitespace(c)) {
+                        inWord = true;
+                        max--;
+                        sb.append(c);
+                    }
+                }
+            }
+            if (sb.toString().length() >= 1) {
+                v.add(sb.toString());
+            }
+            return v.toArray(new String[]{});
+        }
+        // abcdefghdedeuuis
+        // Hello*the*World!
+        // 012345678901234567
+        List<String> v = new ArrayList<String>();
+        int i = 0;
+        int n = 0;
+        while (i < string.length()) {
+            if (max >= 0 && n >= max) {
+                v.add(string.substring(i));
+                break;
+            }
+            int f = string.indexOf(sep, i);
+            if (f >= 0) {
+                v.add(string.substring(i, f));
+                i = f + sep.length();
+                n++;
+            } else {
+                v.add(string.substring(i));
+                break;
+            }
+        }
+        return v.toArray(new String[]{});
+    }
 
     public static String viewWhiteSpaces(String s) {
         s = s.replace("\n", "\u00b6");
@@ -167,7 +169,7 @@ public class StringUtils {
 
     public static String camelize(String s) {
         String[] strings = s.toLowerCase().split("[\\s_\\-]");
-        for (int i = 0; i < strings.length; i++){
+        for (int i = 0; i < strings.length; i++) {
             strings[i] = StringUtils.capitalize(strings[i]);
         }
         return join("", strings);
@@ -176,7 +178,7 @@ public class StringUtils {
     private static final Map<String, String> TRANSLATIONS;
 
     static {
-        String WHITESPACE_CHARS[] = new String[] {
+        String WHITESPACE_CHARS[] = new String[]{
                 "\\u0009", // CHARACTER TABULATION
                 "\\u000A", // LINE FEED (LF)
                 "\\u000B", // LINE TABULATION
@@ -299,7 +301,7 @@ public class StringUtils {
 
     private static String translate(String s) {
         StringBuilder sb = new StringBuilder("");
-        for (int i=0; i<s.length(); i++) {
+        for (int i = 0; i < s.length(); i++) {
             String c = String.valueOf(s.charAt(i));
             if (TRANSLATIONS.containsKey(c)) {
                 sb.append(TRANSLATIONS.get(c));
@@ -315,28 +317,28 @@ public class StringUtils {
         return translate(s);
     }
 
-    private static Map<String, String> createMap(String ... whatWith) {
-        if (whatWith.length %2 != 0) {
+    private static Map<String, String> createMap(String... whatWith) {
+        if (whatWith.length % 2 != 0) {
             throw new RuntimeException("Key/value");
         }
         Map<String, String> model = new HashMap<String, String>();
-        for (int i=0; i<whatWith.length/2; i++) {
-            model.put(whatWith[2*i], whatWith[2*i+1]);
+        for (int i = 0; i < whatWith.length / 2; i++) {
+            model.put(whatWith[2 * i], whatWith[2 * i + 1]);
         }
-        return  model;
+        return model;
     }
 
     public static String constantify(String s) {
         String r = unaccentify(s).toUpperCase();
         StringBuilder sb = new StringBuilder("");
         boolean wasSpace = false;
-        for (int i=0; i<r.length(); i++) {
+        for (int i = 0; i < r.length(); i++) {
             int c = r.codePointAt(i);
             if (Character.isLetterOrDigit(c)) {
                 sb.appendCodePoint(c);
                 wasSpace = false;
             } else if (Character.isWhitespace(c)) {
-                if (! wasSpace)
+                if (!wasSpace)
                     sb.append("_");
                 wasSpace = true;
             }
@@ -348,13 +350,13 @@ public class StringUtils {
         String r = unaccentify(s).toLowerCase();
         StringBuilder sb = new StringBuilder("");
         boolean wasSpace = false;
-        for (int i=0; i<r.length(); i++) {
+        for (int i = 0; i < r.length(); i++) {
             int c = r.codePointAt(i);
             if (Character.isLetterOrDigit(c)) {
                 sb.appendCodePoint(c);
                 wasSpace = false;
             } else if (Character.isWhitespace(c)) {
-                if (! wasSpace)
+                if (!wasSpace)
                     sb.append("-");
                 wasSpace = true;
             } else if (c == '\u002d' || c == '\u005f') {

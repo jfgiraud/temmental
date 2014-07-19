@@ -5,17 +5,17 @@ import java.util.Map;
 
 class Array extends Element {
 
-	private List<Object> parameters;
-	
-	public Array(List<Object> parameters, Cursor cursor) {
-		super(cursor); 
-		this.parameters = parameters;
-	}
+    private List<Object> parameters;
 
-	@Override
-	String getIdentifier() {
-		throw new RuntimeException("Should not be called!");
-	}
+    public Array(List<Object> parameters, Cursor cursor) {
+        super(cursor);
+        this.parameters = parameters;
+    }
+
+    @Override
+    String getIdentifier() {
+        throw new RuntimeException("Should not be called!");
+    }
 
     @Override
     public String getIdentifierForErrorMessage() {
@@ -23,9 +23,9 @@ class Array extends Element {
     }
 
     @Override
-	Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-		return create_parameters_after_process(parameters, functions, model, messages);
-	}
+    Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+        return create_parameters_after_process(parameters, functions, model, messages);
+    }
 
     @Override
     public String repr(int d, boolean displayPosition) {
@@ -33,10 +33,10 @@ class Array extends Element {
     }
 
     public boolean equals(Object o) {
-		if (o == null || ! (o instanceof Array))
-			return false;
-		Array oc = (Array) o;
-		return oc.cursor.equals(cursor) && oc.parameters.size() == parameters.size() && oc.parameters.equals(parameters);
+        if (o == null || !(o instanceof Array))
+            return false;
+        Array oc = (Array) o;
+        return oc.cursor.equals(cursor) && oc.parameters.size() == parameters.size() && oc.parameters.equals(parameters);
 
-	}
+    }
 }

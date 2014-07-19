@@ -15,7 +15,7 @@ public class TestTemplateTest extends TestCase {
     private Map<String, Object> model;
     protected Properties properties;
     protected StringWriter out;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -34,7 +34,7 @@ public class TestTemplateTest extends TestCase {
 
     public void testPrintFile() throws IOException, TemplateException {
 
-    	Template template = new Template("src/test/resources/temmental2/test-file.tpl", filters, properties, Locale.ENGLISH);
+        Template template = new Template("src/test/resources/temmental2/test-file.tpl", filters, properties, Locale.ENGLISH);
 
         model = new HashMap<String, Object>();
         model.put("firstname", "John");
@@ -46,14 +46,14 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("lastname", "Doe");
 
         TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental2/test-file.tpl");
-        
+
         PrintCall call = record.getPrintCallForFile();
         assertEquals(expectedModel, call.getModel());
     }
 
     public void testPrintSection() throws IOException, TemplateException {
 
-    	Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
+        Template template = new Template("src/test/resources/temmental2/test-sections.tpl", filters, properties, Locale.ENGLISH);
 
         List<Map<String, Object>> list = createList(
                 createModel("index", 0, "fruit", "orange"),
@@ -74,9 +74,9 @@ public class TestTemplateTest extends TestCase {
         model.put("fruits", list);
         template.printSection(out, "second", model);
 
-        
+
         TemplateRecord record = TemplateRecorder.getTemplateRecordFor("src/test/resources/temmental2/test-sections.tpl");
-        
+
         List<PrintCall> calls = record.getPrintCallsForSection("first");
 
         HashMap<String, Object> expectedModel = new HashMap<String, Object>();
@@ -88,7 +88,7 @@ public class TestTemplateTest extends TestCase {
         expectedModel.put("firstname", "Jane");
         expectedModel.put("lastname", "Doe");
         assertEquals(expectedModel, calls.get(1).getModel());
-        
+
         calls = record.getPrintCallsForSection("second");
         expectedModel = new HashMap<String, Object>();
         expectedModel.put("fruits", list);
