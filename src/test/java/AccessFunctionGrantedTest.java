@@ -13,7 +13,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static temmental.TemplateUtils.createModel;
 
-public class AccessFunctionGranted {
+public class AccessFunctionGrantedTest {
 
     protected Map<String, Object> model;
     public Map<String, Object> transforms;

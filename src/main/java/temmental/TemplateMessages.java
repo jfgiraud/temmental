@@ -9,12 +9,12 @@ import java.util.*;
 /**
  * Wrapper to ResourceBundle or Properties. It is used for internationalization. Instances are created on Template constructors calls.
  */
-class TemplateMessages {
+public class TemplateMessages {
 
-    List<Object> messages;
+    private List<Object> messages;
     private Locale locale;
 
-    public TemplateMessages(Locale locale, Object... resourcesContainers) throws FileNotFoundException, TemplateException, IOException {
+    TemplateMessages(Locale locale, Object... resourcesContainers) throws FileNotFoundException, TemplateException, IOException {
         this.locale = locale;
         this.messages = new ArrayList<Object>();
         for (Object rs : resourcesContainers) {
