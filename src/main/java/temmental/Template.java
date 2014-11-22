@@ -343,13 +343,13 @@ public class Template {
         return filepath;
     }
 
-    String formatForTest(String format, Map<String, Object> model) throws IOException, TemplateException {
-        parseString(format, true);
-        StringWriter out = new StringWriter();
-        writeSection(out, DEFAULT_SECTION, (Map<String, Object>) transforms, model);
-        TemplateRecorder.log(this, DEFAULT_SECTION, model);
-        return out.toString();
-    }
+//    String formatForTest(String format, Map<String, Object> model) throws IOException, TemplateException {
+//        parseString(format, true);
+//        StringWriter out = new StringWriter();
+//        writeSection(out, DEFAULT_SECTION, (Map<String, Object>) transforms, model);
+//        TemplateRecorder.log(this, DEFAULT_SECTION, model);
+//        return out.toString();
+//    }
 
     /**
      * Prints the whole file on the stream.

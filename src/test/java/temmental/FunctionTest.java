@@ -247,10 +247,10 @@ public class FunctionTest extends AbstractTestElement {
                 return value.toUpperCase();
             }
         });
-        Template template = new Template("src/test/resources/temmental/test-function.tpl", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$name:'upper~", transforms, properties, Locale.ENGLISH);
         model = createModel("name", "jeff");
 
-        assertEquals("JEFF", template.formatForTest("~$name:'upper~", model));
+        assertEquals("JEFF", template.format(model));
         StringWriter out = new StringWriter();
         template.printFile(out, model);
         out.flush();

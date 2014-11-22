@@ -34,10 +34,10 @@ public class TestI18n extends TestCase {
     }
 
     private void assertFoundAndEquals(String expected, Locale locale, String file) throws IOException, TemplateException {
-        template = new Template("src/test/resources/temmental/test-file.tpl", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
-        assertEquals(expected, template.formatForTest("~'hello[]~", model));
-        template = new Template("src/test/resources/temmental/test-file.tpl", filters, "classpath:temmental." + file, locale);
-        assertEquals(expected, template.formatForTest("~'hello[]~", model));
+        StringTemplate template = new StringTemplate("~'hello[]~", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
+        assertEquals(expected, template.format(model));
+        template = new StringTemplate("~'hello[]~", filters, "classpath:temmental." + file, locale);
+        assertEquals(expected, template.format(model));
     }
 
     private void assertNotFound(Locale locale, String file) throws IOException, TemplateException {
