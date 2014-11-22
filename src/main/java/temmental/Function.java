@@ -93,8 +93,6 @@ class Function extends Element {
             occurred = e;
         }
 
-       occurred.printStackTrace();
-
         if (!method.getDeclaringClass().isAssignableFrom(obj.getClass())) {
             throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s. It receives %s.",
                     getIdentifier(),
