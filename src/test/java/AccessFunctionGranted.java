@@ -1,7 +1,6 @@
 import org.junit.Before;
 import org.junit.Test;
 import temmental.Template;
-import temmental.TemplateMessages;
 import temmental.Transform;
 
 import java.io.IOException;
@@ -19,14 +18,12 @@ public class AccessFunctionGranted {
     protected Map<String, Object> model;
     public Map<String, Object> transforms;
     protected Properties properties;
-    protected TemplateMessages messages;
 
     @Before
     public void setUp() throws Exception {
         model = new HashMap<String, Object>();
         transforms = new HashMap<String, Object>();
         properties = new Properties();
-        messages = new TemplateMessages(Locale.FRANCE, properties);
     }
 
     public void populateTransform(String key, Transform value) {
@@ -43,7 +40,6 @@ public class AccessFunctionGranted {
         Template template = new Template("src/test/resources/temmental/test-function.tpl", transforms, properties, Locale.ENGLISH);
         model = createModel("name", "jeff");
 
-        assertEquals("JEFF", template.formatForTest("~$name:'upper~", model));
         StringWriter out = new StringWriter();
         template.printFile(out, model);
         out.flush();

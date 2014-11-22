@@ -9,7 +9,7 @@ class Function extends Element {
     protected Object input;
     protected Identifier function;
 
-    public Function(Identifier func, Object input) {
+    Function(Identifier func, Object input) {
         super(func.cursor);
         this.input = input;
         this.function = func;
