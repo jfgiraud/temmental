@@ -4,10 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static temmental.TemplateUtils.createModel;
 
 public class FunctionTest extends AbstractTestElement {
 
@@ -237,5 +240,21 @@ public class FunctionTest extends AbstractTestElement {
         }
     }
 
+    @Test
+    public void testFoo() throws IOException {
+        populateTransform("upper", new Transform<String, String>() {
+            public String apply(String value) {
+                return value.toUpperCase();
+            }
+        });
+        Template template = new Template("src/test/resources/temmental/test-function.tpl", transforms, properties, Locale.ENGLISH);
+        model = createModel("name", "jeff");
 
+        assertEquals("JEFF", template.formatForTest("~$name:'upper~", model));
+        StringWriter out = new StringWriter();
+        template.printFile(out, model);
+        out.flush();
+        assertEquals("JEFF", out.toString());
+
+    }
 }

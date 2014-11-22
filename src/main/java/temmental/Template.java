@@ -343,7 +343,7 @@ public class Template {
         return filepath;
     }
 
-    String formatForTest(String format, Map<String, Object> model) throws IOException, TemplateException {
+    public String formatForTest(String format, Map<String, Object> model) throws IOException, TemplateException {
         parseString(format, true);
         StringWriter out = new StringWriter();
         writeSection(out, DEFAULT_SECTION, (Map<String, Object>) transforms, model);
