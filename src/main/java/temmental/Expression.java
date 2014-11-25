@@ -80,16 +80,26 @@ class Expression {
                         out.tolist(out.depth());
                         List initParameters = (List) out.pop();
                         out = (Stack) oldOut.pop();
-                        if (!(out.value() instanceof Function)) {
+                        if (out.value() instanceof Function) {
+                            Function func = (Function) out.pop();
+                            out.push(new Functionp(func, initParameters));
+                            commas = (Integer) oldCommas.pop();
+                        } else if (out.value() instanceof Command) {
+                            Command command = (Command) out.pop();
+                            if (initParameters.size() != 1) {
+                                throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
+                                        "Expects one parameter.",
+                                        b.getBracket(), b.getCursor().getPosition());
+                            }
+                            out.push(new Command(command, (Identifier) initParameters.get(0)));
+                            commas = (Integer) oldCommas.pop();
+                        } else {
                             throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
                                     "Expects '%s' token but receives '%s' token.",
                                     b.getBracket(), b.getCursor().getPosition(),
                                     Function.class.getCanonicalName(),
                                     out.value().getClass().getCanonicalName());
                         }
-                        Function func = (Function) out.pop();
-                        out.push(new Functionp(func, initParameters));
-                        commas = (Integer) oldCommas.pop();
                     } else if (b.getBracket() == ']') {
                         if ((out.depth() != 0) && (commas != out.depth() - 1)) {
                             throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());

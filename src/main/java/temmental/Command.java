@@ -8,6 +8,7 @@ import static temmental.StringUtils.viewWhiteSpaces;
 
 public class Command extends Element {
 
+    private Identifier toModel;
     private Keyword keyword;
     private Element element;
     private List<Object> betweenTags;
@@ -22,10 +23,16 @@ public class Command extends Element {
         this.element = element;
         this.betweenTags = new ArrayList<Object>();
         this.opening = (element != null);
+        this.toModel = null;
     }
 
     public Command(Keyword keyword, Cursor cursor) throws TemplateException {
         this(keyword, cursor, null);
+    }
+
+    public Command(Command command, Identifier toModel) {
+        this(command.keyword, command.cursor, command.element);
+        this.toModel = toModel;
     }
 
     @Override
@@ -97,7 +104,15 @@ public class Command extends Element {
         while (it.hasNext()) {
             Object c = it.next();
             if (!(c instanceof Map)) {
-                throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+                if (toModel == null) {
+                    throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+                } else {
+                    Function func = new Function(toModel, c);
+                    c = func.writeObject(functions, model, messages);
+                    if (!(c instanceof Map)) {
+                        throw new TemplateException("Command 'for' requires a Map input at position '%s'", keyword.getCursor().getPosition());
+                    }
+                }
             }
             Map m = new HashMap();
             m.putAll(model);

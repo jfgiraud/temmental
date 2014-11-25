@@ -106,6 +106,30 @@ public class TestTemplateTest extends TestCase {
         assertEquals("before<1><2><3>before", template.format(model));
     }
 
+    public void testCommandForStrings() throws IOException, TemplateException {
+        filters.put("s2m", new Transform<String, Map<String,String>>() {
+            public Map<String, String> apply(final String value) {
+                return new HashMap<String, String>() {{ put("elem", value); }};
+            };
+        });
+        StringTemplate template = new StringTemplate("~$elem~~$l#for<'s2m>~<~$elem~>~#for~~$elem~", filters, properties, Locale.ENGLISH);
+        List<String> elements = Arrays.asList("abc", "def", "ghi");
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before<abc><def><ghi>before", template.format(model));
+    }
+
+    public void testCommandForStrings2() throws IOException, TemplateException {
+        filters.put("s2m", new Transform<String, Map<String,String>>() {
+            public Map<String, String> apply(final String value) {
+                return new HashMap<String, String>() {{ put("elem", value); }};
+            };
+        });
+        StringTemplate template = new StringTemplate("~$elem~~$l#for<'s2m<\"elem\">>~<~$elem~>~#for~~$elem~", filters, properties, Locale.ENGLISH);
+        List<String> elements = Arrays.asList("abc", "def", "ghi");
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before<abc><def><ghi>before", template.format(model));
+    }
+
     public void testCommandTrue() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", filters, properties, Locale.ENGLISH);
         model = createModel("cond", true, "name", "jeff");
