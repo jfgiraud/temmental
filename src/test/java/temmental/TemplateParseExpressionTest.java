@@ -208,6 +208,22 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
         ));
     }
 
+//    @Test
+//    public void testOpeningCommandWithMapper() throws IOException, TemplateException {
+//        parseExpression("~$strings#for<'s2m>~");
+//
+//        assertTokensEquals(identifier("$strings", p(1, 2)),
+//                tocommand(p(1, 10)),
+//                keyword("for", p(1, 11)),
+//                toapply(p(1, 14)),
+//                identifier("'s2m", p(1, 15))
+//        );
+//
+//        assertElementEquals(command(keyword("for", p(1, 11)), p(1, 2),
+//                                identifier("$strings", p(1, 2)))
+//        );
+//    }
+
     @Test
     public void testClosingCommand() throws IOException, TemplateException {
         parseExpression("~#for~");
@@ -396,6 +412,7 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
             @Override
             Stack parseToTokens() throws IOException, TemplateException {
                 tokens = super.parseToTokens();
+                System.out.println(tokens);
                 return tokens.clone();
             }
         };
