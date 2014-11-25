@@ -15,7 +15,7 @@ public class TestI18n extends TestCase {
     private static final Locale locale_es_BO = new Locale("es", "BO");
     private static final Locale locale_fr_CA = new Locale("fr", "CA");
 
-    private Template template;
+    private StringTemplate template;
     private HashMap<String, Transform> filters;
     private HashMap<String, Object> model;
 
@@ -34,21 +34,21 @@ public class TestI18n extends TestCase {
     }
 
     private void assertFoundAndEquals(String expected, Locale locale, String file) throws IOException, TemplateException {
-        template = new Template("src/test/resources/temmental/test-file.tpl", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
-        assertEquals(expected, template.formatForTest("~'hello[]~", model));
-        template = new Template("src/test/resources/temmental/test-file.tpl", filters, "classpath:temmental." + file, locale);
-        assertEquals(expected, template.formatForTest("~'hello[]~", model));
+        template = new StringTemplate("~'hello[]~", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
+        assertEquals(expected, template.format(model));
+        template = new StringTemplate("~'hello[]~", filters, "classpath:temmental." + file, locale);
+        assertEquals(expected, template.format(model));
     }
 
     private void assertNotFound(Locale locale, String file) throws IOException, TemplateException {
         try {
-            template = new Template("test/resources/temmental/test-file.tpl", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
+            template = new StringTemplate("test/resources/temmental/test-file.tpl", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
             fail("An exception must be thrown!");
         } catch (TemplateException e) {
             assertTrue(e.getMessage().startsWith("Can't find properties file"));
         }
         try {
-            template = new Template("src/test/resources/temmental/test-file.tpl", filters, "classpath:temmental." + file, locale);
+            template = new StringTemplate("src/test/resources/temmental/test-file.tpl", filters, "classpath:temmental." + file, locale);
             fail("An exception must be thrown!");
         } catch (TemplateException e) {
             assertTrue(e.getMessage().startsWith("Can't find bundle for "));

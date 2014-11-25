@@ -34,7 +34,7 @@ public class Template {
     }
 
 
-    private Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
+    Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
             throws IOException, TemplateException {
         this.transforms = transforms;
         this.messages = messages;
@@ -341,14 +341,6 @@ public class Template {
 
     public String getFilepath() {
         return filepath;
-    }
-
-    String formatForTest(String format, Map<String, Object> model) throws IOException, TemplateException {
-        parseString(format, true);
-        StringWriter out = new StringWriter();
-        writeSection(out, DEFAULT_SECTION, (Map<String, Object>) transforms, model);
-        TemplateRecorder.log(this, DEFAULT_SECTION, model);
-        return out.toString();
     }
 
     /**
