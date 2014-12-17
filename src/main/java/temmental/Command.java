@@ -31,11 +31,7 @@ public class Command extends Element {
     @Override
     public String repr(int d, boolean displayPosition) {
         String buffer = "@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n";
-        if (element instanceof Element) {
-            buffer += "   " + ((Element) element).repr(d + 1, true);
-        } else {
-            buffer += "   " + viewWhiteSpaces(String.valueOf(element));
-        }
+        buffer += "   " + element.repr(d + 1, true);
         buffer += "\n";
         for (int i = 0; i < betweenTags.size(); i++) {
             Object obj = betweenTags.get(i);
@@ -68,7 +64,7 @@ public class Command extends Element {
         } else if (keyword.getKeyword().equals("false")) {
             writeObjectIf(out, functions, model, messages, true);
         } else if (keyword.getKeyword().equals("set")) {
-            writeObjectSet(out, functions, model, messages, true);
+            writeObjectSet(out, functions, model, messages);
         } else {
             throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
         }
@@ -84,13 +80,11 @@ public class Command extends Element {
             b = !b;
         }
         if (b) {
-            Map m = new HashMap();
-            m.putAll(model);
-            writeObjectBetweenTags(out, functions, messages, m);
+            writeObjectBetweenTags(out, functions, messages, new HashMap<String, Object>(model));
         }
     }
 
-    private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, boolean invert) throws TemplateException, IOException {
+    private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         Object result = element.writeObject(functions, model, messages);
         if (!(result instanceof ArrayList)) {
             throw new TemplateException("Command 'set' requires an array input at position '%s'", keyword.getCursor().getPosition());
@@ -99,8 +93,7 @@ public class Command extends Element {
         String variable = (String) ((List) result).get(0);
         String value = (String) ((List) result).get(1);
 
-        Map m = new HashMap();
-        m.putAll(model);
+        Map<String, Object> m = new HashMap<String, Object>(model);
         m.put(variable, value);
 
         writeObjectBetweenTags(out, functions, messages, m);
@@ -111,20 +104,17 @@ public class Command extends Element {
         if (!(result instanceof Iterable)) {
             throw new TemplateException("Command 'for' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
         }
-        Iterator it = ((Iterable) result).iterator();
-        while (it.hasNext()) {
-            Object c = it.next();
+        for (Object c : ((Iterable) result)) {
             if (!(c instanceof Map)) {
                 throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
             }
-            Map m = new HashMap();
-            m.putAll(model);
+            Map<String, Object> m = new HashMap<String, Object>(model);
             m.putAll((Map) c);
             writeObjectBetweenTags(out, functions, messages, m);
         }
     }
 
-    private void writeObjectBetweenTags(Writer out, Map<String, Object> functions, TemplateMessages messages, Map m) throws TemplateException, IOException {
+    private void writeObjectBetweenTags(Writer out, Map<String, Object> functions, TemplateMessages messages, Map<String, Object> m) throws TemplateException, IOException {
         for (Object item : betweenTags) {
             try {
                 if (item instanceof Command) {
@@ -138,7 +128,7 @@ public class Command extends Element {
                     out.write(String.valueOf(item));
                 }
             } catch (TemplateIgnoreRenderingException e) {
-
+                // pass
             }
         }
     }
@@ -185,6 +175,5 @@ public class Command extends Element {
                 betweenTags.add(line);
             }
         }
-        return;
     }
 }
