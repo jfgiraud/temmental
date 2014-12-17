@@ -15,7 +15,7 @@ public class Command extends Element {
 
     public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
-        if (!Arrays.asList("for", "true", "false").contains(keyword.getKeyword())) {
+        if (!Arrays.asList("for", "true", "false", "set").contains(keyword.getKeyword())) {
             throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
         this.keyword = keyword;
@@ -67,6 +67,8 @@ public class Command extends Element {
             writeObjectIf(out, functions, model, messages, false);
         } else if (keyword.getKeyword().equals("false")) {
             writeObjectIf(out, functions, model, messages, true);
+        } else if (keyword.getKeyword().equals("set")) {
+            writeObjectSet(out, functions, model, messages, true);
         } else {
             throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
         }
@@ -86,6 +88,22 @@ public class Command extends Element {
             m.putAll(model);
             writeObjectBetweenTags(out, functions, messages, m);
         }
+    }
+
+    private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, boolean invert) throws TemplateException, IOException {
+        Object result = element.writeObject(functions, model, messages);
+        if (!(result instanceof ArrayList)) {
+            throw new TemplateException("Command 'set' requires an array input at position '%s'", keyword.getCursor().getPosition());
+        }
+
+        String variable = (String) ((List) result).get(0);
+        String value = (String) ((List) result).get(1);
+
+        Map m = new HashMap();
+        m.putAll(model);
+        m.put(variable, value);
+
+        writeObjectBetweenTags(out, functions, messages, m);
     }
 
     private void writeObjectFor(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
