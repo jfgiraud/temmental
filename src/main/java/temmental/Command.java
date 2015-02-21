@@ -67,6 +67,8 @@ public class Command extends Element {
             writeObjectIf(out, functions, model, messages, true);
         } else if (keyword.getKeyword().equals("set")) {
             writeObjectSet(out, functions, model, messages);
+        } else if (keyword.getKeyword().equals("override")) {
+            writeObjectOverride(out, functions, model, messages);
         } else {
             throw new TemplateException("writeObject not implemented for command '%s'", keyword.getKeyword());
         }
@@ -84,6 +86,19 @@ public class Command extends Element {
         if (b) {
             writeObjectBetweenTags(out, functions, messages, new HashMap<String, Object>(model));
         }
+    }
+
+    private void writeObjectOverride(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+        Object result = element.writeObject(functions, model, messages);
+
+        if (!(result instanceof Map)) {
+            throw new TemplateException("Command '%s' requires a map at position '%s'", keyword.getCursor().getPosition());
+        }
+
+        Map<String, Object> m = new HashMap<String, Object>(model);
+        m.putAll((Map) result);
+
+        writeObjectBetweenTags(out, functions, messages, m);
     }
 
     private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
