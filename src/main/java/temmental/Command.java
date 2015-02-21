@@ -16,7 +16,7 @@ public class Command extends Element {
 
     public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
-        if (!Arrays.asList("for", "true", "false", "set").contains(keyword.getKeyword())) {
+        if (!Arrays.asList("for", "true", "false", "set", "override").contains(keyword.getKeyword())) {
             throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
         this.keyword = keyword;
