@@ -412,7 +412,7 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
             @Override
             Stack parseToTokens() throws IOException, TemplateException {
                 tokens = super.parseToTokens();
-                System.out.println(tokens);
+                //System.out.println(tokens);
                 return tokens.clone();
             }
         };
