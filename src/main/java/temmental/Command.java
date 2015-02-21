@@ -12,6 +12,7 @@ public class Command extends Element {
     private Element element;
     private List<Object> betweenTags;
     private boolean opening;
+    private Element varname;
 
     public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
@@ -22,6 +23,7 @@ public class Command extends Element {
         this.element = element;
         this.betweenTags = new ArrayList<Object>();
         this.opening = (element != null);
+        this.varname = null;
     }
 
     public Command(Keyword keyword, Cursor cursor) throws TemplateException {
@@ -85,13 +87,8 @@ public class Command extends Element {
     }
 
     private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-        Object result = element.writeObject(functions, model, messages);
-        if (!(result instanceof ArrayList)) {
-            throw new TemplateException("Command 'set' requires an array input at position '%s'", keyword.getCursor().getPosition());
-        }
-
-        String variable = (String) ((List) result).get(0);
-        String value = (String) ((List) result).get(1);
+        Object value = element.writeObject(functions, model, messages);
+        String variable = (String) getVarname().writeObject(functions, model, messages);
 
         Map<String, Object> m = new HashMap<String, Object>(model);
         m.put(variable, value);
@@ -106,11 +103,19 @@ public class Command extends Element {
         }
         for (Object c : ((Iterable) result)) {
             if (!(c instanceof Map)) {
-                throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+                if (getVarname() != null) {
+                    String variable = (String) getVarname().writeObject(functions, model, messages);
+                    Map<String, Object> m = new HashMap<String, Object>(model);
+                    m.put(variable, c);
+                    writeObjectBetweenTags(out, functions, messages, m);
+                } else {
+                    throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+                }
+            } else {
+                Map<String, Object> m = new HashMap<String, Object>(model);
+                m.putAll((Map) c);
+                writeObjectBetweenTags(out, functions, messages, m);
             }
-            Map<String, Object> m = new HashMap<String, Object>(model);
-            m.putAll((Map) c);
-            writeObjectBetweenTags(out, functions, messages, m);
         }
     }
 
@@ -174,6 +179,36 @@ public class Command extends Element {
             } else {
                 betweenTags.add(line);
             }
+        }
+    }
+
+    public void setVarname(Element varname) {
+        this.varname = varname;
+    }
+
+    public Element getVarname() {
+        return varname;
+    }
+
+    public boolean allowParameters(int number) {
+        if ("for".equals(keyword.getKeyword()) && (number == 0 || number == 1)) {
+            return true;
+        } else if ("set".equals(keyword.getKeyword()) && number == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public Keyword getKeyword() {
+        return keyword;
+    }
+
+    public void check() {
+        if ("set".equals(keyword.getKeyword()) && varname == null) {
+            throw new TemplateException("Invalid syntax at position '%s'. " +
+                    "Command 'set' expectes one parameter.",
+                    cursor.getPosition(),
+                    getKeyword().getKeyword());
         }
     }
 }

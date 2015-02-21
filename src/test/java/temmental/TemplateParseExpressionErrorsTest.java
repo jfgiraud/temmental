@@ -109,6 +109,22 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
                 "~$message[$firstname:'upper,$lastname:'replace<'ab',','>]:'quote~");
     }
 
+    @Test
+    public void testCommandForTooManyParameters() throws IOException, TemplateException {
+        assertParseThrowsException("Invalid syntax on closing bracket '>' at position '-:l1:c27'. Bad number of parameter for command 'for'.", "~$elem~~$l#for<$elem,$elem>~<~$before~>~#for~~$elem~");
+    }
+
+    @Test
+    public void testCommandSetTooManyParameters() throws IOException, TemplateException {
+        assertParseThrowsException("Invalid syntax on closing bracket '>' at position '-:l1:c27'. Bad number of parameter for command 'set'.",
+                "~$elem~~$l#set<$elem,$elem>~<~$before~>~#set~~$elem~");
+    }
+
+    @Test
+    public void testCommandSetNoParameter() throws IOException, TemplateException {
+        assertParseThrowsException("Invalid syntax at position '-:l1:c11'. Command 'set' expectes one parameter.",
+                "~$elem~~$l#set~<~$before~>~#set~~$elem~");
+    }
 
     protected void assertParseThrowsException(String expectedMessage, String pattern) {
         if (displayRule) {

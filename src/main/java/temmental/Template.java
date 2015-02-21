@@ -153,12 +153,12 @@ public class Template {
                         stack.push(o);
                     }
                 }
-                sections.put(sectionName, createCommands(stack, parseExpression));
+                sections.put(sectionName, createCommands(stack));
             }
         }
     }
 
-    private Stack createCommands(Stack stack, boolean parseExpression) throws TemplateException, IOException {
+    private Stack createCommands(Stack stack) throws TemplateException, IOException {
         Stack oldOut = new Stack();
         Stack out = new Stack();
         stack.reverse();
@@ -167,6 +167,7 @@ public class Template {
             if (obj instanceof Command) {
                 Command cmd = (Command) obj;
                 cmd.readUntilClosing(stack);
+                cmd.check();
                 out.push(cmd);
             } else {
                 out.push(obj);

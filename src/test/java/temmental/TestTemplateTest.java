@@ -1,6 +1,7 @@
 package temmental;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -8,7 +9,6 @@ import java.util.*;
 
 import static temmental.TemplateUtils.createList;
 import static temmental.TemplateUtils.createModel;
-import static temmental.TemplateUtils.transform;
 
 public class TestTemplateTest extends TestCase {
 
@@ -33,6 +33,7 @@ public class TestTemplateTest extends TestCase {
         TemplateRecorder.setRecording(false);
     }
 
+    @Test
     public void testPrintFile() throws IOException, TemplateException {
 
         Template template = new Template("src/test/resources/temmental/test-file.tpl", transforms, properties, Locale.ENGLISH);
@@ -52,6 +53,7 @@ public class TestTemplateTest extends TestCase {
         assertEquals(expectedModel, call.getModel());
     }
 
+    @Test
     public void testPrintSection() throws IOException, TemplateException {
 
         Template template = new Template("src/test/resources/temmental/test-sections.tpl", transforms, properties, Locale.ENGLISH);
@@ -96,6 +98,7 @@ public class TestTemplateTest extends TestCase {
         assertEquals(expectedModel, calls.get(0).getModel());
     }
 
+    @Test
     public void testCommandFor() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$l#for~<~$elem~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
         List<Map<String, Object>> elements = createList(
@@ -107,8 +110,25 @@ public class TestTemplateTest extends TestCase {
         assertEquals("before<1><2><3>before", template.format(model));
     }
 
+    @Test
+    public void testCommandForQuote() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("~$elem~~$l#for<'elem>~<~$elem~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
+        List<Integer> elements = Arrays.asList(1, 2, 3);
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before<1><2><3>before", template.format(model));
+    }
+
+    @Test
+    public void testCommandForIndirection() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("~$elem~~$l#for<$elem>~<~$before~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
+        List<Integer> elements = Arrays.asList(1, 2, 3);
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before<1><2><3>before", template.format(model));
+    }
+
+    @Test
     public void testCommandSet() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("~$elem~~('elem,$newvalue)#set~<~$elem~>~$l#for~<~$elem~>~#for~<~$elem~>~#set~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<'elem>~<~$elem~>~$l#for~<~$elem~>~#for~<~$elem~>~#set~~$elem~", transforms, properties, Locale.ENGLISH);
         model = createModel("elem", "before",
                 "newvalue", "after",
                 "l", createList(
@@ -119,36 +139,42 @@ public class TestTemplateTest extends TestCase {
         assertEquals("before<after><1><2><3><after>before", template.format(model));
     }
 
+    @Test
     public void testCommandSetWithIndirection() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("~$elem~~($elem,$newvalue)#set~<~$elem~><~$before?~>~#set~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<$elem>~<~$elem~><~$before?~>~#set~~$elem~", transforms, properties, Locale.ENGLISH);
         model = createModel("elem", "before", "newvalue", "after");
         assertEquals("before<before><after>before", template.format(model));
     }
 
+    @Test
     public void testCommandTrueCondIsTrue() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", transforms, properties, Locale.ENGLISH);
         model = createModel("cond", true, "name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }
 
+    @Test
     public void testCommandTrueCondIsFalse() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", transforms, properties, Locale.ENGLISH);
         model = createModel("cond", false, "name", "jeff");
         assertEquals("", template.format(model));
     }
 
+    @Test
     public void testCommandFalseCondIsTrue() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$cond#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
         model = createModel("cond", true, "name", "jeff");
         assertEquals("", template.format(model));
     }
 
+    @Test
     public void testCommandFalseCondIsFalse() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$cond#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
         model = createModel("cond", false, "name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }
 
+    @Test
     public void testCommandDefaultValueTrue() throws IOException, TemplateException {
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {
@@ -160,6 +186,7 @@ public class TestTemplateTest extends TestCase {
         assertEquals("", template.format(model));
     }
 
+    @Test
     public void testCommandDefaultValueFalse() throws IOException, TemplateException {
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {

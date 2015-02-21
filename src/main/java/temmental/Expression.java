@@ -80,16 +80,30 @@ class Expression {
                         out.tolist(out.depth());
                         List initParameters = (List) out.pop();
                         out = (Stack) oldOut.pop();
-                        if (!(out.value() instanceof Function)) {
-                            throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
-                                    "Expects '%s' token but receives '%s' token.",
-                                    b.getBracket(), b.getCursor().getPosition(),
-                                    Function.class.getCanonicalName(),
-                                    out.value().getClass().getCanonicalName());
+                        if (out.value() instanceof  Command) {
+                            Command command = (Command) out.pop();
+                            if (! command.allowParameters(initParameters.size())) {
+                                throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
+                                        "Bad number of parameter for command '%s'.",
+                                        b.getBracket(), b.getCursor().getPosition(),
+                                        command.getKeyword().getKeyword());
+
+                            }
+                            command.setVarname((Element) initParameters.get(0));
+                            out.push(command);
+                            commas = (Integer) oldCommas.pop();
+                        } else {
+                            if (!(out.value() instanceof Function)) {
+                                throw new TemplateException("Invalid syntax on closing bracket '%c' at position '%s'. " +
+                                        "Expects '%s' token but receives '%s' token.",
+                                        b.getBracket(), b.getCursor().getPosition(),
+                                        Function.class.getCanonicalName(),
+                                        out.value().getClass().getCanonicalName());
+                            }
+                            Function func = (Function) out.pop();
+                            out.push(new Functionp(func, initParameters));
+                            commas = (Integer) oldCommas.pop();
                         }
-                        Function func = (Function) out.pop();
-                        out.push(new Functionp(func, initParameters));
-                        commas = (Integer) oldCommas.pop();
                     } else if (b.getBracket() == ']') {
                         if ((out.depth() != 0) && (commas != out.depth() - 1)) {
                             throw new TemplateException("No parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
@@ -123,9 +137,6 @@ class Expression {
                 Object input = out.pop();
                 out.push(new Function(filter, input));
             } else if (token instanceof ToDefaultTok) {
-                //System.out.println("=tok====");tokens.printStack(System.out);
-                //System.out.println("=out====");out.printStack(System.out);
-                //System.out.println("=oldout====");oldOut.printStack(System.out);
                 Object defaultValue = null;
                 if (!tokens.empty()) {
                     Object nextToken = tokens.value();
@@ -133,17 +144,11 @@ class Expression {
                         defaultValue = tokens.pop();
                     }
                 }
-                //System.out.println(defaultValue);
-                //System.out.println(defaultValue.getClass().getCanonicalName());
-
                 Element input = (Element) out.pop();
                 out.push(new DefaultFunction(input, defaultValue));
             } else if (token instanceof CommaTok) {
                 commas += 1;
             } else if (token instanceof CommandTok) {
-                //System.out.println("=tok====");tokens.printStack(System.out);
-                //System.out.println("=out====");out.printStack(System.out);
-                //System.out.println("=oldout====");oldOut.printStack(System.out);
                 Keyword keyword = (Keyword) tokens.pop();
                 if (out.empty()) {
                     out.push(new Command(keyword, ((CommandTok) token).getCursor()));
