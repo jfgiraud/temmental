@@ -10,6 +10,7 @@ class Expression {
     private String expr;
     private Cursor cursor;
     private boolean betweenTildes;
+    private Object currentToken = null;
 
     Expression(String expr, Cursor cursor, boolean betweenTildes) {
         this.expr = expr;
@@ -24,7 +25,14 @@ class Expression {
     public Object parse() throws IOException, TemplateException {
         Stack tokens = parseToTokens();
         tokens.reverse();
-        return interpretTokens(tokens);
+        try {
+            return interpretTokens(tokens);
+        } catch (ClassCastException e) {
+            if (currentToken instanceof Token)
+                throw new TemplateException(e, "Parsing exception at position %s.", ((Token)currentToken).getCursor().getPosition());
+            else
+                throw e;
+        }
     }
 
     @Override
@@ -48,6 +56,7 @@ class Expression {
         Stack out = new Stack();
         while (tokens.depth() >= 1) {
             Object token = tokens.pop();
+            currentToken = token;
             if (isLeafToken(token)) {
                 out.push(token);
             } else if (token instanceof BracketTok) {

@@ -122,9 +122,16 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
     @Test
     public void testCommandSetNoParameter() throws IOException, TemplateException {
-        assertParseThrowsException("Invalid syntax at position '-:l1:c11'. Command 'set' expectes one parameter.",
+        assertParseThrowsException("Invalid syntax at position '-:l1:c11'. Command 'set' expects one parameter.",
                 "~$elem~~$l#set~<~$before~>~#set~~$elem~");
     }
+
+    @Test
+    public void testInvalidSyntax2() throws IOException, TemplateException {
+        assertParseThrowsException("Parsing exception at position -:l1:c23.",
+                "~$date_time:'is_today<#true~</b>~#true~");
+    }
+
 
     protected void assertParseThrowsException(String expectedMessage, String pattern) {
         if (displayRule) {
@@ -135,7 +142,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
             template.parseString(pattern, true);
             fail("An exception must be raised.");
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             assertEquals(expectedMessage, e.getMessage());
         }
     }

@@ -221,7 +221,7 @@ public class Command extends Element {
     public void check() {
         if ("set".equals(keyword.getKeyword()) && varname == null) {
             throw new TemplateException("Invalid syntax at position '%s'. " +
-                    "Command 'set' expectes one parameter.",
+                    "Command 'set' expects one parameter.",
                     cursor.getPosition(),
                     getKeyword().getKeyword());
         }
