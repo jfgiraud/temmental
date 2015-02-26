@@ -401,6 +401,11 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
                 todefault(p(1, 15)),
                 123
         );
+
+        assertElementEquals(
+                or(message(identifier("$variable", p(1, 2)), list()),
+                        123)
+        );
     }
 
     protected void parseExpression(String s) throws IOException, TemplateException {
