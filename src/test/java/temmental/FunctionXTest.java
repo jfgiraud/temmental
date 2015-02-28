@@ -32,41 +32,41 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testTestMessageWithGlobalDefaultValue() throws IOException, TemplateException {
-        parse("~'msg[$p1]!\"text\"~");
+        parse("~'msg[$p1]!\"text\"¡~");
         assertWriteEquals("text");
     }
 
     @Test
     public void testTestMessageWithDefaultValue() throws IOException, TemplateException {
-        parse("~'msg[$p1!\"unknown\"]~");
+        parse("~'msg[$p1!\"unknown\"¡]~");
         populateProperty("msg", "Hello {0}");
         assertWriteEquals("Hello unknown");
     }
 
     @Test
     public void testTestMessageWithDefaultValue2() throws IOException, TemplateException {
-        parse("~'msg[$p1!]~");
+        parse("~'msg[$p1!¡]~");
         populateProperty("msg", "Hello {0}");
         assertWriteEquals("Hello ");
     }
 
     @Test
     public void testTestMessageWithDefaultValue3() throws IOException, TemplateException {
-        parse("~'msg[$p1]!\"text\"~");
+        parse("~'msg[$p1]!\"text\"¡~");
         populateProperty("msg", "Hello {0}");
         assertWriteEquals("text");
     }
 
     @Test
     public void testTestMessageWithDefaultValue4() throws IOException, TemplateException {
-        parse("~'msg[$p1]!\"text\"~");
+        parse("~'msg[$p1]!\"text\"¡~");
         populateModel("p1", "something");
         assertWriteEquals("text");
     }
 
     @Test
     public void testTestMessageWithDefaultValue5() throws IOException, TemplateException {
-        parse("~$msg!'default[$p1]~");
+        parse("~$msg!'default[$p1]¡~");
         populateProperty("default", "Bonjour {0}");
         populateModel("p1", "bidule");
         assertWriteEquals("Bonjour bidule");
@@ -314,7 +314,7 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testADynamicFunctionCanBeOptional_CaseUnknown2() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-        parse("~$text:$f!:'upper~");
+        parse("~$text:$f!¡:'upper~");
         populateModel("text", "It is an example!");
         populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
         assertWriteEquals("IT IS AN EXAMPLE!");
@@ -361,7 +361,7 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testSubstr_ParamOptional2() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        parse("~$text:'substr<$b1,$b2!8>~");
+        parse("~$text:'substr<$b1,$b2!8¡>~");
         Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
         populateTransform("substr", func);
         populateModel("text", "lorem ipsum");

@@ -325,9 +325,9 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
     @Test
     public void testVariableWithDefaultValueNumber() throws IOException, TemplateException {
-        parseExpression("~$variable!123~");
+        parseExpression("~$variable!123¡~");
 
-        assertTokensEquals(identifier("$variable", p(1, 2)), todefault(p(1, 11)), 123);
+        assertTokensEquals(identifier("$variable", p(1, 2)), bracket('!', p(1, 11)), 123, bracket('¡', p(1, 15)));
 
         assertElementEquals(
                 or(identifier("$variable", p(1, 2)),
@@ -336,9 +336,9 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
     @Test
     public void testVariableWithDefaultValueString() throws IOException, TemplateException {
-        parseExpression("~$variable!\"some thing\"~");
+        parseExpression("~$variable!\"some thing\"¡~");
 
-        assertTokensEquals(identifier("$variable", p(1, 2)), todefault(p(1, 11)), text("some thing", p(1, 12)));
+        assertTokensEquals(identifier("$variable", p(1, 2)), bracket('!', p(1, 11)), text("some thing", p(1, 12)), bracket('¡', p(1, 24)));
 
         assertElementEquals(
                 or(identifier("$variable", p(1, 2)),
@@ -347,11 +347,13 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
     @Test
     public void testVariableWithDefaultValueIdentifier() throws IOException, TemplateException {
-        parseExpression("~$variable!$variable2?~");
+        parseExpression("~$variable!$variable2?¡~");
 
         assertTokensEquals(identifier("$variable", p(1, 2)),
-                todefault(p(1, 11)),
-                identifier("$variable2?", p(1, 12)));
+                bracket('!', p(1, 11)),
+                identifier("$variable2?", p(1, 12)),
+                bracket('¡', p(1, 23))
+                );
 
         assertElementEquals(or(
                 identifier("$variable", p(1, 2)),
@@ -360,29 +362,53 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
     @Test
     public void testMessageWithDefaultKey() throws IOException, TemplateException {
-        parseExpression("~$variable!'prop[]~");
+        parseExpression("~$variable!'prop[]¡~");
 
         assertTokensEquals(identifier("$variable", p(1, 2)),
-                todefault(p(1, 11)),
+                bracket('!', p(1, 11)),
                 identifier("'prop", p(1, 12)),
                 bracket('[', p(1, 17)),
-                bracket(']', p(1, 18))
+                bracket(']', p(1, 18)),
+                bracket('¡', p(1, 19))
         );
 
         assertElementEquals(
-                message(or(identifier("$variable", p(1, 2)), identifier("'prop", p(1, 12)))
-                        , list()));
+            or(
+                    message(identifier("$variable", p(1, 2)), list()),
+                    message(identifier("'prop", p(1, 12)), list())));
+    }
+
+
+    @Test
+    public void testMessageWithDefaultKey3() throws IOException, TemplateException {
+        parseExpression("~$variable[]!'prop[]¡~");
+
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                bracket('[', p(1, 11)),
+                bracket(']', p(1, 12)),
+                bracket('!', p(1, 13)),
+                identifier("'prop", p(1, 14)),
+                bracket('[', p(1, 19)),
+                bracket(']', p(1, 20)),
+                bracket('¡', p(1, 21))
+        );
+
+        assertElementEquals(
+                or(
+                        message(identifier("$variable", p(1, 2)), list()),
+                        message(identifier("'prop", p(1, 14)), list())));
     }
 
     @Test
     public void testMessageWithDefaultKey2() throws IOException, TemplateException {
-        parseExpression("~$variable!\"prop\"[]~");
+        parseExpression("~$variable!\"prop\"¡[]~");
 
         assertTokensEquals(identifier("$variable", p(1, 2)),
-                todefault(p(1, 11)),
+                bracket('!', p(1, 11)),
                 text("prop", p(1, 12)),
-                bracket('[', p(1, 18)),
-                bracket(']', p(1, 19))
+                bracket('¡', p(1, 18)),
+                bracket('[', p(1, 19)),
+                bracket(']', p(1, 20))
         );
 
         assertElementEquals(
@@ -392,14 +418,15 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
 
     @Test
     public void testToRename() throws IOException, TemplateException {
-        parseExpression("~$variable[$b]!123~");
+        parseExpression("~$variable[$b]!123¡~");
 
         assertTokensEquals(identifier("$variable", p(1, 2)),
                 bracket('[', p(1, 11)),
                 identifier("$b", p(1, 12)),
                 bracket(']', p(1, 14)),
-                todefault(p(1, 15)),
-                123
+                bracket('!', p(1, 15)),
+                123,
+                bracket('¡', p(1, 19))
         );
 
         assertElementEquals(

@@ -62,10 +62,6 @@ public abstract class AbstractTestTemplate {
         return new ToApplyTok(new Cursor(position));
     }
 
-    protected ToDefaultTok todefault(String position) {
-        return new ToDefaultTok(new Cursor(position));
-    }
-
     protected CommandTok tocommand(String position) {
         return new CommandTok(new Cursor(position));
     }

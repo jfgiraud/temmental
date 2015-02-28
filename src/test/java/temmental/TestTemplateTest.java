@@ -181,7 +181,7 @@ public class TestTemplateTest extends TestCase {
                 return value;
             }
         });
-        StringTemplate template = new StringTemplate("~$cond!true#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond!true¡#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
         model = createModel("name", "jeff");
         assertEquals("", template.format(model));
     }
@@ -193,7 +193,7 @@ public class TestTemplateTest extends TestCase {
                 return value;
             }
         });
-        StringTemplate template = new StringTemplate("~$cond!false#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond!false¡#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
         model = createModel("name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }

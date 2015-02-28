@@ -132,7 +132,6 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
                 "~$date_time:'is_today<#true~</b>~#true~");
     }
 
-
     protected void assertParseThrowsException(String expectedMessage, String pattern) {
         if (displayRule) {
             displayRule(pattern);

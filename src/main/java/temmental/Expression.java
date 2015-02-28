@@ -54,6 +54,7 @@ class Expression {
         Stack oldCommas = new Stack();
         int commas = 0;
         Stack out = new Stack();
+        //tokens.printStack(System.out);
         while (tokens.depth() >= 1) {
             Object token = tokens.pop();
             currentToken = token;
@@ -74,7 +75,7 @@ class Expression {
                                 other.getBracket(), other.getCursor().getPosition());
                     }
                     out.remove(out.depth());
-                    if (commas == 0 && commas != out.depth() - 1) {
+                    if (b.getBracket() != '¡' && commas == 0 && commas != out.depth() - 1) {
                         if (b.getBracket() == '>') {
                             throw new TemplateException("Empty init list parameter before '%c' at position '%s'.", b.getBracket(), b.getCursor().getPosition());
                         } else if (b.getBracket() != ']') {
@@ -137,6 +138,21 @@ class Expression {
                         out.tolist(out.depth());
                         out.push(new Array((List<Object>) out.pop(), other.getCursor()));
                         commas = (Integer) oldCommas.pop();
+                    } else if (b.getBracket() == '¡') {
+                        Object def = ! out.empty() ? out.pop() : null;
+                        out = (Stack) oldOut.pop();
+                        Element input = (Element) out.pop();
+                        out.push(new DefaultFunction(input, def));
+                        commas = (Integer) oldCommas.pop();
+                        /*Object defaultValue = null;
+                        if (!tokens.empty()) {
+                            Object nextToken = tokens.value();
+                            if (isLeafToken(nextToken)) {
+                                defaultValue = tokens.pop();
+                            }
+                        }
+                        Element input = (Element) out.pop();
+                        out.push(new DefaultFunction(input, defaultValue));*/
                     } else {
                         throw new TemplateException("BracketTok %c not supported at position '%s'!", b.getBracket(), b.getCursor().getPosition());
                     }
@@ -145,16 +161,6 @@ class Expression {
                 Identifier filter = (Identifier) tokens.pop();
                 Object input = out.pop();
                 out.push(new Function(filter, input));
-            } else if (token instanceof ToDefaultTok) {
-                Object defaultValue = null;
-                if (!tokens.empty()) {
-                    Object nextToken = tokens.value();
-                    if (isLeafToken(nextToken)) {
-                        defaultValue = tokens.pop();
-                    }
-                }
-                Element input = (Element) out.pop();
-                out.push(new DefaultFunction(input, defaultValue));
             } else if (token instanceof CommaTok) {
                 commas += 1;
             } else if (token instanceof CommandTok) {
@@ -236,19 +242,7 @@ class Expression {
                     word = new StringWriter();
                     stack.push(new ToApplyTok(cursor.clone().move1l()));
                     afterHash = false;
-                } else if (!inSQ && !inDQ && currentChar == '!') {
-                    String expr = word.toString();
-                    if (!expr.equals("")) {
-                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
-                    } else {
-                        behaviourOnEmptyToken(currentChar, stack, cursor);
-                    }
-                    word = new StringWriter();
-                    stack.push(new ToDefaultTok(cursor.clone().move1l()));
-                    afterHash = false;
                 } else if (!inSQ && !inDQ && BracketTok.isBracket(currentChar)) {
-                    //if (!stack.empty())
-                    //    stack.printStack(System.out);
                     String expr = word.toString();
                     if (!expr.equals("")) {
                         stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
@@ -313,17 +307,16 @@ class Expression {
                 BracketTok b = (BracketTok) stack.value();
                 if (b.isOpening()) {
                     throw new TemplateException("No parameter before ':' at position '%s'.", cursor.getPosition(-1));
-                } else {
-                    // ] } > )
-                    if (b.getBracket() != ']' && b.getBracket() != '>' && b.getBracket() != ')') {
-                        throw new TemplateException("No token at position '%s'.", cursor.getPosition(-1));
-                    }
+                } else if (! b.isClosing()) {
+                    throw new TemplateException("No token at position '%s'.", cursor.getPosition(-1));
                 }
             } else if (stack.value() instanceof CommaTok) {
                 throw new TemplateException("No parameter before ':' at position '%s'.", cursor.getPosition(-1));
             }
         } else if (currentChar == '[' || currentChar == '<') {
-            throw new TemplateException("No identifier before '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
+            if (stack.empty() || ! (stack.value() instanceof BracketTok && ((BracketTok) stack.value()).getBracket() == '¡'))
+                throw new TemplateException("No identifier before '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
+
         }
     }
 
