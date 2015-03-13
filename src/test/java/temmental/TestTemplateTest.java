@@ -197,4 +197,12 @@ public class TestTemplateTest extends TestCase {
         model = createModel("name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }
+
+    @Test
+    public void testCharAt() throws IOException, TemplateException, NoSuchMethodException {
+        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'''>~And after", transforms, properties, Locale.ENGLISH);
+        transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
+        model = createModel("data", "the key is 'open'");
+        assertEquals("Some text...11And after", template.format(model));
+    }
 }

@@ -94,7 +94,7 @@ abstract class Element {
     }
 
     public final String toString() {
-        return repr(0, false);
+        return repr(0, true);
     }
 
     public abstract String repr(int d, boolean displayPosition);
