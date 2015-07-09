@@ -117,7 +117,7 @@ class Function extends Element {
     protected Method getApplyMethod(Transform t) {
         Method[] methods = t.getClass().getMethods();
         for (Method method : methods) {
-            if (method.getName().equals("apply")) {
+            if (method.getName().equals("apply") && !method.isSynthetic()) {
                 method.setAccessible(true);
                 return method;
             }

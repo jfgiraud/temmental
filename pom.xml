@@ -13,7 +13,7 @@
     <description>A small template engine without dependency.</description>
 
     <properties>
-        <jdk.version>1.5</jdk.version>
+        <jdk.version>1.7</jdk.version>
     </properties>
 
     <dependencies>
