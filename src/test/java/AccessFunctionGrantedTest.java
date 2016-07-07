@@ -1,7 +1,7 @@
 import org.junit.Before;
 import org.junit.Test;
-import temmental.Template;
-import temmental.Transform;
+import com.github.jfgiraud.temmental.Template;
+import com.github.jfgiraud.temmental.Transform;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
-import static temmental.TemplateUtils.createModel;
+import static com.github.jfgiraud.temmental.TemplateUtils.createModel;
 
 public class AccessFunctionGrantedTest {
 
