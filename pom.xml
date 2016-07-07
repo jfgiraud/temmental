@@ -15,8 +15,8 @@
 
     <scm>
         <url>https://github.com/jfgiraud/temmental</url>
-        <connection>scm:git:ssh://jfgiraud@github.com/jfgiraud/temmental.git</connection>
-        <developerConnection>scm:git:ssh://jfgiraud@github.com/jfgiraud/temmental.git</developerConnection>
+        <connection>scm:git:ssh://git@github.com/jfgiraud/temmental.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jfgiraud/temmental.git</developerConnection>
     </scm>
 
     <properties>
