@@ -12,10 +12,11 @@
     <url>https://github.com/jfgiraud/temmental</url>
     <description>A small template engine without dependency.</description>
 
+
     <scm>
-        <connection>scm:git:git@github.com:jfgiraud/temmental.git</connection>
-        <url>scm:git:git@github.com:jfgiraud/temmental.git</url>
-        <developerConnection>scm:git:git@github.com:jfgiraud/temmental.git</developerConnection>
+        <url>https://github.com/jfgiraud/temmental</url>
+        <connection>scm:git:ssh://git@github.com/jfgiraud/temmental.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jfgiraud/temmental.git</developerConnection>
     </scm>
 
     <properties>
@@ -45,7 +46,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>LATEST</version>
+                <version>2.2.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
