@@ -457,6 +457,7 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
         for (int i = 0; i < expectedTokens.length; i++) {
             assertEquals("Invalid element #" + (i + 1), expectedTokens[expectedTokens.length - i - 1], tokens.value(i + 1));
         }
+
     }
 
     protected void assertElementEquals(Object expected) throws IOException, TemplateException {
