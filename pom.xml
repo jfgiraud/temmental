@@ -10,7 +10,6 @@
     <url>https://github.com/jfgiraud/temmental</url>
     <description>A small template engine without dependency.</description>
 
-
     <distributionManagement>
         <repository>
             <id>jfgiraud-repo</id>
