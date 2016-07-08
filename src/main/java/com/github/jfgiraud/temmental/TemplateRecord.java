@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Record of all calls concerning a template (test case).
- * <p/>
+ *
  * The calls to the following functions are recorded :
  * <ul>
  * <li><code>template.printSection(out, sectionName, model)</code></li>
@@ -15,7 +15,7 @@ import java.util.Map;
  * <li><code>template.printFile(out, sectionName)</code></li>
  * <li><code>template.printFile(out, sectionName, model)</code></li>
  * </ul>
- * <p/>
+ * 
  * These class permits to retrieve models used to display parts of the template.
  *
  * @see TemplateRecorder#getTemplateRecordFor
