@@ -15,7 +15,7 @@ import java.util.Map;
  * <li><code>template.printFile(out, sectionName)</code></li>
  * <li><code>template.printFile(out, sectionName, model)</code></li>
  * </ul>
- * 
+ *
  * These class permits to retrieve models used to display parts of the template.
  *
  * @see TemplateRecorder#getTemplateRecordFor
