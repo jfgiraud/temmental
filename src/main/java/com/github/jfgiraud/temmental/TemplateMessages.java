@@ -1,7 +1,6 @@
 package com.github.jfgiraud.temmental;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -14,7 +13,7 @@ public class TemplateMessages {
     private List<Object> messages;
     private Locale locale;
 
-    TemplateMessages(Locale locale, Object... resourcesContainers) throws FileNotFoundException, TemplateException, IOException {
+    TemplateMessages(Locale locale, Object... resourcesContainers) throws TemplateException, IOException {
         this.locale = locale;
         this.messages = new ArrayList<Object>();
         for (Object rs : resourcesContainers) {
@@ -28,7 +27,7 @@ public class TemplateMessages {
         }
     }
 
-    TemplateMessages(String resourcePath, Locale locale) throws TemplateException, FileNotFoundException, IOException {
+    TemplateMessages(String resourcePath, Locale locale) throws TemplateException, IOException {
         this.locale = locale;
         this.messages = Arrays.asList(readResource(resourcePath, locale));
     }
@@ -75,7 +74,7 @@ public class TemplateMessages {
 
     private boolean containsKey(ResourceBundle messageContainer, String key) {
         try {
-            if (((ResourceBundle) messageContainer).getString(key) != null)
+            if (messageContainer.getString(key) != null)
                 return true;
         } catch (MissingResourceException e) {
         }
@@ -113,7 +112,7 @@ public class TemplateMessages {
         return (new MessageFormat(getString(key), locale)).format(parameters, new StringBuffer(), null).toString();
     }
 
-    private Object readResource(String resourcePath, Locale locale) throws TemplateException, FileNotFoundException, IOException {
+    private Object readResource(String resourcePath, Locale locale) throws TemplateException, IOException {
         String protocol = resourcePath.substring(0, resourcePath.indexOf(":"));
         resourcePath = resourcePath.substring(resourcePath.indexOf(":") + 1);
         if (protocol.equals("classpath")) {

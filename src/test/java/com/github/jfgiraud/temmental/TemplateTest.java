@@ -14,11 +14,11 @@ import static org.junit.Assert.fail;
 
 public class TemplateTest extends AbstractTestTemplate {
 
-    protected Stack stack;
+    private Stack stack;
 
-    protected Template template;
-    protected Map<String, Object> model;
-    protected Properties properties;
+    private Template template;
+    private Map<String, Object> model;
+    private Properties properties;
 
     private boolean displayRule = true;
 
@@ -144,14 +144,14 @@ public class TemplateTest extends AbstractTestTemplate {
         assertParsingEquals(toparse("~$anAloneVariable~", p(1, 1)));
     }
 
-    protected void parse(String s) throws IOException, TemplateException {
+    private void parse(String s) throws IOException, TemplateException {
         if (displayRule) {
             displayRule(s);
         }
         template.parseString(s, false);
     }
 
-    protected void assertParsingEquals(Object... expectedStack) throws IOException {
+    private void assertParsingEquals(Object... expectedStack) throws IOException {
         Stack stack = template.getStack();
         assertEquals(expectedStack.length, stack.depth());
         for (int i = 0; i < expectedStack.length; i++) {
@@ -159,7 +159,7 @@ public class TemplateTest extends AbstractTestTemplate {
         }
     }
 
-    protected void assertParsingThrowsException(String expectedMessage, String pattern) {
+    private void assertParsingThrowsException(String expectedMessage, String pattern) {
         try {
             parse(pattern);
             fail("An exception must be raised.");

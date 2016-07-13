@@ -20,7 +20,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
     private boolean displayRule = true;
 
     @Before
-    public void setUp() throws FileNotFoundException, TemplateException, IOException {
+    public void setUp() throws TemplateException, IOException {
         model = new HashMap<String, Object>();
         properties = new Properties();
         template = new Template(null, null, properties);

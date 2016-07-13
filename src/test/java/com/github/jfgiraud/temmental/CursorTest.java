@@ -1,7 +1,5 @@
 package com.github.jfgiraud.temmental;
 
-import com.github.jfgiraud.temmental.Cursor;
-import com.github.jfgiraud.temmental.Stack;
 import org.junit.Before;
 import org.junit.Test;
 
