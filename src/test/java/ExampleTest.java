@@ -55,10 +55,4 @@ public class ExampleTest {
 
     }
 
-    @Test
-    public void testFoo() throws IOException, ParseException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method m = StringUtils.class.getDeclaredMethod("capitalize", String.class);
-        Object r = m.invoke(StringUtils.class, "toto");
-        System.out.println(r);
-    }
 }
