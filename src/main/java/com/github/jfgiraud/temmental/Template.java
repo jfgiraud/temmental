@@ -15,7 +15,7 @@ public class Template {
     private Map<String, ? extends Object> transforms;
     private static final String DEFAULT_SECTION = "__default_section";
 
-    private HashMap<String, com.github.jfgiraud.temmental.Stack> sections;
+    private HashMap<String, Stack> sections;
 
 
     /**
@@ -123,11 +123,11 @@ public class Template {
     private void readReader(Reader sr, int line, int column, boolean parseExpression) throws IOException, TemplateException {
 
         {
-            sections = new HashMap<String, com.github.jfgiraud.temmental.Stack>();
-            sections.put(DEFAULT_SECTION, new com.github.jfgiraud.temmental.Stack());
-            com.github.jfgiraud.temmental.Stack stack = sections.get(DEFAULT_SECTION);
+            sections = new HashMap<String, Stack>();
+            sections.put(DEFAULT_SECTION, new Stack());
+            Stack stack = sections.get(DEFAULT_SECTION);
 
-            com.github.jfgiraud.temmental.Stack taeStack = parseToTextAndExpressions(sr, new Cursor(filepath, line, column));
+            Stack taeStack = parseToTextAndExpressions(sr, new Cursor(filepath, line, column));
             taeStack.reverse();
             while (!taeStack.empty()) {
                 Object o = taeStack.pop();
@@ -140,11 +140,11 @@ public class Template {
         }
 
         {
-            com.github.jfgiraud.temmental.Stack stack;
+            Stack stack;
             for (String sectionName : sections.keySet()) {
-                com.github.jfgiraud.temmental.Stack taeStack = sections.get(sectionName);
+                Stack taeStack = sections.get(sectionName);
                 taeStack.reverse();
-                stack = new com.github.jfgiraud.temmental.Stack();
+                stack = new Stack();
                 while (!taeStack.empty()) {
                     Object o = taeStack.pop();
                     if (parseExpression && (o instanceof Expression)) {
@@ -158,9 +158,9 @@ public class Template {
         }
     }
 
-    private com.github.jfgiraud.temmental.Stack createCommands(com.github.jfgiraud.temmental.Stack stack) throws TemplateException, IOException {
-        com.github.jfgiraud.temmental.Stack oldOut = new com.github.jfgiraud.temmental.Stack();
-        com.github.jfgiraud.temmental.Stack out = new com.github.jfgiraud.temmental.Stack();
+    private Stack createCommands(Stack stack) throws TemplateException, IOException {
+        Stack oldOut = new Stack();
+        Stack out = new Stack();
         stack.reverse();
         while (!stack.empty()) {
             Object obj = stack.pop();
@@ -182,7 +182,7 @@ public class Template {
     }
 
 
-    private com.github.jfgiraud.temmental.Stack parseToSections(com.github.jfgiraud.temmental.Stack stack, Text o) throws TemplateException {
+    private Stack parseToSections(Stack stack, Text o) throws TemplateException {
         String s = (String) o.writeObject(null, null, null);
         Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
         Matcher m = p.matcher(s);
@@ -192,13 +192,13 @@ public class Template {
             int b = m.end();
             while (m.find()) {
                 int e = m.start();
-                stack = new com.github.jfgiraud.temmental.Stack();
+                stack = new Stack();
                 sections.put(name, stack);
                 stack.push(s.substring(b, e)); // after
                 name = m.group(1);
                 b = m.end();
             }
-            stack = new com.github.jfgiraud.temmental.Stack();
+            stack = new Stack();
             sections.put(name, stack);
             stack.push(s.substring(b)); // after
         } else {
@@ -209,12 +209,12 @@ public class Template {
     }
 
 
-    com.github.jfgiraud.temmental.Stack getStack() {
+    Stack getStack() {
         return sections.get(DEFAULT_SECTION);
     }
 
-    private static com.github.jfgiraud.temmental.Stack parseToTextAndExpressions(Reader sr, Cursor cursor) throws IOException, TemplateException {
-        com.github.jfgiraud.temmental.Stack stack = new com.github.jfgiraud.temmental.Stack();
+    private static Stack parseToTextAndExpressions(Reader sr, Cursor cursor) throws IOException, TemplateException {
+        Stack stack = new Stack();
         StringWriter buffer = new StringWriter();
         boolean opened = false;
         try {
@@ -319,9 +319,12 @@ public class Template {
     }
 
     private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
-        com.github.jfgiraud.temmental.Stack stack = sections.get(sectionName);
+        Stack stack = sections.get(sectionName);
         for (int i = stack.depth(); i > 0; i--) {
-            writeObject(out, functions, model, messages, stack.value(i));
+            try {
+                writeObject(out, functions, model, messages, stack.value(i));
+            } catch (TemplateIgnoreRenderingException e) {
+            }
         }
     }
 
@@ -330,7 +333,7 @@ public class Template {
     }
 
     public void printStructure(PrintWriter out) throws IOException {
-        for (Map.Entry<String, com.github.jfgiraud.temmental.Stack> entry : sections.entrySet()) {
+        for (Map.Entry<String, Stack> entry : sections.entrySet()) {
             out.println("--- section '" + entry.getKey() + "'");
             entry.getValue().printStack(out);
         }

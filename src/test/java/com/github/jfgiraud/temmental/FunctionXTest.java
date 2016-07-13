@@ -306,10 +306,10 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testADynamicFunctionCanBeOptional_CaseUnknown() throws IOException, TemplateException, NoSuchMethodException, SecurityException {
-        parse("~$text:$f?~");
+        parse("abc~$text:$f?~def");
         populateModel("text", "It is an example!");
         populateTransform("upper", String.class.getDeclaredMethod("toUpperCase"));
-        assertWriteThrowsIgnoreRenderingException("Ignore rendering because key 'f' is not present or has null value in the model map at position '-:l1:c8'.");
+        assertWriteEquals("abcdef");
     }
 
     @Test
@@ -351,12 +351,13 @@ public class FunctionXTest extends AbstractTestElement {
 
     @Test
     public void testSubstr_ParamOptional() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        parse("~$text:'substr<$b1,$b2?>~");
+        parse("abc~$text:'substr<$b1,$b2?>~def");
         Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
         populateTransform("substr", func);
         populateModel("text", "lorem ipsum");
         populateModel("b1", 5);
-        assertWriteThrowsIgnoreRenderingException("Ignore rendering because key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+//        assertWriteThrowsIgnoreRenderingException("Ignore rendering because key 'b2' is not present or has null value in the model map at position '-:l1:c20'.");
+        assertWriteEquals("abcdef");
     }
 
     @Test
@@ -367,6 +368,16 @@ public class FunctionXTest extends AbstractTestElement {
         populateModel("text", "lorem ipsum");
         populateModel("b1", 5);
         assertWriteEquals(" ip");
+    }
+
+    @Test
+    public void testSubstr_ParamOptional3() throws IOException, TemplateException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        parse("~$text:'substr<$b1,$b2>!88¡~");
+        Method func = String.class.getDeclaredMethod("substring", int.class, int.class);
+        populateTransform("substr", func);
+        populateModel("text", "lorem ipsum");
+        populateModel("b1", 5);
+        assertWriteEquals("88");
     }
 
     @Test

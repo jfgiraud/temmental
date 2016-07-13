@@ -2,6 +2,7 @@ package com.github.jfgiraud.temmental;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 class Function extends Element {
@@ -81,10 +82,14 @@ class Function extends Element {
 
         Exception occurred;
         try {
-            if (params == null)
-                return method.invoke(obj);
-            else
-                return method.invoke(obj, params);
+            if (!Modifier.isStatic(method.getModifiers())) {
+                if (params == null)
+                    return method.invoke(obj);
+                else
+                    return method.invoke(obj, params);
+            } else {
+                return method.invoke(null, obj);
+            }
         } catch (IllegalAccessException e) {
             occurred = e;
         } catch (IllegalArgumentException e) {
