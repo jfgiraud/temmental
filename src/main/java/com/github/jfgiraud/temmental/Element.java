@@ -16,6 +16,14 @@ abstract class Element {
 
     abstract Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException;
 
+    Object writeFinalObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
+        Object result = writeObject(functions, model, messages);
+        if (result == null) {
+            throw new TemplateException("Final returned value is null at position '%s'", cursor.getPosition());
+        }
+        return result;
+    }
+
      /*
         if (defaultValue instanceof Identifier) {
             return ((Element) defaultValue).getInModel(map);

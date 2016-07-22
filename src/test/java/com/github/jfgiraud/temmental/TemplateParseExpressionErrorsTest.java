@@ -132,6 +132,28 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
                 "~$date_time:'is_today<#true~</b>~#true~");
     }
 
+    @Test
+    public void testOptionalNotCompatibleWithDefault() throws IOException, TemplateException {
+        assertParseThrowsException("Non compatible options (?/!) at positions '-:l1:c2' and '-:l1:c18'.", "~$accountNumber?!'unknown[]¡~");
+        assertParseThrowsException("Non compatible options (?/!) at positions '-:l1:c18' and '-:l1:c34'.", "~'account_number[$accountNumber?!'unknown[]¡]~");
+        assertParseThrowsException("Non compatible options (?/!) at positions '-:l1:c2' and '-:l1:c35'.", "~$account_number?[$accountNumber]!'unknown[]¡~");
+    }
+
+    @Test
+    public void testNotClosed() throws IOException, TemplateException {
+//        assertParseThrowsException("xxx", "~\"hello\":'upper~");
+        assertParseThrowsException("Too much objects in the stack for expression '~$toto!123~' at position '-:l1:c1'. One or more tags are not closed ('!'=1).", "~$toto!123~");
+        assertParseThrowsException("Too much objects in the stack for expression '~($toto,$tutu~' at position '-:l1:c1'. One or more tags are not closed ('('=1).", "~($toto,$tutu~");
+        assertParseThrowsException("Too much objects in the stack for expression '~'account_number<$toto~' at position '-:l1:c1'. One or more tags are not closed ('<'=1).", "~'account_number<$toto~");
+        assertParseThrowsException("Too much objects in the stack for expression '~'account_number[$toto~' at position '-:l1:c1'. One or more tags are not closed ('['=1).", "~'account_number[$toto~");
+    }
+
+    @Test
+    public void testInvertedBrackets() throws IOException, TemplateException {
+        //TODO inverted brackets
+        //fail();
+    }
+
     protected void assertParseThrowsException(String expectedMessage, String pattern) {
         if (displayRule) {
             displayRule(pattern);

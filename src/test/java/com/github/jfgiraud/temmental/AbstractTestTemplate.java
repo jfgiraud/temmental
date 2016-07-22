@@ -33,7 +33,7 @@ public abstract class AbstractTestTemplate {
     }
 
     DefaultFunction or(Element e, Object d) throws TemplateException {
-        return new DefaultFunction(e, d);
+        return new DefaultFunction(e, d, null);
     }
 
     Identifier identifier(String name, String position) throws TemplateException {

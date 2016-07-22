@@ -176,6 +176,29 @@ public class TestTemplateTest extends TestCase {
     }
 
     @Test
+    public void testMessageDefault() throws IOException, TemplateException {
+        properties.put("hello", "Bonjour {0}");
+        StringTemplate template = new StringTemplate("~$message[$name]!\"text\"¡~", transforms, properties, Locale.ENGLISH);
+        model = createModel("message", false, "name", "jeff");
+        assertEquals("text", template.format(model));
+    }
+
+    @Test
+    public void testDefaultAcceptedWhenAFunctionIsUsedAndReturnsNull() throws IOException, TemplateException {
+        properties.put("hello", "Bonjour {0}");
+        transforms.put("null", new Transform<String, String>() {
+            public String apply(String value) {
+                return null;
+            }
+        });
+        StringTemplate template = new StringTemplate("~$message[$name]:'null!123¡~", transforms, properties, Locale.ENGLISH);
+        template.printStructure(System.err);
+        model = createModel("message", "hello", "name", "jeff");
+
+        assertEquals("123", template.format(model));
+    }
+
+    @Test
     public void testCommandDefaultValueTrue() throws IOException, TemplateException {
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {

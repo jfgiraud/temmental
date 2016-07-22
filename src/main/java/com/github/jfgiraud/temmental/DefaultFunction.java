@@ -8,7 +8,14 @@ public class DefaultFunction extends Identifier {
     private final Object defaultValue;
 
     public DefaultFunction(Element input, Object defaultValue) throws TemplateException {
+        this(input, defaultValue, input.cursor);
+    }
+
+    public DefaultFunction(Element input, Object defaultValue, Cursor defaultValueCursor) throws TemplateException {
         super(input.getIdentifier(), input.cursor);
+        if (!input.isRequired()) {
+            throw new TemplateException("Non compatible options (?/!) at positions '%s' and '%s'.", input.cursor.getPosition(), defaultValueCursor.move1r().getPosition());
+        }
         this.input = input;
         this.defaultValue = defaultValue;
     }
@@ -21,11 +28,10 @@ public class DefaultFunction extends Identifier {
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
         try {
-            return ((Element) input).writeObject(functions, model, messages);
+            return ((Element) input).writeFinalObject(functions, model, messages);
         } catch (TemplateIgnoreRenderingException e) {
             throw e;
         } catch (TemplateException e) {
-            //e.printStackTrace();
             if (defaultValue == null && input instanceof Function) {
                 Object o = ((Function) input).input;
                 if (o instanceof Element) {

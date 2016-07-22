@@ -39,7 +39,7 @@ public abstract class AbstractTestElement extends AbstractTestTemplate {
         transforms.put(key, method);
     }
 
-    public void populateProperty(String key, String value) {
+    public void populateProperty(String key, Object value) {
         properties.put(key, value);
     }
 

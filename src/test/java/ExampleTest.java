@@ -23,7 +23,7 @@ public class ExampleTest {
         filters = new HashMap<String, Object>();
         filters.put("upper", String.class.getDeclaredMethod("toUpperCase"));
         filters.put("titleize", StringUtils.class.getDeclaredMethod("titleize", String.class));
-        filters.put("sdf", new Transform<String[], Transform<Date,String>>() {
+        filters.put("date_formatter", new Transform<String[], Transform<Date,String>>() {
             public Transform<Date, String> apply(final String[] objects) {
                 return new Transform<Date, String>() {
                     public String apply(Date value) {
@@ -46,6 +46,7 @@ public class ExampleTest {
         model.put("city", "Le Taillan-Médoc");
         model.put("clientNumber", "12345678");
         model.put("lineNumber", "+33687654321");
+//        model.put("email", "johndoe@example.com");
         model.put("date", new GregorianCalendar(locale).getTime());
         model.put("inscription", new SimpleDateFormat("yyyy/MM/dd hh:mm:ss").parse("2010/11/05 15:26:34"));
 

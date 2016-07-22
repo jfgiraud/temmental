@@ -3,7 +3,9 @@ package com.github.jfgiraud.temmental;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class Expression {
 
@@ -55,6 +57,11 @@ class Expression {
         int commas = 0;
         Stack out = new Stack();
         //tokens.printStack(System.out);
+        Map<Integer, Integer> brackets = new HashMap<Integer, Integer>();
+        brackets.put((int)'(', 0);
+        brackets.put((int)'[', 0);
+        brackets.put((int)'<', 0);
+        brackets.put((int)'!', 0);
         while (tokens.depth() >= 1) {
             Object token = tokens.pop();
             currentToken = token;
@@ -63,12 +70,14 @@ class Expression {
             } else if (token instanceof BracketTok) {
                 BracketTok b = (BracketTok) token;
                 if (b.isOpening()) {
+                    brackets.put(b.getBracket(), brackets.get(b.getBracket())+1);
                     oldOut.push(out);
                     out = new Stack();
                     out.push(token);
                     oldCommas.push(commas);
                     commas = 0;
                 } else {
+                    brackets.put(b.neg(), brackets.get(b.neg())-1);
                     BracketTok other = (BracketTok) out.value(out.depth());
                     if (other.getBracket() != b.neg()) {
                         throw new TemplateException("Corresponding bracket for '%c' at position '%s' is invalid (found '%c' at position '%s').", b.getBracket(), b.getCursor().getPosition(),
@@ -142,17 +151,8 @@ class Expression {
                         Object def = ! out.empty() ? out.pop() : null;
                         out = (Stack) oldOut.pop();
                         Element input = (Element) out.pop();
-                        out.push(new DefaultFunction(input, def));
+                        out.push(new DefaultFunction(input, def, other.getCursor()));
                         commas = (Integer) oldCommas.pop();
-                        /*Object defaultValue = null;
-                        if (!tokens.empty()) {
-                            Object nextToken = tokens.value();
-                            if (isLeafToken(nextToken)) {
-                                defaultValue = tokens.pop();
-                            }
-                        }
-                        Element input = (Element) out.pop();
-                        out.push(new DefaultFunction(input, defaultValue));*/
                     } else {
                         throw new TemplateException("BracketTok %c not supported at position '%s'!", b.getBracket(), b.getCursor().getPosition());
                     }
@@ -176,10 +176,19 @@ class Expression {
             }
         }
         if (out.depth() > 1) {
-            // out.printStack(System.out);
-            throw new TemplateException("Too much objects in the stack!");
+            String r = "";
+            for (int c : brackets.keySet()) {
+                if (brackets.get(c) != 0) {
+                    r += (r.equals("") ? "" : ", ") + String.format("'%c'=%d", c, brackets.get(c));
+                }
+            }
+            if (r.length() == 0) {
+                throw new TemplateException("Too much objects in the stack for expression '%s' at position '%s'.", expr, cursor.getPosition());
+            } else {
+                throw new TemplateException("Too much objects in the stack for expression '%s' at position '%s'. One or more tags are not closed (%s).", expr, cursor.getPosition(), r);
+            }
         } else if (out.empty()) {
-            throw new TemplateException("Not enough object in the stack!");
+            throw new TemplateException("Not enough object in the stack for expression '%s' at position '%s'.", expr, cursor.getPosition());
         }
         return out.pop();
     }

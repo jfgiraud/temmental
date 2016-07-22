@@ -28,7 +28,6 @@ public class MessageTest extends AbstractTestElement {
     private void assertWriteObjectThrowsAnException(String expected, Message message) throws IOException {
         try {
             message.writeObject(transforms, model, messages);
-            fail("An exception must be raised.");
         } catch (TemplateException e) {
             assertEquals(expected, e.getMessage());
         }
@@ -55,6 +54,21 @@ public class MessageTest extends AbstractTestElement {
         populateModel("lastname", "Doe");
 
         assertEquals("hello John Doe", message.writeObject(null, model, messages));
+    }
+
+    @Test
+    public void testMessageKeyOptionalPresentButInvalidType() throws TemplateException, IOException {
+        Message message = message(identifier("$message?", "-:l1:c1"),
+                list(identifier("$firstname", "-:l1:c2"), identifier("$lastname", "-:l1:c3")));
+
+        populateProperty("themessage", "hello {0} {1}");
+
+        populateModel("message", Boolean.FALSE);
+        populateModel("firstname", "John");
+        populateModel("lastname", "Doe");
+
+        assertWriteObjectThrowsAnException("Invalid value for '$message?' at position '-:l1:c1': expects java.lang.String type but obtains java.lang.Boolean type.",
+                message);
     }
 
     @Test

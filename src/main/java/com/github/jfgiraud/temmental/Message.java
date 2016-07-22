@@ -19,9 +19,17 @@ class Message extends Element {
         return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Message(" + messageIdentifier.getIdentifier() + "," + parameters + ")";
     }
 
+    private <T> T assertType(Class expectedClass, Object obj) {
+        if (!expectedClass.isInstance(obj)) {
+            throw new TemplateException("Invalid value for '%s' at position '%s': expects %s type but obtains %s type.",
+                    messageIdentifier.getIdentifier(), cursor.getPosition(), expectedClass.getCanonicalName(), obj.getClass().getCanonicalName());
+        }
+        return (T) obj;
+    }
+
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        String key = (String) messageIdentifier.writeObject(functions, model, messages);
+        String key = assertType(String.class, messageIdentifier.writeObject(functions, model, messages));
 
         List args = create_parameters_after_process(parameters, functions, model, messages);
         if (args == null) {

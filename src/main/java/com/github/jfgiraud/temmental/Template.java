@@ -274,39 +274,27 @@ public class Template {
         }
 
         if (value instanceof Identifier) {
-            Object o = ((Identifier) value).writeObject(functions, newModel, messages);
-            if (o != null) {
-                out.write(o.toString());
-            }
+            Object o = ((Identifier) value).writeFinalObject(functions, newModel, messages);
+            out.write(o.toString());
             return;
         }
 
         if (value instanceof Text) {
-            Object o = ((Text) value).writeObject(functions, newModel, messages);
-            if (o != null) {
-                out.write(o.toString());
-            }
+            Object o = ((Text) value).writeFinalObject(functions, newModel, messages);
+            out.write(o.toString());
             return;
         }
 
         if (value instanceof Function) {
             Function function = ((Function) value);
-            Object result = function.writeObject(functions, newModel, messages);
-            if (result != null && result instanceof Transform) {
-                throw new TemplateException("Unable to apply function '%s' at position '%s'. This function expects one or more parameters. It receives no parameter.", function.getIdentifier(), function.cursor.getPosition());
-            }
-
-            if (result != null) {
-                out.write(result.toString());
-            }
+            Object result = function.writeFinalObject(functions, newModel, messages);
+            out.write(result.toString());
             return;
         }
 
         if (value instanceof Message) {
-            Object result = ((Message) value).writeObject(functions, newModel, messages);
-            if (result != null) {
-                out.write(result.toString());
-            }
+            Object result = ((Message) value).writeFinalObject(functions, newModel, messages);
+            out.write(result.toString());
             return;
         }
 

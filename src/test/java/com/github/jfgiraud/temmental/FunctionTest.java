@@ -56,6 +56,25 @@ public class FunctionTest extends AbstractTestElement {
     }
 
     @Test
+    public void testFunctionReturnsNull() throws TemplateException, IOException {
+        Function f = function(identifier("'nullop", "-:l1:c2"), identifier("$text", "-:l1:c2"));
+
+        populateTransform("nullop", new Transform<String,String>() {
+            public String apply(String value) {
+                return null;
+            }
+        });
+        populateModel("text", "Something...");
+
+        try {
+            f.writeObject(transforms, model, null);
+        } catch (TemplateException e) {
+            assertEquals("Unable to render '…:'nullop' at position '-:l1:c2'. The function 'nullop returns null value.",
+                    e.getMessage());
+        }
+    }
+
+    @Test
     public void testFunctionVarRequiredAndFound() throws TemplateException, IOException {
         Function f = function(identifier("$f", "-:l1:c2"), identifier("$text", "-:l1:c2"));
 
