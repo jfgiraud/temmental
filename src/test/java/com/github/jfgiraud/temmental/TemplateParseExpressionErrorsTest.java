@@ -151,7 +151,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
     @Test
     public void testInvertedBrackets() throws IOException, TemplateException {
         //TODO inverted brackets
-        //fail();
+//        fail();
     }
 
     protected void assertParseThrowsException(String expectedMessage, String pattern) {

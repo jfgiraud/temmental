@@ -184,6 +184,14 @@ public class TestTemplateTest extends TestCase {
     }
 
     @Test
+    public void testMessageOptional() throws IOException, TemplateException {
+        properties.put("hello", "Bonjour {0}");
+        StringTemplate template = new StringTemplate("~$message?[$name]~", transforms, properties, Locale.ENGLISH);
+        model = createModel("name", "jeff");
+        assertEquals("", template.format(model));
+    }
+
+    @Test
     public void testDefaultAcceptedWhenAFunctionIsUsedAndReturnsNull() throws IOException, TemplateException {
         properties.put("hello", "Bonjour {0}");
         transforms.put("null", new Transform<String, String>() {
@@ -228,5 +236,29 @@ public class TestTemplateTest extends TestCase {
         transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
         model = createModel("data", "the key is 'open'");
         assertEquals("Some text...11And after", template.format(model));
+    }
+
+    @Test
+    public void testOptionalWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
+        StringTemplate template = new StringTemplate("Some text...~$data?:'id~And after", transforms, properties, Locale.ENGLISH);
+        transforms.put("id", new Transform<Object, Object>() {
+            public Object apply(Object value) {
+                return value;
+            }
+        });
+        model = createModel("data", null);
+        assertEquals("Some text...And after", template.format(model));
+    }
+
+    @Test
+    public void testDefaultWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
+        StringTemplate template = new StringTemplate("Some text...~$data:'id!\"xxx\"¡~And after", transforms, properties, Locale.ENGLISH);
+        transforms.put("id", new Transform<Object, Object>() {
+            public Object apply(Object value) {
+                return value;
+            }
+        });
+        model = createModel("data", null);
+        assertEquals("Some text...xxxAnd after", template.format(model));
     }
 }

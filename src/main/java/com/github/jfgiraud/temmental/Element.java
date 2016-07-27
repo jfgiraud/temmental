@@ -45,7 +45,7 @@ abstract class Element {
             if (varName.endsWith("?")) {
                 varName = varName.substring(0, varName.length() - 1);
             }
-            if (map.containsKey(varName)) {
+            if (map.containsKey(varName) && map.get(varName) != null) {
                 return map.get(varName);
             } else {
                 throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varName, cursor.getPosition());

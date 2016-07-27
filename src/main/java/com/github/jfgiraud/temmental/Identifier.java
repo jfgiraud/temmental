@@ -13,7 +13,7 @@ class Identifier extends Element {
     }
 
     private void checkExprValid(String expr) throws TemplateException {
-        boolean valid = (expr.matches("'\\w+") || expr.matches("\\$\\w+(\\?)?"));
+        boolean valid = (expr.matches("'[\\w\\.]+") || expr.matches("\\$[\\w\\.]+(\\?)?"));
         if (!valid) {
             throw new TemplateException("Invalid identifier syntax for '%s' at position '%s'.", expr, cursor.getPosition());
         }
