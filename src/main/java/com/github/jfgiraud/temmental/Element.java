@@ -37,9 +37,9 @@ abstract class Element {
         return defaultValue;
     }  */
 
-    Object getInModel(Map<String, Object> map) throws TemplateException {
+    Object getInModel(Map<String, Object> map, String prefix) throws TemplateException {
         String varName = getIdentifier();
-        varName = varName.substring(1);
+        varName = varName.substring(prefix.length());
         boolean optional = !isRequired();
         if (optional) {
             if (varName.endsWith("?")) {
@@ -88,7 +88,16 @@ abstract class Element {
                             getIdentifierForErrorMessage(), cursor.getPosition(), i + 1);
                 }
             }
-            args.add(afterProcess);
+            if (parameter != null && parameter instanceof Identifier && ((Identifier) parameter).getIdentifier().startsWith("@$")) {
+                if (afterProcess instanceof List) {
+                    args.addAll((List) afterProcess);
+                } else {
+                    throw new TemplateException("Unable to render '%s' at position '%s'. Parameter %s does not implement List interface.",
+                            getIdentifierForErrorMessage(), cursor.getPosition(), getIdentifier());
+                }
+            } else {
+                args.add(afterProcess);
+            }
         }
         return args;
     }

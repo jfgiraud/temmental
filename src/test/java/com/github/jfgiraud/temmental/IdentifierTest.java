@@ -14,6 +14,7 @@ public class IdentifierTest extends AbstractTestElement {
         assertInvalidSyntaxThrowsAnException("Invalid identifier syntax for '$var?iable' at position '-:l1:c1'.", "$var?iable");
         assertInvalidSyntaxThrowsAnException("Invalid identifier syntax for ''variable?' at position '-:l1:c1'.", "'variable?");
         assertInvalidSyntaxThrowsAnException("Invalid identifier syntax for ''variable!' at position '-:l1:c1'.", "'variable!");
+        assertInvalidSyntaxThrowsAnException("Invalid identifier syntax for '$var.iable' at position '-:l1:c1'.", "$var.iable");
     }
 
     @Test

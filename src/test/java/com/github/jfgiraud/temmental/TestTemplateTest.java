@@ -280,4 +280,28 @@ public class TestTemplateTest extends TestCase {
         model = createModel("data", null);
         assertEquals("Some text...xxxAnd after", template.format(model));
     }
+
+    @Test
+    public void testMessage() throws IOException, TemplateException, NoSuchMethodException {
+        properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
+        StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties, Locale.ENGLISH);
+        model = createModel("before", "BEFORE", "parameters", Arrays.asList("zero", "one"), "after", "AFTER");
+        assertEquals("<<<0:BEFORE 1:zero 2:one 3:AFTER>>>", template.format(model));
+    }
+
+    @Test
+    public void testMessageEmpty() throws IOException, TemplateException, NoSuchMethodException {
+        properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
+        StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties, Locale.ENGLISH);
+        model = createModel("before", "BEFORE", "parameters", Arrays.asList(), "after", "AFTER");
+        assertEquals("<<<0:BEFORE 1:AFTER 2:{2} 3:{3}>>>", template.format(model));
+    }
+
+    @Test
+    public void testMessageEmpty2() throws IOException, TemplateException, NoSuchMethodException {
+        properties.put("key", "0:{0} 1:{1}");
+        StringTemplate template = new StringTemplate("<<<~'key[@$parameters]~>>>", transforms, properties, Locale.ENGLISH);
+        model = createModel("parameters", Arrays.asList());
+        assertEquals("<<<0:{0} 1:{1}>>>", template.format(model));
+    }
 }
