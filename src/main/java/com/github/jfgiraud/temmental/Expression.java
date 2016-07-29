@@ -108,7 +108,7 @@ class Expression {
                                         command.getKeyword().getKeyword());
 
                             }
-                            command.setVarname((Element) initParameters.get(0));
+                            command.setInitParameters(initParameters);
                             out.push(command);
                             commas = (Integer) oldCommas.pop();
                         } else {

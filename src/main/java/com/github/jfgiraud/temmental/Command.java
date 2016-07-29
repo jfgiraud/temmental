@@ -10,18 +10,18 @@ public class Command extends Element {
     private Element element;
     private List<Object> betweenTags;
     private boolean opening;
-    private Element varname;
+    private List initParameters;
 
     public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
         super(cursor);
-        if (!Arrays.asList("for", "true", "false", "set", "override").contains(keyword.getKeyword())) {
+        if (!Arrays.asList("for", "true", "false", "set", "enum", "override").contains(keyword.getKeyword())) {
             throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
         this.keyword = keyword;
         this.element = element;
         this.betweenTags = new ArrayList<Object>();
         this.opening = (element != null);
-        this.varname = null;
+        this.initParameters = null;
     }
 
     public Command(Keyword keyword, Cursor cursor) throws TemplateException {
@@ -59,6 +59,8 @@ public class Command extends Element {
     void writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         if (keyword.getKeyword().equals("for")) {
             writeObjectFor(out, functions, model, messages);
+        } else if (keyword.getKeyword().equals("enum")) {
+            writeObjectEnum(out, functions, model, messages);
         } else if (keyword.getKeyword().equals("true")) {
             writeObjectIf(out, functions, model, messages, false);
         } else if (keyword.getKeyword().equals("false")) {
@@ -101,12 +103,20 @@ public class Command extends Element {
 
     private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
         Object value = element.writeObject(functions, model, messages);
-        String variable = (String) getVarname().writeObject(functions, model, messages);
+        String variable = getInitParameterValue(functions, model, messages, 0);
 
         Map<String, Object> m = new HashMap<String, Object>(model);
         m.put(variable, value);
 
         writeObjectBetweenTags(out, functions, messages, m);
+    }
+
+    private String getInitParameterValue(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, int index) {
+        if (getInitParameter(index) instanceof Element) {
+            return (String) ((Element) getInitParameter(index)).writeObject(functions, model, messages);
+        } else {
+            return getInitParameter(index).toString();
+        }
     }
 
     private void writeObjectFor(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
@@ -116,8 +126,8 @@ public class Command extends Element {
         }
         for (Object c : ((Iterable) result)) {
             if (!(c instanceof Map)) {
-                if (getVarname() != null) {
-                    String variable = (String) getVarname().writeObject(functions, model, messages);
+                if (getInitParameter(0) != null) {
+                    String variable = getInitParameterValue(functions, model, messages, 0);
                     Map<String, Object> m = new HashMap<String, Object>(model);
                     m.put(variable, c);
                     writeObjectBetweenTags(out, functions, messages, m);
@@ -129,6 +139,32 @@ public class Command extends Element {
                 m.putAll((Map) c);
                 writeObjectBetweenTags(out, functions, messages, m);
             }
+        }
+    }
+
+    private void writeObjectEnum(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
+        Object result = element.writeObject(functions, model, messages);
+        if (!(result instanceof Iterable)) {
+            throw new TemplateException("Command 'enum' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
+        }
+        int i = 0;
+        String variable = getInitParameterValue(functions, model, messages, 0);
+        for (Object c : ((Iterable) result)) {
+            Map<String, Object> m = new HashMap<String, Object>(model);
+            m.put(variable, i);
+            if (!(c instanceof Map)) {
+                if (getInitParameter(1) != null) {
+                    String variable2 = getInitParameterValue(functions, model, messages, 1);
+                    m.put(variable2, c);
+                    writeObjectBetweenTags(out, functions, messages, m);
+                } else {
+                    throw new TemplateException("Command 'enum' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
+                }
+            } else {
+                m.putAll((Map) c);
+                writeObjectBetweenTags(out, functions, messages, m);
+            }
+            i++;
         }
     }
 
@@ -195,16 +231,18 @@ public class Command extends Element {
         }
     }
 
-    public void setVarname(Element varname) {
-        this.varname = varname;
+    public void setInitParameters(List initParameters) {
+        this.initParameters = initParameters;
     }
 
-    public Element getVarname() {
-        return varname;
+    public Object getInitParameter(int index) {
+        return initParameters == null ? null : initParameters.get(index);
     }
 
     public boolean allowParameters(int number) {
         if ("for".equals(keyword.getKeyword()) && (number == 0 || number == 1)) {
+            return true;
+        } else if ("enum".equals(keyword.getKeyword()) && (number == 1 || number == 2 || number == 3)) {
             return true;
         } else if ("set".equals(keyword.getKeyword()) && number == 1) {
             return true;
@@ -217,9 +255,15 @@ public class Command extends Element {
     }
 
     public void check() {
-        if ("set".equals(keyword.getKeyword()) && varname == null) {
+        if ("set".equals(keyword.getKeyword()) && (initParameters == null || initParameters.get(0) == null)) {
             throw new TemplateException("Invalid syntax at position '%s'. " +
                     "Command 'set' expects one parameter.",
+                    cursor.getPosition(),
+                    getKeyword().getKeyword());
+        }
+        if ("enum".equals(keyword.getKeyword()) && (initParameters == null || (initParameters.size() < 1 || initParameters.size() > 3))) {
+            throw new TemplateException("Invalid syntax at position '%s'. " +
+                    "Command 'enum' expects one, two or three parameters.",
                     cursor.getPosition(),
                     getKeyword().getKeyword());
         }

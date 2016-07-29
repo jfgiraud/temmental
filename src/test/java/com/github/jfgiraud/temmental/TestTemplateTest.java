@@ -112,6 +112,25 @@ public class TestTemplateTest extends TestCase {
     }
 
     @Test
+    public void testCommandEnum() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties, Locale.ENGLISH);
+        List<Map<String, Object>> elements = createList(
+                createModel("elem", 1),
+                createModel("elem", 2),
+                createModel("elem", 3)
+        );
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before0<1>1<2>2<3>before", template.format(model));
+    }
+
+    public void testCommandEnumForQuote() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index,'elem>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties, Locale.ENGLISH);
+        List<Integer> elements = Arrays.asList(10, 20, 30);
+        model = createModel("l", elements, "elem", "before");
+        assertEquals("before0<10>1<20>2<30>before", template.format(model));
+    }
+
+    @Test
     public void testCommandForQuote() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$l#for<'elem>~<~$elem~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
         List<Integer> elements = Arrays.asList(1, 2, 3);
