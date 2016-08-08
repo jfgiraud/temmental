@@ -12,7 +12,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.format("@%s\ttoken(%d)", cursor.getPosition(), expr);
+        return String.format("@%s\ttoken(%c)", cursor.getPosition(), expr);
     }
 
     public boolean equals(Object o) {

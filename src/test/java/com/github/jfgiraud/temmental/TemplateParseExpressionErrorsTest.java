@@ -3,7 +3,6 @@ package com.github.jfgiraud.temmental;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,7 +104,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
     @Test
     public void testComplexMessage2() throws IOException, TemplateException {
-        assertParseThrowsException("Invalid length for char at position '-:l1:c54').",
+        assertParseThrowsException("Invalid length for char at position '-:l1:c48').",
                 "~$message[$firstname:'upper,$lastname:'replace<'ab',','>]:'quote~");
     }
 

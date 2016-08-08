@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.github.jfgiraud.temmental.StringUtils.viewWhiteSpaces;
+
 public class Stack {
 
     private List<Object> items;
@@ -52,7 +54,19 @@ public class Stack {
     }
 
     public void printStack(PrintWriter out) {
+        for (int i=depth(); i>0; i--) {
+            out.write(i + ": ");
+            Object o = value(i);
+            if (o instanceof String) {
+                out.write(viewWhiteSpaces(String.valueOf(o)));
+            } else {
+                out.write(String.valueOf(o));
+            }
+            out.write('\n');
+        }
+        out.flush();
     }
+
 
     public void tolist(int depth) {
         List<Object> cloned = new ArrayList<Object>();

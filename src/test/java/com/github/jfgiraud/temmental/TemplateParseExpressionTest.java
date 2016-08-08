@@ -109,6 +109,27 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
     }
 
     @Test
+    public void testFilterWithInitQuote() throws IOException, TemplateException {
+        parseExpression("~$variable:'replaceAll<\"'\",'\\''>~");
+
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                toapply(p(1, 11)),
+                identifier("'replaceAll", p(1, 12)),
+                bracket('<', p(1, 23)),
+                text("'", p(1, 24)),
+                comma(p(1, 27)),
+                character('\'', p(1, 28)),
+                bracket('>', p(1, 31))
+        );
+
+        assertElementEquals(
+                functionp(identifier("'replaceAll", p(1, 12)),
+                        list(text("'", p(1, 24)), character('\'', p(1, 28))),
+                        identifier("$variable", p(1, 2))));
+
+    }
+
+    @Test
     public void testFilterWithInitChar() throws IOException, TemplateException {
         parseExpression("~$variable:'indexOf<'a'>~");
         //               1234567890123456789012345
@@ -123,6 +144,25 @@ public class TemplateParseExpressionTest extends AbstractTestTemplate {
         assertElementEquals(
                 functionp(identifier("'indexOf", p(1, 12)),
                         list(character('a', p(1, 21))),
+                        identifier("$variable", p(1, 2))));
+
+    }
+
+    @Test
+    public void testFilterWithInitCharQuote() throws IOException, TemplateException {
+        parseExpression("~$variable:'indexOf<'\\''>~");
+        //               1234567890123456789012345
+        assertTokensEquals(identifier("$variable", p(1, 2)),
+                toapply(p(1, 11)),
+                identifier("'indexOf", p(1, 12)),
+                bracket('<', p(1, 20)),
+                character('\'', p(1, 21)),
+                bracket('>', p(1, 24))
+        );
+
+        assertElementEquals(
+                functionp(identifier("'indexOf", p(1, 12)),
+                        list(character('\'', p(1, 21))),
                         identifier("$variable", p(1, 2))));
 
     }

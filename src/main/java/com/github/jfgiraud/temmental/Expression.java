@@ -26,6 +26,7 @@ class Expression {
 
     public Object parse() throws IOException, TemplateException {
         Stack tokens = parseToTokens();
+
         tokens.reverse();
         try {
             return interpretTokens(tokens);
@@ -52,16 +53,15 @@ class Expression {
     // ====== static methods ======================================================================================
 
     Object interpretTokens(Stack tokens) throws TemplateException {
+
         Stack oldOut = new Stack();
         Stack oldCommas = new Stack();
         int commas = 0;
         Stack out = new Stack();
-        //tokens.printStack(System.out);
         Map<Integer, Integer> brackets = new HashMap<Integer, Integer>();
-        brackets.put((int)'(', 0);
-        brackets.put((int)'[', 0);
-        brackets.put((int)'<', 0);
-        brackets.put((int)'!', 0);
+        for (int c : BracketTok.OPENING_BRACKETS) {
+            brackets.put(c, 0);
+        }
         while (tokens.depth() >= 1) {
             Object token = tokens.pop();
             currentToken = token;
@@ -216,7 +216,7 @@ class Expression {
         StringWriter word = new StringWriter();
         boolean inDQ = false;
         boolean inSQ = false;
-        boolean isProg = false;
+        boolean firstInSQ = true;
         boolean escape = false;
         boolean afterHash = false;
         try {
@@ -276,20 +276,32 @@ class Expression {
                     word.write(currentChar);
                 } else if (!inSQ && !inDQ && currentChar == '\'') {
                     inSQ = true;
-                    word.write(currentChar);
-                } else if (inSQ && currentChar == '\'') {
-                    inSQ = false;
+                    firstInSQ = true;
                     word.write(currentChar);
                 } else if (inDQ && currentChar == '"') {
                     inDQ = false;
                     word.write(currentChar);
-                } else if (inDQ || inSQ) {
+                } else if (inDQ) {
                     word.write(currentChar);
+                } else if (inSQ) {
+                    if (firstInSQ) {
+                        word.write(currentChar);
+                        firstInSQ = false;
+                    } else if (String.format("%c", currentChar).matches("[\\.\\w]+")) {
+                        word.write(currentChar);
+                    } else if (currentChar == '\\') {
+                        escape = true;
+                        cursor.move1l();
+                    } else if (currentChar == '\'') {
+                        word.write(currentChar);
+                    } else {
+                        inSQ = false;
+                        firstInSQ = true;
+                        cursor.move1l();
+                        continue;
+                    }
                 } else {
                     word.write(currentChar);
-                }
-                if (inSQ && word.toString().length() == 3) {
-                    inSQ = false;
                 }
                 currentChar = sr.read();
             }
@@ -339,13 +351,14 @@ class Expression {
             t = t.substring(0, t.length() - 1);
             return new Text(t, c);
         } else if (expr.startsWith("'") && expr.endsWith("'")) {
+            System.err.println("expr="+expr);
             Cursor c = cursor.clone().movel(expr, 0);
             String t = expr.substring(1); //c.move1r();
             t = t.substring(0, t.length() - 1);
             if (t.length() == 0) {
-                throw new TemplateException("Empty char at position '%s').", cursor.getPosition());
+                throw new TemplateException("Empty char at position '%s').", c.getPosition());
             } else if (t.length() > 1) {
-                throw new TemplateException("Invalid length for char at position '%s').", cursor.getPosition());
+                throw new TemplateException("Invalid length for char at position '%s').", c.getPosition());
             }
             return new Char(t.charAt(0), c);
         } else if (expr.matches("(-)?\\d+[lL]")) {

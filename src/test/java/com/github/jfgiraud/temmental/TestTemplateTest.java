@@ -1,6 +1,5 @@
 package com.github.jfgiraud.temmental;
 
-import com.github.jfgiraud.temmental.*;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -219,9 +218,7 @@ public class TestTemplateTest extends TestCase {
             }
         });
         StringTemplate template = new StringTemplate("~$message[$name]:'null!123¡~", transforms, properties, Locale.ENGLISH);
-        template.printStructure(System.err);
         model = createModel("message", "hello", "name", "jeff");
-
         assertEquals("123", template.format(model));
     }
 
@@ -251,12 +248,36 @@ public class TestTemplateTest extends TestCase {
 
     @Test
     public void testCharAt() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'''>~And after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'o'>~And after", transforms, properties, Locale.ENGLISH);
         transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
+        model = createModel("data", "the key is 'open'");
+        assertEquals("Some text...12And after", template.format(model));
+    }
+
+    @Test
+    public void testCharAtSQ() throws IOException, TemplateException, NoSuchMethodException {
+        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'\\''>~And after", transforms, properties, Locale.ENGLISH);
+        transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
+        String c = "'\''";
+        System.err.println(c);
         model = createModel("data", "the key is 'open'");
         assertEquals("Some text...11And after", template.format(model));
     }
 
+   /* @Test
+    public void testGet() throws IOException, TemplateException, NoSuchMethodException {
+        transforms.put("upper", String.class.getDeclaredMethod("toUpperCase"));
+        transforms.put("inc", new Transform<Integer,Integer>() {
+            public Integer apply(Integer value) {
+                return value+1;
+            }
+        });
+
+        StringTemplate template = new StringTemplate("~$data{$i}~", transforms, properties, Locale.ENGLISH);
+        model = createModel("data", Arrays.asList("a", "b", "c", "d", "e", "f", "g"), "i", 5);
+        assertEquals("f", template.format(model));
+    }
+*/
     @Test
     public void testOptionalWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
         StringTemplate template = new StringTemplate("Some text...~$data?:'id~And after", transforms, properties, Locale.ENGLISH);
@@ -304,4 +325,13 @@ public class TestTemplateTest extends TestCase {
         model = createModel("parameters", Arrays.asList());
         assertEquals("<<<0:{0} 1:{1}>>>", template.format(model));
     }
+
+    @Test
+    public void testMessageWithArray() throws IOException, TemplateException, NoSuchMethodException {
+        properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
+        StringTemplate template = new StringTemplate("~($a,$b)#set<'parameters>~<<<~'key[$before,@$parameters,$after]~>>>~#set~", transforms, properties, Locale.ENGLISH);
+        model = createModel("before", "BEFORE", "a", "zero", "b", "one", "after", "AFTER");
+        assertEquals("<<<0:BEFORE 1:zero 2:one 3:AFTER>>>", template.format(model));
+    }
+
 }
