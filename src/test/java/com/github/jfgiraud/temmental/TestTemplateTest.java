@@ -259,7 +259,6 @@ public class TestTemplateTest extends TestCase {
         StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'\\''>~And after", transforms, properties, Locale.ENGLISH);
         transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
         String c = "'\''";
-        System.err.println(c);
         model = createModel("data", "the key is 'open'");
         assertEquals("Some text...11And after", template.format(model));
     }

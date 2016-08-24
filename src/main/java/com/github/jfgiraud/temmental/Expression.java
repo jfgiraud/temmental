@@ -351,7 +351,6 @@ class Expression {
             t = t.substring(0, t.length() - 1);
             return new Text(t, c);
         } else if (expr.startsWith("'") && expr.endsWith("'")) {
-            System.err.println("expr="+expr);
             Cursor c = cursor.clone().movel(expr, 0);
             String t = expr.substring(1); //c.move1r();
             t = t.substring(0, t.length() - 1);

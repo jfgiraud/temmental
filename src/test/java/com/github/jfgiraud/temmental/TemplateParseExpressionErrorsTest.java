@@ -162,7 +162,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
             template.parseString(pattern, true);
             fail("An exception must be raised.");
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             assertEquals(expectedMessage, e.getMessage());
         }
     }
