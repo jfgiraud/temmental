@@ -57,7 +57,7 @@ public class TemplateUtils {
 //     * Filter and convert a collection of items to a list of models using the given function.
 //     * @param <T> The type of items
 //     * @param items The collection of items
-//     * @param function The function to apply on an item. If the result is true, the item is converted to a model and the model is added to the result. 
+//     * @param function The function to apply on an item. If the result is true, the item is converted to a model and the model is added to the result.
 //     * @return the list of Models
 //     */
 //	public static <T> List<Map<String,Object>> filterAndConvert(Iterable<T> items, ConditionalConvertFunction<T> function) {

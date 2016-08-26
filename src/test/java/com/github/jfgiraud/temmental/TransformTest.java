@@ -42,12 +42,21 @@ public class TransformTest {
 
 
     @Test
-    public void testIf() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'if<\"##TRUE-BLOCK##\",\"##FALSE-BLOCK##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+    public void testIfTwoArgs() throws IOException {
+        StringTemplate template = new StringTemplate("before~$bool:'if<\"##true-block##\",\"##false-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
         model = createModel("bool", true);
         assertEquals("before##TRUE-BLOCK##after", template.format(model));
         model = createModel("bool", false);
         assertEquals("before##FALSE-BLOCK##after", template.format(model));
+    }
+
+    @Test
+    public void testIfOneArg() throws IOException {
+        StringTemplate template = new StringTemplate("before~$bool:'if<\"##true-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+        model = createModel("bool", true);
+        assertEquals("before##TRUE-BLOCK##after", template.format(model));
+        model = createModel("bool", false);
+        assertEquals("beforeafter", template.format(model));
     }
 
     @Test
@@ -60,10 +69,19 @@ public class TransformTest {
     }
 
     @Test
-    public void testIfNot() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##FALSE-BLOCK##\",\"##TRUE-BLOCK##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+    public void testIfNotTwoArgs() throws IOException {
+        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##false-block##\",\"##true-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
         model = createModel("bool", true);
         assertEquals("before##TRUE-BLOCK##after", template.format(model));
+        model = createModel("bool", false);
+        assertEquals("before##FALSE-BLOCK##after", template.format(model));
+    }
+
+    @Test
+    public void testIfNotOneArg() throws IOException {
+        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##false-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+        model = createModel("bool", true);
+        assertEquals("beforeafter", template.format(model));
         model = createModel("bool", false);
         assertEquals("before##FALSE-BLOCK##after", template.format(model));
     }

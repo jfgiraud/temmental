@@ -8,17 +8,17 @@ import java.util.Map;
 class Function extends Element {
 
     protected Object input;
-    protected Identifier function;
+    protected Identifier functionIdentifier;
 
     Function(Identifier func, Object input) {
         super(func.cursor);
         this.input = input;
-        this.function = func;
+        this.functionIdentifier = func;
     }
 
     @Override
     String getIdentifier() {
-        return function.getIdentifier();
+        return functionIdentifier.getIdentifier();
     }
 
     @Override
@@ -28,22 +28,20 @@ class Function extends Element {
 
     @Override
     public String repr(int d, boolean displayPosition) {
-        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + function + "," + input + ")";
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Function(" + functionIdentifier + "," + input + ")";
     }
 
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        Object result = function.writeObject(functions, model, messages);
-
-        String o = (String) result;
+        String o = (String) functionIdentifier.writeObject(functions, model, messages);
 
         Object fp = functions.get(o);
 
-        if (fp == null && function.isRequired()) {
-            throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
-        } else if (fp == null && function.getIdentifier().endsWith("?")) {
-            throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
-        } else if (fp == null && !function.isRequired()) {
+        if (fp == null && functionIdentifier.isRequired()) {
+            throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, functionIdentifier.getIdentifier(), functionIdentifier.cursor.getPosition());
+        } else if (fp == null && functionIdentifier.getIdentifier().endsWith("?")) {
+            throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, functionIdentifier.cursor.getPosition());
+        } else if (fp == null && !functionIdentifier.isRequired()) {
             // fp = IDT;
         }
 
@@ -95,7 +93,12 @@ class Function extends Element {
         } catch (IllegalArgumentException e) {
             occurred = e;
         } catch (InvocationTargetException e) {
-            occurred = e;
+            if (e.getCause() instanceof TemplateIgnoreRenderingException)
+                throw (TemplateIgnoreRenderingException) e.getCause();
+            throw new TemplateException(e, "Unable to render '\u2026:%s' at position '%s'. The function %s throws an exception!",
+                    getIdentifier(),
+                    cursor.getPosition(),
+                    o);
         }
 
         if (!method.getDeclaringClass().isAssignableFrom(obj.getClass())) {
@@ -106,13 +109,14 @@ class Function extends Element {
                     method.getDeclaringClass().getCanonicalName(),
                     obj.getClass().getCanonicalName());
         } else {
-            if (method.getParameterTypes().length != 0) {
+            int length = method.getParameterTypes().length;
+            if (length != 0) {
                 throw new TemplateException(occurred, "Unable to render '\u2026:%s' at position '%s'. The function %s expects %s parameter%s but is called without parameter!",
                         getIdentifier(),
                         cursor.getPosition(),
                         o,
-                        (method.getParameterTypes().length == 1 ? "one" : Integer.toString(method.getParameterTypes().length)),
-                        (method.getParameterTypes().length > 1 ? "s" : ""));
+                        (length == 1 ? "one" : Integer.toString(length)),
+                        (length > 1 ? "s" : ""));
             } else {
                 throw new TemplateException(occurred, "Unable to determine reason.");
             }
@@ -136,7 +140,7 @@ class Function extends Element {
             return false;
         if (o instanceof Function) {
             Function oc = (Function) o;
-            return oc.input.equals(input) && oc.function.equals(function);
+            return oc.input.equals(input) && oc.functionIdentifier.equals(functionIdentifier);
         }
         return false;
     }

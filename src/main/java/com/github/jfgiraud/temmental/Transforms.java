@@ -2,18 +2,28 @@ package com.github.jfgiraud.temmental;
 
 import java.lang.reflect.Method;
 
+import static com.github.jfgiraud.temmental.TemplateUtils.getDeclaredMethod;
+
 // TODO add documentation
 public class Transforms {
 
     static final ParamTransform<Object[], Boolean, Object> IF = new ParamTransform<Object[], Boolean, Object>() {
         public Object apply(Object[] values, Boolean value) {
-            return value ? values[0] : values[1];
+            if (value)
+                return values[0];
+            if (values.length == 2)
+                return values[1];
+            throw new TemplateIgnoreRenderingException("Invalid number of parameters!");
         }
     };
 
     static final ParamTransform<Object[], Boolean, Object> IF_NOT = new ParamTransform<Object[], Boolean, Object>() {
         public Object apply(Object[] values, Boolean value) {
-            return value ? values[1] : values[0];
+            if (!value)
+                return values[0];
+            if (values.length == 2)
+                return values[1];
+            throw new TemplateIgnoreRenderingException("Invalid number of parameters!");
         }
     };
 
@@ -29,7 +39,7 @@ public class Transforms {
         }
     };
 
-    static final Method UPPER = TemplateUtils.getDeclaredMethod(String.class, "toUpperCase", null);
+    static final Method UPPER = getDeclaredMethod(String.class, "toUpperCase", null);
 
-    static final Method LOWER = TemplateUtils.getDeclaredMethod(String.class, "toLowerCase", null);
+    static final Method LOWER = getDeclaredMethod(String.class, "toLowerCase", null);
 }

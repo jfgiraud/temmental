@@ -10,7 +10,7 @@ class Functionp extends Function {
     private List<Object> initParameters;
 
     public Functionp(Function f, List<Object> initParameters) {
-        super(f.function, f.input);
+        super(f.functionIdentifier, f.input);
         this.initParameters = initParameters;
     }
 
@@ -21,14 +21,14 @@ class Functionp extends Function {
 
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        String o = (String) function.writeObject(functions, model, messages);
+        String o = (String) functionIdentifier.writeObject(functions, model, messages);
 
         Object fp = functions.get(o);
 
-        if (fp == null && function.isRequired()) {
-            throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, function.getIdentifier(), function.cursor.getPosition());
-        } else if (fp == null && function.getIdentifier().endsWith("?")) {
-            throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, function.cursor.getPosition());
+        if (fp == null && functionIdentifier.isRequired()) {
+            throw new TemplateException("No transform function named '%s' is associated with the template for rendering '\u2026:%s' at position '%s'.", o, functionIdentifier.getIdentifier(), functionIdentifier.cursor.getPosition());
+        } else if (fp == null && functionIdentifier.getIdentifier().endsWith("?")) {
+            throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, functionIdentifier.cursor.getPosition());
         }
 
         Object arg = ((input instanceof Element)
@@ -84,15 +84,15 @@ class Functionp extends Function {
             }
         }
 
-        Exception occured = null;
+        Exception occurred;
         try {
             return method.invoke(arg, initParametersProcessed.toArray());
         } catch (IllegalAccessException e) {
-            occured = e;
+            occurred = e;
         } catch (IllegalArgumentException e) {
-            occured = e;
+            occurred = e;
         } catch (InvocationTargetException e) {
-            occured = e;
+            occurred = e;
         }
         for (int i = 0; i < initParametersProcessed.size(); i++) {
             Object tmpVlue = initParametersProcessed.get(i);
@@ -107,7 +107,7 @@ class Functionp extends Function {
             }
         }
 
-        throw new TemplateException(occured, "Unable to determine reason.");
+        throw new TemplateException(occurred, "Unable to determine reason.");
     }
 
     static final Map<Class, Class> builtInMap;
@@ -171,14 +171,14 @@ class Functionp extends Function {
             return false;
         if (o instanceof Functionp) {
             Functionp oc = (Functionp) o;
-            return oc.input.equals(input) && oc.function.equals(function) && oc.initParameters.equals(initParameters);
+            return oc.input.equals(input) && oc.functionIdentifier.equals(functionIdentifier) && oc.initParameters.equals(initParameters);
         }
         return false;
     }
 
     @Override
     public String repr(int d, boolean displayPosition) {
-        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Functionp(" + function + "," + initParameters + "," + input + ")";
+        return (displayPosition ? "@" + cursor.getPosition() + pref(d) : "") + "Functionp(" + functionIdentifier + "," + initParameters + "," + input + ")";
     }
 
     @Override
