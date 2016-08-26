@@ -104,6 +104,17 @@ public class TemplateUtils {
         return model;
     }
 
+    /**
+     * Append entries to the specified model: it is an association of key/value pairs.
+     *
+     * @param model the model where add data.
+     * @param map a key followed by a value. It is an enumeration, so this implies an even size.
+     * @throws TemplateException if there is not an even size of parameters for the map
+     */
+    public static void putToModel(Map<String, Object> model, Object... map) throws TemplateException {
+        model.putAll(createModel(map));
+    }
+
     public static <In, Out> List<Out> transform(final List<In> list, final Transform<In, Out> transform) {
         ArrayList<Out> result = new ArrayList<Out>();
         for (In item : list) {

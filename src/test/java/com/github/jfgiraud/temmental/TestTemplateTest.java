@@ -258,7 +258,6 @@ public class TestTemplateTest extends TestCase {
     public void testCharAtSQ() throws IOException, TemplateException, NoSuchMethodException {
         StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'\\''>~And after", transforms, properties, Locale.ENGLISH);
         transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
-        String c = "'\''";
         model = createModel("data", "the key is 'open'");
         assertEquals("Some text...11And after", template.format(model));
     }

@@ -92,7 +92,7 @@ public class Command extends Element {
         Object result = element.writeObject(functions, model, messages);
 
         if (!(result instanceof Map)) {
-            throw new TemplateException("Command '%s' requires a map at position '%s'", keyword.getCursor().getPosition());
+            throw new TemplateException("Command '%s' requires a map at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
 
         Map<String, Object> m = new HashMap<String, Object>(model);
