@@ -1,6 +1,8 @@
 package com.github.jfgiraud.temmental;
 
 import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -9,17 +11,17 @@ import java.util.*;
 
 import static com.github.jfgiraud.temmental.TemplateUtils.createList;
 import static com.github.jfgiraud.temmental.TemplateUtils.createModel;
+import static org.junit.Assert.assertEquals;
 
-public class TestTemplateTest extends TestCase {
+public class TestTemplateTest {
 
     protected HashMap<String, Object> transforms;
     private Map<String, Object> model;
     protected Properties properties;
     protected StringWriter out;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         transforms = new HashMap<String, Object>();
         properties = new Properties();
         properties.put("hello", "Bonjour");
@@ -27,9 +29,8 @@ public class TestTemplateTest extends TestCase {
         out = new StringWriter();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         TemplateRecorder.setRecording(false);
     }
 

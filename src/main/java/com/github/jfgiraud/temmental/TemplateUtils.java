@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.*;
 
 
@@ -142,5 +143,11 @@ public class TemplateUtils {
         return messages;
     }
 
-
+    static Method getDeclaredMethod(Class clazz, String name, Object... parameters) {
+        try {
+            return clazz.getDeclaredMethod(name, (Class<?>[]) parameters);
+        } catch (NoSuchMethodException e) {
+            throw new TemplateException("Unable to find method %s on %s", name, clazz.getCanonicalName());
+        }
+    }
 }

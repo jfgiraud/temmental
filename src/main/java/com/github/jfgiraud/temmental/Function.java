@@ -99,7 +99,7 @@ class Function extends Element {
         }
 
         if (!method.getDeclaringClass().isAssignableFrom(obj.getClass())) {
-            throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s. It receives %s.",
+            throw new TemplateException(occurred, "Unable to render '\u2026:%s' at position '%s'. The function %s expects %s. It receives %s.",
                     getIdentifier(),
                     cursor.getPosition(),
                     o,
@@ -107,7 +107,7 @@ class Function extends Element {
                     obj.getClass().getCanonicalName());
         } else {
             if (method.getParameterTypes().length != 0) {
-                throw new TemplateException("Unable to render '\u2026:%s' at position '%s'. The function %s expects %s parameter%s but is called without parameter!",
+                throw new TemplateException(occurred, "Unable to render '\u2026:%s' at position '%s'. The function %s expects %s parameter%s but is called without parameter!",
                         getIdentifier(),
                         cursor.getPosition(),
                         o,
@@ -122,7 +122,7 @@ class Function extends Element {
     protected Method getApplyMethod(Transform t) {
         Method[] methods = t.getClass().getMethods();
         for (Method method : methods) {
-            if (method.getName().equals("apply") && !method.isSynthetic()) {
+            if (method.getName().equals("apply") && method.getParameterTypes().length == 1 && !method.isSynthetic()) {
                 method.setAccessible(true);
                 return method;
             }
