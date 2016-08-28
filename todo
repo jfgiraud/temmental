@@ -2,23 +2,24 @@
 testOpeningCommandWithMapper
 
 
-'eq
-'ne
-'lt
-'le
-'gt
-'ge
+
 'in
-'empty
-'size
 'filter
-'and
-'or
 'sort
 'asbool
 'asint
 'aslong
+repr
+simplequote
+doublequote
+quote
+concat
+
 
 ...
+
+$selected:'if<" attr=\"selected\"">
+$selected:'if<"selected">:'dq:'prefix<"attr=">
+("attr=", $selected:'if<"selected">:'dq):'concat
 
 $a:'eq<$b:'repr>
