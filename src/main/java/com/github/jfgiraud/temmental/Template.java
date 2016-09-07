@@ -222,12 +222,15 @@ public class Template {
             boolean escape = false;
             while (currentChar != -1) {
                 cursor.next(currentChar);
-                if (currentChar == '\\') {
-                    escape = true;
-                    cursor.move1l();
-                } else if (escape) {
+                if (escape) {
+                    if (currentChar != '~') {
+                        buffer.write('\\');
+                    }
                     buffer.write(currentChar);
                     escape = false;
+                } else if (currentChar == '\\') {
+                    escape = true;
+                    cursor.move1l();
                 } else if (!opened && currentChar == '~') {
                     String expr = buffer.toString();
                     if (!expr.equals("")) {

@@ -12,6 +12,7 @@ import java.util.*;
 import static com.github.jfgiraud.temmental.TemplateUtils.createList;
 import static com.github.jfgiraud.temmental.TemplateUtils.createModel;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestTemplateTest {
 
@@ -123,6 +124,7 @@ public class TestTemplateTest {
         assertEquals("before0<1>1<2>2<3>before", template.format(model));
     }
 
+    @Test
     public void testCommandEnumForQuote() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index,'elem>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties, Locale.ENGLISH);
         List<Integer> elements = Arrays.asList(10, 20, 30);
@@ -136,6 +138,13 @@ public class TestTemplateTest {
         List<Integer> elements = Arrays.asList(1, 2, 3);
         model = createModel("l", elements, "elem", "before");
         assertEquals("before<1><2><3>before", template.format(model));
+    }
+
+    @Test
+    public void testBackSlashInTextContext() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("^[\\w]*$", transforms, properties, Locale.ENGLISH);
+        model = createModel();
+        assertEquals("^[\\w]*$", template.format(model));
     }
 
     @Test
