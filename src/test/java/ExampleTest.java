@@ -82,7 +82,12 @@ public class ExampleTest {
         model.put("genre", 'm');
         List<Option> options = Arrays.asList(new Option("Appels", 25.2), new Option("Envoi SMS", 3.5));
         model.put("options", options);
-        model.put("totaux", new Option("Totaux", options.stream().map(o -> o.value).mapToDouble(Double::doubleValue).sum()));
+//        model.put("totaux", new Option("Totaux", options.stream().map(o -> o.value).mapToDouble(Double::doubleValue).sum()));
+        double totaux = 0;
+        for (Option o : options) {
+            totaux += o.value;
+        }
+        model.put("totaux", new Option("Totaux", totaux));
         template.printSection(out, "body", model);
         System.out.println(out.toString());
 
