@@ -143,7 +143,7 @@ public class TemplateUtils {
         return messages;
     }
 
-    static Method getDeclaredMethod(Class clazz, String name, Object... parameters) {
+    public static Method getDeclaredMethod(Class clazz, String name, Object... parameters) {
         try {
             return clazz.getDeclaredMethod(name, (Class<?>[]) parameters);
         } catch (NoSuchMethodException e) {

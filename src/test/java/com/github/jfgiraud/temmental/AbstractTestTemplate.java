@@ -78,8 +78,8 @@ public abstract class AbstractTestTemplate {
         return new Text(name, new Cursor(position));
     }
 
-    Char character(char c, String position) {
-        return new Char(c, new Cursor(position));
+    Character character(char c, String position) {
+        return new Character(c);
     }
 
     void displayRule(String s) {

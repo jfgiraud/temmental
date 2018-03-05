@@ -11,3 +11,15 @@
 ~'client_since[$inscription?:'date_formatter<'ddmmyyyy[]>]~
 
 <!-- #section body -->
+
+~$genre:'genre<"Madame","Monsieur">~,
+
+Veuillez trouver la facture relative à votre ligne.
+
+~$options#for<'option>~
+  ~$option:'toModel#override~
+    ~$label~: ~$value~
+  ~#override~
+~#for~
+~$totaux:'toModel#override~~$label~: ~$value~~#override~
+

@@ -127,7 +127,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
     @Test
     public void testInvalidSyntax2() throws IOException, TemplateException {
-        assertParseThrowsException("Parsing exception at position -:l1:c23.",
+        assertParseThrowsException("Parsing exception at position -:l1:c22.",
                 "~$date_time:'is_today<#true~</b>~#true~");
     }
 
@@ -160,6 +160,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
 
         try {
             template.parseString(pattern, true);
+            template.printStructure(System.out);
             fail("An exception must be raised.");
         } catch (Exception e) {
 //            e.printStackTrace();

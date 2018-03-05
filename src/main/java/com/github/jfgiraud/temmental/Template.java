@@ -266,10 +266,13 @@ public class Template {
         return stack;
     }
 
+    private static HashMap<String, Object> cloneModel(Map<String, Object> model) {
+        return new HashMap<String, Object>(model);
+    }
 
     static void writeObject(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, Object value) throws TemplateException, IOException {
 
-        Map<String, Object> newModel = new HashMap<String, Object>(model);
+        Map<String, Object> newModel = cloneModel(model);
 
         if (value instanceof String || value instanceof Number) {
             out.write(value.toString());
@@ -354,7 +357,7 @@ public class Template {
      * @throws java.io.IOException if an I/O error occurs
      */
     public void printFile(Writer out) throws TemplateException, java.io.IOException {
-        printSection(out, DEFAULT_SECTION, new HashMap<String, Object>());
+        printSection(out, DEFAULT_SECTION, newEmptyModel());
     }
 
     /**
@@ -397,7 +400,11 @@ public class Template {
      * @throws java.io.IOException if an I/O error occurs
      */
     public void printSection(Writer out, String sectionName) throws TemplateException, java.io.IOException {
-        printSection(out, sectionName, new HashMap<String, Object>());
+        printSection(out, sectionName, newEmptyModel());
+    }
+
+    private HashMap<String, Object> newEmptyModel() {
+        return new HashMap<String, Object>();
     }
 
     /**

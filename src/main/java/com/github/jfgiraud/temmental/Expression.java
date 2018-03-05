@@ -168,7 +168,7 @@ class Expression {
                 if (out.empty()) {
                     out.push(new Command(keyword, ((CommandTok) token).getCursor()));
                 } else {
-                    Element input = (Element) out.pop();
+                    Object input = out.pop();
                     out.push(new Command(keyword, ((CommandTok) token).getCursor(), input));
                 }
             } else {
@@ -193,8 +193,8 @@ class Expression {
         return out.pop();
     }
 
-    private boolean isLeafToken(Object token) {
-        return token instanceof Char || token instanceof Text || token instanceof Number || token instanceof Boolean || token instanceof Identifier;
+    static boolean isLeafToken(Object token) {
+        return token instanceof Character || token instanceof Text || token instanceof Number || token instanceof Boolean || token instanceof Identifier;
     }
 
     Stack parseToTokens() throws IOException, TemplateException {
@@ -359,7 +359,7 @@ class Expression {
             } else if (t.length() > 1) {
                 throw new TemplateException("Invalid length for char at position '%s').", c.getPosition());
             }
-            return new Char(t.charAt(0), c);
+            return new Character(t.charAt(0));
         } else if (expr.matches("(-)?\\d+[lL]")) {
             return Long.parseLong(expr.substring(0, expr.length() - 1));
         } else if (expr.matches("(-)?\\d+")) {

@@ -7,14 +7,17 @@ import java.util.*;
 public class Command extends Element {
 
     private Keyword keyword;
-    private Element element;
+    private Object element;
     private List<Object> betweenTags;
     private boolean opening;
     private List initParameters;
 
-    public Command(Keyword keyword, Cursor cursor, Element element) throws TemplateException {
+    public Command(Keyword keyword, Cursor cursor, Object element) throws TemplateException {
         super(cursor);
-        if (!Arrays.asList("for", "true", "false", "set", "enum", "override").contains(keyword.getKeyword())) {
+        if (element != null && !Expression.isLeafToken(element) && !(element instanceof Element)) {
+            throw new TemplateException("Parsing exception at position %s.", ((Token) element).getCursor().getPosition());
+        }
+        if (!Arrays.asList("for", "true", "false", "set", "enum", "override", "put").contains(keyword.getKeyword())) {
             throw new TemplateException("Invalid command name '%s' at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
         this.keyword = keyword;
@@ -31,7 +34,7 @@ public class Command extends Element {
     @Override
     public String repr(int d, boolean displayPosition) {
         String buffer = "@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n";
-        buffer += "   " + element.repr(d + 1, true);
+        buffer += "   " + ((element instanceof Element) ? ((Element) element).repr(d + 1, true) : element);
         buffer += "\n";
         for (int i = 0; i < betweenTags.size(); i++) {
             Object obj = betweenTags.get(i);
@@ -75,7 +78,7 @@ public class Command extends Element {
     }
 
     private void writeObjectIf(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages, boolean invert) throws TemplateException, IOException {
-        Object result = element.writeObject(functions, model, messages);
+        Object result = writeElement(functions, model, messages);
         if (!(result instanceof Boolean)) {
             throw new TemplateException("Command '%s' requires a boolean input at position '%s'", invert ? "false" : "true", keyword.getCursor().getPosition());
         }
@@ -84,28 +87,32 @@ public class Command extends Element {
             b = !b;
         }
         if (b) {
-            writeObjectBetweenTags(out, functions, messages, new HashMap<String, Object>(model));
+            writeObjectBetweenTags(out, functions, messages, cloneModel(model));
         }
     }
 
+    private HashMap<String, Object> cloneModel(Map<String, Object> model) {
+        return new HashMap<String, Object>(model);
+    }
+
     private void writeObjectOverride(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-        Object result = element.writeObject(functions, model, messages);
+        Object result = writeElement(functions, model, messages);
 
         if (!(result instanceof Map)) {
             throw new TemplateException("Command '%s' requires a map at position '%s'", keyword.getKeyword(), keyword.getCursor().getPosition());
         }
 
-        Map<String, Object> m = new HashMap<String, Object>(model);
+        Map<String, Object> m = cloneModel(model);
         m.putAll((Map) result);
 
         writeObjectBetweenTags(out, functions, messages, m);
     }
 
     private void writeObjectSet(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-        Object value = element.writeObject(functions, model, messages);
+        Object value = writeElement(functions, model, messages);
         String variable = getInitParameterValue(functions, model, messages, 0);
 
-        Map<String, Object> m = new HashMap<String, Object>(model);
+        Map<String, Object> m = cloneModel(model);
         m.put(variable, value);
 
         writeObjectBetweenTags(out, functions, messages, m);
@@ -120,7 +127,7 @@ public class Command extends Element {
     }
 
     private void writeObjectFor(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-        Object result = element.writeObject(functions, model, messages);
+        Object result = writeElement(functions, model, messages);
         if (!(result instanceof Iterable)) {
             throw new TemplateException("Command 'for' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
         }
@@ -128,14 +135,14 @@ public class Command extends Element {
             if (!(c instanceof Map)) {
                 if (getInitParameter(0) != null) {
                     String variable = getInitParameterValue(functions, model, messages, 0);
-                    Map<String, Object> m = new HashMap<String, Object>(model);
+                    Map<String, Object> m = cloneModel(model);
                     m.put(variable, c);
                     writeObjectBetweenTags(out, functions, messages, m);
                 } else {
                     throw new TemplateException("Command 'for' requires an iterable input of Map at position '%s'", keyword.getCursor().getPosition());
                 }
             } else {
-                Map<String, Object> m = new HashMap<String, Object>(model);
+                Map<String, Object> m = cloneModel(model);
                 m.putAll((Map) c);
                 writeObjectBetweenTags(out, functions, messages, m);
             }
@@ -143,14 +150,14 @@ public class Command extends Element {
     }
 
     private void writeObjectEnum(Writer out, Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException, IOException {
-        Object result = element.writeObject(functions, model, messages);
+        Object result = writeElement(functions, model, messages);
         if (!(result instanceof Iterable)) {
             throw new TemplateException("Command 'enum' requires an iterable input at position '%s'", keyword.getCursor().getPosition());
         }
         int i = 0;
         String variable = getInitParameterValue(functions, model, messages, 0);
         for (Object c : ((Iterable) result)) {
-            Map<String, Object> m = new HashMap<String, Object>(model);
+            Map<String, Object> m = cloneModel(model);
             m.put(variable, i);
             if (!(c instanceof Map)) {
                 if (getInitParameter(1) != null) {
@@ -166,6 +173,13 @@ public class Command extends Element {
             }
             i++;
         }
+    }
+
+    private Object writeElement(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) {
+        if (element instanceof Element)
+            return ((Element) element).writeObject(functions, model, messages);
+        else
+            return element;
     }
 
     private void writeObjectBetweenTags(Writer out, Map<String, Object> functions, TemplateMessages messages, Map<String, Object> m) throws TemplateException, IOException {
