@@ -1,7 +1,9 @@
-<!-- #section header -->
+<!-- #section header || other -->
 ~$firstName~ ~$lastName:'upper~                                        Bordeaux, ~$date:'date_formatter<'eeddmmyyyy[]>:'titleize~
-~$streetLines#for<'streetLine>~~$streetLine:'titleize~
-~#for~~$zip~ ~$city:'upper~
+~$streetLines#for<'streetLine>~
+    ~$streetLine:'titleize~ ~$streetLine~
+~#for~
+~$zip~ ~$city:'upper~
 ~$country!"FRANCE"¡~
 ~'email[$email?]~
 
@@ -22,4 +24,5 @@ Veuillez trouver la facture relative à votre ligne.
   ~#override~
 ~#for~
 ~$totaux:'toModel#override~~$label~: ~$value~~#override~
+
 

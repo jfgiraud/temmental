@@ -5,10 +5,12 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -136,6 +138,13 @@ public class TemplateTest extends AbstractTestTemplate {
                 toparse("~$v~", p(1, 14)),
                 toparse("~#for~", p(1, 18))
         );
+    }
+
+    @Test
+    public void testComputeAliases() throws IOException, TemplateException {
+        assertEquals(Arrays.asList("toto"), Template.computeAliases("toto"));
+        assertEquals(Arrays.asList("toto", "tata"), Template.computeAliases("toto || tata"));
+        assertEquals(Arrays.asList("toto", "tata"), Template.computeAliases("|| toto || tata"));
     }
 
     @Test

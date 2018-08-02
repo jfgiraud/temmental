@@ -121,6 +121,11 @@ public class TransformTest {
         assertEquals("OK", template.format(model));
         model = createModel("a", 1, "b", "1");
         assertEquals("", template.format(model));
+        model = createModel("a", "1", "b", "1");
+        assertEquals("OK", template.format(model));
+        template = new StringTemplate("~$a:'eq<\"COMMANDES\">#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        model = createModel("a", "COMMANDES");
+        assertEquals("OK", template.format(model));
     }
 
     @Test

@@ -200,17 +200,17 @@ class Expression {
     Stack parseToTokens() throws IOException, TemplateException {
         Stack stack = new Stack();
         String expression = expr;
-        Cursor cursor = this.cursor.clone();
+        Cursor localCursor = this.cursor.clone();
         if (betweenTildes) {
             if (!expression.startsWith("~")) {
-                throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, cursor.getPosition());
+                throw new TemplateException("Expression '%s' doesn't start with '~' character at position '%s'", expression, localCursor.getPosition());
             }
             if (!expression.endsWith("~")) {
-                throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, cursor.getPosition());
+                throw new TemplateException("Expression '%s' doesn't end with '~' character at position '%s'", expression, localCursor.getPosition());
             }
             expression = expression.substring(1);
             expression = expression.substring(0, expression.length() - 1);
-            cursor.move1r();
+            localCursor.move1r();
         }
         StringReader sr = new StringReader(expression);
         StringWriter word = new StringWriter();
@@ -222,54 +222,54 @@ class Expression {
         try {
             int currentChar = sr.read();
             while (currentChar != -1) {
-                cursor.next(currentChar);
+                localCursor.next(currentChar);
                 if (!inSQ && !inDQ && currentChar == '\\') {
-                    throw new TemplateException("Invalid escape char '%c' at position '%s'.", currentChar, cursor.getPosition(-1));
+                    throw new TemplateException("Invalid escape char '%c' at position '%s'.", currentChar, localCursor.getPosition(-1));
                 } else if ((inSQ || inDQ) && currentChar == '\\') {
                     escape = true;
-                    cursor.move1l();
+                    localCursor.move1l();
                 } else if (escape) {
                     word.write(currentChar);
                     escape = false;
                 } else if (!inSQ && !inDQ && currentChar == '#') {
                     String expr = word.toString();
                     if (!expr.equals("")) {
-                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
+                        stack.push(evalToken(expr, localCursor.clone().move1l(), afterHash));
                     } else {
-                        behaviourOnEmptyToken(currentChar, stack, cursor);
+                        behaviourOnEmptyToken(currentChar, stack, localCursor);
                     }
                     word = new StringWriter();
-                    stack.push(new CommandTok(cursor.clone().move1l()));
+                    stack.push(new CommandTok(localCursor.clone().move1l()));
                     afterHash = true;
                 } else if (!inSQ && !inDQ && currentChar == ':') {
                     String expr = word.toString();
                     if (!expr.equals("")) {
-                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
+                        stack.push(evalToken(expr, localCursor.clone().move1l(), afterHash));
                     } else {
-                        behaviourOnEmptyToken(currentChar, stack, cursor);
+                        behaviourOnEmptyToken(currentChar, stack, localCursor);
                     }
                     word = new StringWriter();
-                    stack.push(new ToApplyTok(cursor.clone().move1l()));
+                    stack.push(new ToApplyTok(localCursor.clone().move1l()));
                     afterHash = false;
                 } else if (!inSQ && !inDQ && BracketTok.isBracket(currentChar)) {
                     String expr = word.toString();
                     if (!expr.equals("")) {
-                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
+                        stack.push(evalToken(expr, localCursor.clone().move1l(), afterHash));
                     } else {
-                        behaviourOnEmptyToken(currentChar, stack, cursor);
+                        behaviourOnEmptyToken(currentChar, stack, localCursor);
                     }
                     word = new StringWriter();
-                    stack.push(new BracketTok(currentChar, cursor.clone().move1l()));
+                    stack.push(new BracketTok(currentChar, localCursor.clone().move1l()));
                     afterHash = false;
                 } else if (!inSQ && !inDQ && currentChar == ',') {
                     String expr = word.toString();
                     if (!expr.equals("")) {
-                        stack.push(evalToken(expr, cursor.clone().move1l(), afterHash));
+                        stack.push(evalToken(expr, localCursor.clone().move1l(), afterHash));
                     } else {
-                        behaviourOnEmptyToken(currentChar, stack, cursor);
+                        behaviourOnEmptyToken(currentChar, stack, localCursor);
                     }
                     word = new StringWriter();
-                    stack.push(new CommaTok(cursor.clone().move1l()));
+                    stack.push(new CommaTok(localCursor.clone().move1l()));
                     afterHash = false;
                 } else if (!inSQ && !inDQ && currentChar == '"') {
                     inDQ = true;
@@ -291,13 +291,13 @@ class Expression {
                         word.write(currentChar);
                     } else if (currentChar == '\\') {
                         escape = true;
-                        cursor.move1l();
+                        localCursor.move1l();
                     } else if (currentChar == '\'') {
                         word.write(currentChar);
                     } else {
                         inSQ = false;
                         firstInSQ = true;
-                        cursor.move1l();
+                        localCursor.move1l();
                         continue;
                     }
                 } else {
@@ -310,9 +310,9 @@ class Expression {
         }
         String expr = word.toString();
         if (!expr.equals("")) {
-            stack.push(evalToken(expr, cursor.clone(), afterHash));
+            stack.push(evalToken(expr, localCursor.clone(), afterHash));
         } else {
-            behaviourOnEmptyToken(0, stack, cursor);
+            behaviourOnEmptyToken(0, stack, localCursor);
         }
 
         return stack;

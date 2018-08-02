@@ -3,6 +3,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -77,6 +78,9 @@ public class ExampleTest {
 
         StringWriter out = new StringWriter();
         template.printSection(out, "header", model);
+//        template.printSection(out, "other", model);
+
+        template.printStructure(new PrintWriter(out));
 
         model.clear();
         model.put("genre", 'm');

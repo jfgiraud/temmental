@@ -16,6 +16,7 @@ public class Template {
     private static final String DEFAULT_SECTION = "__default_section";
 
     private HashMap<String, Stack> sections;
+    private HashMap<String, String> sectionAliases;
 
 
     /**
@@ -124,6 +125,7 @@ public class Template {
 
         {
             sections = new HashMap<String, Stack>();
+            sectionAliases = new HashMap<String, String>();
             sections.put(DEFAULT_SECTION, new Stack());
             Stack stack = sections.get(DEFAULT_SECTION);
 
@@ -184,28 +186,50 @@ public class Template {
 
     private Stack parseToSections(Stack stack, Text o) throws TemplateException {
         String s = (String) o.writeObject(null, null, null);
-        Pattern p = Pattern.compile("<!--\\s*#section\\s+([a-zA-Z0-9_]+)\\s*-->");
+        Pattern p = Pattern.compile("<!--\\s*#section\\s+(?<name>[a-zA-Z0-9_]+)(?<aliases>(\\s+\\|\\|\\s+([a-zA-Z0-9_]+))+)?\\s*-->");
         Matcher m = p.matcher(s);
         if (m.find()) {
             stack.push(s.substring(0, m.start())); // before
-            String name = m.group(1);
+            List<String> aliases = computeAliases(m.group("aliases"));
+            String name = m.group("name");
             int b = m.end();
             while (m.find()) {
                 int e = m.start();
                 stack = new Stack();
-                sections.put(name, stack);
+                setSectionAndAliases(name, stack, aliases);
                 stack.push(s.substring(b, e)); // after
-                name = m.group(1);
+                aliases = computeAliases(m.group("aliases"));
+                name = m.group("name");
                 b = m.end();
             }
             stack = new Stack();
-            sections.put(name, stack);
+            setSectionAndAliases(name, stack, aliases);
             stack.push(s.substring(b)); // after
         } else {
             stack.push(o);
         }
 
         return stack;
+    }
+
+    private void setSectionAndAliases(String name, Stack stack, List<String> aliases) {
+        sections.put(name, stack);
+        if (!aliases.isEmpty()) {
+            for (String alias : aliases) {
+                sectionAliases.put(alias, name);
+            }
+        }
+    }
+
+    static List<String> computeAliases(String aliases) {
+        List<String> result = new ArrayList<>();
+        if (aliases != null) {
+            aliases = aliases.replaceFirst("^\\s*\\|\\|", "");
+            for (String section : Arrays.asList(StringUtils.split(aliases, "||", -1))) {
+                result.add(StringUtils.strip(section));
+            }
+        }
+        return result;
     }
 
 
@@ -313,7 +337,7 @@ public class Template {
     }
 
     private void writeSection(Writer out, String sectionName, Map<String, Object> functions, Map<String, Object> model) throws IOException, TemplateException {
-        Stack stack = sections.get(sectionName);
+        Stack stack = sections.containsKey(sectionName) ? sections.get(sectionName) : sections.get(sectionAliases.get(sectionName));
         for (int i = stack.depth(); i > 0; i--) {
             try {
                 writeObject(out, functions, model, messages, stack.value(i));
@@ -329,6 +353,13 @@ public class Template {
     public void printStructure(PrintWriter out) throws IOException {
         for (Map.Entry<String, Stack> entry : sections.entrySet()) {
             out.println("--- section '" + entry.getKey() + "'");
+            if (sectionAliases.containsValue(entry.getKey())) {
+                for (String alias : sectionAliases.keySet()) {
+                    if (sectionAliases.get(alias).equals(entry.getKey())) {
+                        out.println("--- declared alias '" + alias + "'");
+                    }
+                }
+            }
             entry.getValue().printStack(out);
         }
     }
@@ -414,6 +445,6 @@ public class Template {
      * @return <code>true</code> if the section exists, <code>false</code> otherwise.
      */
     public boolean hasSection(String sectionName) {
-        return sections.containsKey(sectionName);
+        return sections.containsKey(sectionName) || sectionAliases.containsKey(sectionName);
     }
 }
