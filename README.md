@@ -1,4 +1,4 @@
-[logo]: http://temmental.sourceforge.net/logo.jpg "The ~$adjective~ template engine!"
+[logo]: ./logo.jpg "The ~$adjective~ template engine!"
 
 ## description
 
