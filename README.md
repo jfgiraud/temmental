@@ -1,4 +1,4 @@
-[logo]: ./logo.jpg "The ~$adjective~ template engine!"
+![Logo](https://raw.githubusercontent.com/jfgiraud/temmental/master/temmental.jpg)
 
 ## description
 
