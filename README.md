@@ -1,87 +1,65 @@
 [logo]: http://temmental.sourceforge.net/logo.jpg "The ~$adjective~ template engine!"
 
-Table of Contents:
-
-* [temmental](#temmental)
-    - [description](#description)
-    - [example](#example)
-    - [principles](#principles)
-* [The template](#template)
-    - [Example of file with 3 section](#example-of-file-with-3-sections)
-    - [Example of file without section](#example-of-file-without-section)
-
-<a name="temmental"/>
-
-# temmental
-
-<a name="description"/>
-
 ## description
 
-Temmental is a *small* template engine *without dependency* written in *java*.
+Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
 
-The template syntax does not depend of manipulated documents: 
-You can use this template engine to generate text, html, xml... documents.
+The template syntax does not depend of manipulated documents.
+ 
+You can use this template engine to generate _text_, _html_, _xml_... documents.
 
-<a name="example"/>
+The template engine is made to raise exceptions as soon as possible when something wrong is detected.
 
-## example
+## explore
 
-You can explore the unit tests of the project, but i wrote a complex example. Here are the links:
+You can explore the unit tests of the project, but i wrote a complex example: 
+
 - [ExampleTest.java](./src/test/java/ExampleTest.java)
 - [example.tpl](./src/test/resources/example.tpl)
 - [example_en.properties](./src/test/resources/example_en.properties)
 - [example_fr.properties](./src/test/resources/example_fr.properties)
 
-<a name="principles"/>
-
 ## principles
 
-To use the template engine, you need a template object. 
+To use the template engine, you need to create a template object. 
+
+After that, you call print-methods with models to write on the expected output.
+
+# the template
+
+## constructors
+  
 ```java
-    public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
-            throws IOException, TemplateException {
-
-    public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties)
-            throws IOException, TemplateException {
-
-    public Template(String filePath, Map<String, ? extends Object> transforms, Locale locale, Object... resourcesContainers)
-            throws IOException, TemplateException {
-
-    public Template(String filePath, Map<String, ? extends Object> transforms, ResourceBundle bundle)
-            throws IOException, TemplateException {
-
-    public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath)
-            throws IOException, TemplateException {
-
-    public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale)
-            throws IOException, TemplateException {
+public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
+public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties)
+public Template(String filePath, Map<String, ? extends Object> transforms, Locale locale, Object... resourcesContainers)
+public Template(String filePath, Map<String, ? extends Object> transforms, ResourceBundle bundle)
+public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath)
+public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale)
+    
+// all constructors throw IOException or TemplateException
 ```
 
-Instanciation example:
+## instantiation example
+
 ```java
-template = new Template("src/test/resources/example.tpl", transforms, "file:src/test/resources/example_fr.properties", locale);
+template = new Template("src/test/resources/example.tpl", transforms, "file:src/test/resources/example.properties", locale);
 ```
 
 In this example, the template object is created with:
-- the path of the template file
-```java
-"src/test/resources/example.tpl"
-```
-- a map of named transform functions 
-```java
-transforms
-```
-- a resourcePath 
-```java
-"file:src/test/resources/example_fr.properties"
-```
-- a locale 
-```java
-Locale.FRENCH
-```
+- the path of the template file `"src/test/resources/example.tpl"`
+- a map of named transform functions `transforms` 
+- a locale `Locale.FRENCH` 
+- a resourcePath `"file:src/test/resources/example.properties"` 
 
-After that, you call print-methods with or without models (map of key/value) to write data on the given stream.
+1. As you can see, the specified resource path doesn't exist. Only the localized resource pathes exist.
+ The given locale will be used to compute the best resource file to use. 
+2. If a transform function is used in the template file but not declared in the transforms map, an exception will be thrown.
+3. If a property key is used in the template file but not declared in the properties, an exception will be thrown.
+
+## using template object
+
+You call print-methods with or without models (map of key/value) to write data on the given stream.
 
 ```java
     public void printFile(Writer out) throws TemplateException, java.io.IOException {
@@ -95,14 +73,13 @@ After that, you call print-methods with or without models (map of key/value) to 
     public void printSection(Writer out, String sectionName) throws TemplateException, java.io.IOException {
 ```
 
-
-<a name="template"/>
+1. If the model doesn't declare a variable used in the template or if the model has null value for that variable, an 
+exception will be thrown.
+2. Variables can also be used in the template for "property messages" or "transform functions" (indirection).
 
 # The template
 
 The template is a file containing sections or not.
-
-<a name="example-of-file-with-3-sections"/>
 
 ## Example of file with 3 sections
 
@@ -120,14 +97,14 @@ Good bye.
 The 3 sections are named: 'first', 'second' and 'third'. 'last' is an alias of 'third'.
 
 When using sections, you should call __printSection__ method to render the section of the file.
+
 You can call the __printSection__ on the same section as many times as you want.
+
 ```java
-tpl.printSection(out, "first", createModel("firstName", "John", "lastname", "Doe"));
+tpl.printSection(out, "first", createModel("firstName", "John", "lastName", "Doe"));
 ```
 
 There is no order between sections. The final rendering is done by the order of your _printSection_ calls in the java code.
-
-<a name="example-of-file-without-section"/>
 
 ## Example of file without section
 
@@ -144,12 +121,16 @@ Good bye.
 When using no section, you should use __printFile__ method to render the file.
 
 ```java
-tpl.printFile(out, createModel("firstName", "John", "lastname", "Doe", "fruits", Arrays.asList("orange", "apple", "banana")));
+tpl.printFile(out, createModel("firstName", "John", "lastName", "Doe", "fruits", Arrays.asList("orange", "apple", "banana")));
 ```
+
+As the templates with sections, you can call `printFile` more than once.
 
 # The message properties
 
-The message properties is used to create the Template object. It contains key/value pairs to internationalize templates.
+The message properties is used to create the Template object. 
+
+It contains key/value pairs to internationalize templates.
 
 Example:
 
