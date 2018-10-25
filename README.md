@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/jfgiraud/temmental/master/temmental.jpg)
+![Logo](/temmental.jpg)
 
 ## description
 
