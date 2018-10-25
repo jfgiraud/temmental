@@ -3,6 +3,7 @@ package com.github.jfgiraud.temmental;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -211,6 +212,38 @@ class Expression {
             expression = expression.substring(1);
             expression = expression.substring(0, expression.length() - 1);
             localCursor.move1r();
+
+            if (expression.startsWith("|")) {
+                String copy = expression;
+                expression = expression.substring(1);
+                localCursor.move1r();
+                int nextPipe = expression.indexOf("|");
+                if (nextPipe == -1) {
+                    throw new TemplateException("Expression '%s' doesn't contain '|' character at position '%s'", expression, localCursor.getPosition());
+                }
+                String options = expression.substring(0, nextPipe);
+                expression = expression.substring(nextPipe + 1);
+                boolean first = true;
+                for (String option : options.split(",")) {
+                    if (!first)
+                        localCursor.move1r();
+                    if ("t".equals(option)) {
+                        localCursor.setEatLeft(true);
+                        localCursor.setEatRight(true);
+                    } else if ("lt".equals(option)) {
+                        localCursor.setEatLeft(true);
+                    } else if ("rt".equals(option)) {
+                        localCursor.setEatRight(true);
+                    } else {
+                        throw new TemplateException("Expression '%s' contains invalid option at position '%s'", copy, localCursor.getPosition());
+                    }
+                    localCursor.mover(option.length());
+                }
+                if ("".equals(expression)) {
+                    stack.push(evalToken("\"\"", localCursor, false));
+
+                }
+            }
         }
         StringReader sr = new StringReader(expression);
         StringWriter word = new StringWriter();

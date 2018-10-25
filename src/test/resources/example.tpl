@@ -1,8 +1,8 @@
 <!-- #section header || other -->
 ~$firstName~ ~$lastName:'upper~                                        Bordeaux, ~$date:'date_formatter<'eeddmmyyyy[]>:'titleize~
-~$streetLines#for<'streetLine>~
-    ~$streetLine:'titleize~ ~$streetLine~
-~#for~
+~|rt|$streetLines#for<'streetLine>~
+    ~|lt|$streetLine:'titleize~
+~|rt|#for~
 ~$zip~ ~$city:'upper~
 ~$country!"FRANCE"¡~
 ~'email[$email?]~
@@ -14,15 +14,16 @@
 
 <!-- #section body -->
 
-~$genre:'genre<"Madame","Monsieur">~,
+~$genre:'gender<"Madame","Monsieur">~,
 
 Veuillez trouver la facture relative à votre ligne.
 
-~$options#for<'option>~
-  ~$option:'toModel#override~
-    ~$label~: ~$value~
-  ~#override~
-~#for~
-~$totaux:'toModel#override~~$label~: ~$value~~#override~
+~'you_have[$options:'size]~
+~|rt|$options#for<'option>~
+    ~|lt|$option:'toModel#override~  - ~|rt|~
+        ~|lt|$label~: ~'price[$price]~ (~$unit[$quantity]~)
+    ~|lt,rt|#override~
+~|lt|#for~
+~$totaux:'toModel#override~~$label~: ~'price[$price]~~#override~
 
 

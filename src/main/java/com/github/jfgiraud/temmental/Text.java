@@ -13,6 +13,21 @@ class Text extends Element {
         this.expr = expr;
     }
 
+    public static String cleanSpaces(String p, boolean left, boolean right) {
+        if (left) {
+            p = p.replaceFirst("[ \t]+$", "");
+        }
+        if (right) {
+            p = p.replaceFirst("^[ \t]+", "");
+            p = p.replaceFirst("^\n", "");
+        }
+        return p;
+    }
+
+    public void cleanSpaces(boolean left, boolean right) {
+        expr = cleanSpaces(expr, left, right);
+    }
+
     public boolean equals(Object o) {
         if (o == null || !(o instanceof Text))
             return false;

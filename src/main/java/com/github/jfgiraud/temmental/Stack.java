@@ -39,6 +39,10 @@ public class Stack {
         return items.get(depth-1);
     }
 
+    void setvalue(int depth, Object o) {
+        items.add(depth - 1, o);
+    }
+
     public void remove(int depth) {
         items.remove(depth-1);
     }
@@ -67,7 +71,6 @@ public class Stack {
         out.flush();
     }
 
-
     public void tolist(int depth) {
         List<Object> cloned = new ArrayList<Object>();
         for (int i = 1; i <= depth; i++) {
@@ -83,4 +86,5 @@ public class Stack {
     public void tolist() {
         tolist((Integer) pop());
     }
+
 }

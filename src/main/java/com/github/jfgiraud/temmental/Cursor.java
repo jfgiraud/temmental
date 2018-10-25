@@ -6,6 +6,8 @@ class Cursor {
     private int line;
     private int column;
     private Stack linesLength;
+    boolean eatLeft = false;
+    boolean eatRight = false;
 
     Cursor(String file, int line, int column) {
         this.file = (file == null ? "-" : file);
@@ -37,7 +39,10 @@ class Cursor {
     }
 
     protected Cursor clone() {
-        return new Cursor(file, line, column, linesLength);
+        Cursor c = new Cursor(file, line, column, linesLength);
+        c.setEatLeft(eatLeft);
+        c.setEatRight(eatRight);
+        return c;
     }
 
     public void next(int currentChar) {
@@ -50,7 +55,13 @@ class Cursor {
         }
     }
 
+    private char b(boolean b) {
+        return b ? 't' : 'f';
+    }
+
     String getPosition(int delta) {
+        if (eatLeft || eatRight)
+            return String.format("%s:l%d:c%d[%c,%c]", file, line, column + delta, b(eatLeft), b(eatRight));
         return String.format("%s:l%d:c%d", file, line, column + delta);
     }
 
@@ -99,5 +110,13 @@ class Cursor {
         return oc.file.equals(file) && oc.line == line && oc.column == column;
     }
 
+
+    public void setEatLeft(boolean eatLeft) {
+        this.eatLeft = eatLeft;
+    }
+
+    public void setEatRight(boolean eatRight) {
+        this.eatRight = eatRight;
+    }
 
 }

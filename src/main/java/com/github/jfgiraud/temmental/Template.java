@@ -155,8 +155,33 @@ public class Template {
                         stack.push(o);
                     }
                 }
+                cleanSpaces(stack);
                 sections.put(sectionName, createCommands(stack));
             }
+        }
+    }
+
+    private void cleanSpaces(Stack stack) {
+        for (int i = 1, d = stack.depth(); i <= d; i++) {
+            Object c = stack.value(i);
+            if (c instanceof Element) {
+                Element e = (Element) c;
+                if (e.cursor.eatLeft && i < d) {
+                    cleanAt(stack, i + 1, true, false);
+                }
+                if (e.cursor.eatRight && i > 1) {
+                    cleanAt(stack, i - 1, false, true);
+                }
+            }
+        }
+    }
+
+    private void cleanAt(Stack stack, int i, boolean left, boolean right) {
+        Object p = stack.value(i);
+        if (p instanceof String) {
+            stack.setvalue(i, Text.cleanSpaces((String) p, left, right));
+        } else if (p instanceof Text) {
+            ((Text) p).cleanSpaces(left, right);
         }
     }
 
@@ -186,7 +211,7 @@ public class Template {
 
     private Stack parseToSections(Stack stack, Text o) throws TemplateException {
         String s = (String) o.writeObject(null, null, null);
-        Pattern p = Pattern.compile("<!--\\s*#section\\s+(?<name>[a-zA-Z0-9_]+)(?<aliases>(\\s+\\|\\|\\s+([a-zA-Z0-9_]+))+)?\\s*-->");
+        Pattern p = Pattern.compile("<!--\\s*#section\\s+(?<name>[a-zA-Z0-9_]+)(?<aliases>(\\s+\\|\\|\\s+([a-zA-Z0-9_]+))+)?\\s*-->\\s*");
         Matcher m = p.matcher(s);
         if (m.find()) {
             stack.push(s.substring(0, m.start())); // before
