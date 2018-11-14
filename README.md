@@ -209,6 +209,17 @@ Veuillez trouver la facture relative à votre ligne.
 ~$totaux:'toModel#override~~$label~: ~'price[$price]~~#override~
 ```
 
+Small explanations,
+- `$variable` is a variable (so defined in the model). 
+- `:'function` is a transform function (so defined in the transform map)
+- `:$function` is a dynamic transform function (function is defined in the model, the associated value must be defined in the transform map)
+- `:'function<$parameter1,...,$parameterN>` is a parametrized transform function (so defined in the transform map). 
+- `:$function<$parameter1,...,$parameterN>` is a parametrized dynamic transform function (function is defined in the model, the associated value must be defined in the transform map)
+- `'property[$parameter1,...,$parameterN]` is a message. The property named 'property' is defined in the resource file.
+- `$property[$parameter1,...,$parameterN]` is a dynamic message. The value associated with the 'property' variable must be defined in the model and the value property must be defined in the resource file.
+- `$xxx!'unknown[]¡` is a default replacement. If xxx is not defined in the model or has null value, the exception will be catched and $xxx will be replaced with the message `'unknown[]` 
+
+
 |syntax example|model|
 |---|:---:|
 |`<!-- #section header \|\| other -->`|define the section named header. other is an alias to header|
