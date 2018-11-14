@@ -4,15 +4,13 @@
 
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
 
-The template syntax does not depend of manipulated documents.
- 
-You can use this template engine to generate _text_, _html_, _xml_... documents.
+The template syntax does not depend of manipulated documents. You can use this template engine to generate _text_, _html_, _xml_... documents.
 
 The template engine is made to raise exceptions as soon as possible when something wrong is detected.
 
 ## explore
 
-You can explore the unit tests of the project, but i wrote a complex example: 
+You can explore the unit tests of the project, but a complex example is available: 
 
 - [ExampleTest.java](./src/test/java/ExampleTest.java)
 - [example.tpl](./src/test/resources/example.tpl)
@@ -133,34 +131,32 @@ The message properties is used to create the Template object.
 It contains key/value pairs to internationalize templates.
 
 Example:
+```text
+hello_dear=Bonjour {0} {1}
+client_number=Num\u00e9ro client : {0}
+account_number=Num\u00e9ro de compte : {0}
+line_number=Num\u00e9ro ligne : {0}
+unknown=inconnu
+eeddmmyyyy=EEEEEEEEEEEEEE dd MMMMMMMMMMMMMM yyyy
+ddmmyyyy=dd/MM/yyyy
+client_since=Anciennet\u00e9 : {0}
+email=Email: {0}
+# properties are iso-8859-1, so i use unicode sequence for euro sign
+price={0}\u20ac
+duration={0} secondes
+sms={0} SMS
+you_have=Vous avez {0,choice,0#aucune option|1#une option|1<{0,number,integer} options} :
+```
 
+The message properties contains localized messages. You can write your template without defining properties but its better to define a such file.
 
+A property message can:
+- require multiple parameters to be used
+- define a format to display a date and/or an hour
+- be use to manipulate plurials
+- ... 
 
-###HERE
-###HERE
-###HERE
-###HERE
-###HERE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+You can refer to the [MessageFormat](https://docs.oracle.com/javase/1.5.0/docs/api/java/text/MessageFormat.html) class of the java library.
 
 
 # The transform map
@@ -169,11 +165,15 @@ The transform map contains key/value pairs.
 
 The values are functions to transform an input value to an output value.
 
-For sample, __upper__, __lower__, __capitalize__ could populate the transform map to manipulate string cases. 
+For sample, __upper__, __lower__, __capitalize__ could populate the transform map to manipulate string cases.
+
+A sequence of transform function can be used in the template to render data. 
 
 # The model
 
 The model is a Map containing key/value pairs. The "holes" in template file we be replaced by these values after applying transform methods.
+
+The holes are the variables between "~" (example ~$firstname~)
 
 |syntax example|model|transforms|result|description|
 |---|:---:|:---:|:---:|:---:|
