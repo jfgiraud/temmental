@@ -167,31 +167,50 @@ The values are functions to transform an input value to an output value.
 
 For sample, __upper__, __lower__, __capitalize__ could populate the transform map to manipulate string cases.
 
-A sequence of transform function can be used in the template to render data. 
+A sequence of transform functions can be used in the template to render data. 
 
 # The model
 
-The model is a Map containing key/value pairs. The "holes" in template file we be replaced by these values after applying transform methods.
+The model is a Map containing key/value pairs. 
 
-The holes are the variables between "~" (example ~$firstname~)
+These key/value pairs will be used to compute the code between tildes (variables, messages, commands...)
+
+The result of the computing is used to render your data in the template.
+
+The best way to understand the code of a template is to read the given example: [example.tpl](./src/test/resources/example.tpl) 
+
+```text
+<!-- #section header || other -->
+~$firstName~ ~$lastName:'upper~                                        Bordeaux, ~$date:'date_formatter<'eeddmmyyyy[]>:'titleize~
+~|t|$streetLines#for<'streetLine>~
+    ~|lt|$streetLine:'titleize~
+~|t|#for~
+~$zip~ ~$city:'upper~
+~$country!"FRANCE"¡~
+~'email[$email?]~
+
+~'client_number[$clientNumber]~
+~'account_number[$accountNumber!'unknown[]¡]~
+~'line_number[$lineNumber!'unknown[]¡]~
+~'client_since[$inscription?:'date_formatter<'ddmmyyyy[]>]~
+
+<!-- #section body -->
+
+~$genre:'gender<"Madame","Monsieur">~,
+
+Veuillez trouver la facture relative à votre ligne.
+
+~'you_have[$options:'size]~
+~|rt|$options#for<'option>~
+    ~|lt|$option:'toModel#override~  - ~|rt|~
+        ~|lt|$label~: ~'price[$price]~ (~$unit[$quantity]~)
+    ~|lt,rt|#override~
+~|lt|#for~
+~$totaux:'toModel#override~~$label~: ~'price[$price]~~#override~
+```
 
 |syntax example|model|transforms|result|description|
-|---|:---:|:---:|:---:|:---:|
-|~$firstname~|{'firstname': 'John'}|x|John|Replace the tag firstname by the value associated to the key firstname contained in the model.|
-|~$lastName:'upper~|{'lastname': 'Doe'}|{'upper':String.class.getDeclaredMethod("toUpperCase")|DOE||xxx
+|---|:---:|
+|`<!-- #section header || other -->`||
 
 	
-
-```
-~$variable~     
-~$variable?~
-~$variable:'function~
-~$variable?:'function~
-~$variable:$function~
-~$variable?:$function~
-~'property[]~
-~$property[]~
-
-```
-
-
