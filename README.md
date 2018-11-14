@@ -209,8 +209,11 @@ Veuillez trouver la facture relative à votre ligne.
 ~$totaux:'toModel#override~~$label~: ~'price[$price]~~#override~
 ```
 
-|syntax example|model|transforms|result|description|
+|syntax example|model|
 |---|:---:|
-|`<!-- #section header || other -->`||
-
+|`<!-- #section header \|\| other -->`|define the section named header. other is an alias to header|
+|`~$firstName~`|the value associated with the firsName key in the model will be written|
+|`~$lastName:'upper~`|the lastName will be written after being upperized (upper is defined in the transform map)|
+|`Bordeaux, `|static text|
+|`~$date:'date_formatter<'eeddmmyyyy[]>:'titleize~`|a date instance is transformed by the date formatter to the format defined in the properties. The result is titleized|
 	
