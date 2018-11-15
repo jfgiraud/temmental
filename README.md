@@ -1,5 +1,7 @@
 ![Logo](/temmental.jpg)
 
+# temmental
+
 ## description
 
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
@@ -23,7 +25,7 @@ To use the template engine, you need to create a template object.
 
 After that, you call print-methods with models to write on the expected output.
 
-# the template
+# Template class
 
 ## constructors
   
@@ -75,11 +77,11 @@ You call print-methods with or without models (map of key/value) to write data o
 exception will be thrown.
 2. Variables can also be used in the template for "property messages" or "transform functions" (indirection).
 
-# The template
+# The template file `.tpl`
 
 The template is a file containing sections or not.
 
-## Example of file with 3 sections
+## example of file with 3 sections
 
 ```
 <!-- #section first -->
@@ -104,7 +106,7 @@ tpl.printSection(out, "first", createModel("firstName", "John", "lastName", "Doe
 
 There is no order between sections. The final rendering is done by the order of your _printSection_ calls in the java code.
 
-## Example of file without section
+## example of file without section
 
 ```
 Hello ~$firstName~ ~$lastName:'upper~,
