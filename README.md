@@ -1,7 +1,5 @@
 ![Logo](/temmental.jpg)
 
-# 
-
 ## description
 
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
