@@ -158,6 +158,20 @@ A property message can:
 
 You can refer to the [MessageFormat](https://docs.oracle.com/javase/1.5.0/docs/api/java/text/MessageFormat.html) class of the java library.
 
+Example of use in `.tpl` file:
+
+```text
+~'hello_dear[$firstName,$lastName]~
+```
+
+Example of use in `.java` file:
+```text
+Map<String, Object> model = new HashMap<String, Object>();
+model.put("firstName", "John");
+model.put("lastName", "Doe");
+StringWriter out = new StringWriter();
+template.printFile(out, model);
+```
 
 # The transform map
 
@@ -168,6 +182,37 @@ The values are functions to transform an input value to an output value.
 For sample, __upper__, __lower__, __capitalize__ could populate the transform map to manipulate string cases.
 
 A sequence of transform functions can be used in the template to render data. 
+
+Example of declarations:
+```java
+transforms = new HashMap<>();
+transforms.put("upper", String.class.getDeclaredMethod("toUpperCase"));
+transforms.put("size", Transforms.SIZE);
+transforms.put("gender", new ParamTransform<String[], Character, String>() {
+    @Override
+    public String apply(String[] values, Character c) {
+	if (c == 'f')
+	    return values[0];
+	if (c == 'm')
+	    return values[1];
+	return StringUtils.join(", ", Arrays.asList(values[0], values[1]));
+    }
+});
+transforms.put("titleize", StringUtils.class.getDeclaredMethod("titleize", String.class));
+transforms.put("date_formatter", new Transform<String[], Transform<Date, String>>() {
+    public Transform<Date, String> apply(final String[] objects) {
+	return new Transform<Date, String>() {
+	    public String apply(Date value) {
+		return new SimpleDateFormat(objects[0], locale).format(value);
+	    }
+	};
+    }
+});
+transforms.put("toModel", TemplateUtils.getDeclaredMethod(ConvertToModel.class, "toModel", null));
+transforms.put("add", Transforms.ADD);
+```
+
+As you can see, you have multiple ways to declare transform functions.
 
 # The model
 
