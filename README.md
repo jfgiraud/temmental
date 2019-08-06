@@ -1,4 +1,4 @@
-![Logo](/temmental.jpg)
+![Logo](/temmental.jpg?raw=true)
 
 ## description
 
