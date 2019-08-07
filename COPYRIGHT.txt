@@ -1,2 +1,2 @@
-AUTHOR:
+Author:
     Jean-François GIRAUD
