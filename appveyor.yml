@@ -7,6 +7,6 @@ build_script:
   - mvn compile test
 only_commits:
   files:
-    **/*.java
-    **/*.properties
-    **/*.tpl
+    - ./**/*.java
+    - ./**/*.properties
+    - ./**/*.tpl
