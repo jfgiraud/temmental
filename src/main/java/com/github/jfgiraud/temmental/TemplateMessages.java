@@ -129,7 +129,9 @@ public class TemplateMessages {
         } else if (protocol.equals("file")) {
             List<String> tab = new ArrayList<String>();
             populateResourcesPossibilities(tab, resourcePath, locale);
+            System.out.println("locale="+locale);
             populateResourcesPossibilities(tab, resourcePath, Locale.getDefault());
+            System.out.println("locale="+Locale.getDefault());
             tab.add(resourcePath);
             String found = null;
             for (String path : tab) {
