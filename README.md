@@ -1,6 +1,7 @@
 ![Logo](/temmental.jpg?raw=true)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/lnub4vglis74x8is/branch/master?svg=true)](https://ci.appveyor.com/project/jfgiraud/temmental/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/lnub4vglis74x8is/branch/master?svg=true)](https://ci.appveyor.com/project/jfgiraud/temmental/branch/master) 
+[![License](https://img.shields.io/badge/license-GPL-brightgreen)](./LICENSE.txt)
 
 ## description
 
