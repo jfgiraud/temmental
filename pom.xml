@@ -13,7 +13,8 @@
     <distributionManagement>
         <repository>
             <id>jfgiraud-repo</id>
-            <url>file:///${basedir}/../../../mvn-repo/repository/</url>
+            <!-- <url>file:///${basedir}/../../../mvn-repo/repository/</url> -->
+            <url>https://maven.pkg.github.com/jfgiraud/temmental</url>
         </repository>
     </distributionManagement>
 
