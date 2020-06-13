@@ -18,7 +18,7 @@ public class ExampleTest {
     @Before
     public void setUp() throws NoSuchMethodException, IOException {
         setLanguage(Locale.FRENCH);
-        transforms = new HashMap<>();
+        transforms = new HashMap<String, Object>();
         transforms.put("upper", String.class.getDeclaredMethod("toUpperCase"));
         transforms.put("size", Transforms.SIZE);
         transforms.put("gender", new ParamTransform<String[], Character, String>() {
