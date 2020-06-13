@@ -3,4 +3,5 @@ stack: jdk 5
 build_script:
   - which java && which javac && java -version
   - echo java home is $JAVA_HOME
+  - pwd
   - mvn compile test
