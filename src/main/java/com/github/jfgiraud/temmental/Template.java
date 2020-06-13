@@ -247,7 +247,7 @@ public class Template {
     }
 
     static List<String> computeAliases(String aliases) {
-        List<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<String>();
         if (aliases != null) {
             aliases = aliases.replaceFirst("^\\s*\\|\\|", "");
             for (String section : Arrays.asList(StringUtils.split(aliases, "||", -1))) {
