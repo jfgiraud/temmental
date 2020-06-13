@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/lnub4vglis74x8is/branch/master?svg=true)](https://ci.appveyor.com/project/jfgiraud/temmental/branch/master) 
 [![License](https://img.shields.io/badge/license-GPL-brightgreen)](./LICENSE.txt)
-![java](https://img.shields.io/badge/dependencies-no-informational)
+![java](https://img.shields.io/badge/java-%3E%3D5-informational)
 ![Dependencies](https://img.shields.io/badge/dependencies-no-informational)
 
 ## description
