@@ -5,3 +5,8 @@ build_script:
   - echo java home is $JAVA_HOME
   - pwd
   - mvn compile test
+only_commits:
+  files:
+    **/*.java
+    **/*.properties
+    **/*.tpl
