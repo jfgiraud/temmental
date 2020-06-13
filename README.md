@@ -1,5 +1,7 @@
 ![Logo](/temmental.jpg?raw=true)
 
+[![Build status](https://ci.appveyor.com/api/projects/status/lnub4vglis74x8is/branch/master?svg=true)](https://ci.appveyor.com/project/jfgiraud/temmental/branch/master)
+
 ## description
 
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
