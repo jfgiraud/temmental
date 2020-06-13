@@ -134,6 +134,7 @@ public class TemplateMessages {
             String found = null;
             for (String path : tab) {
                 File f = new File(path);
+                System.out.println(path);
                 if (f.exists()) {
                     found = path;
                     break;
