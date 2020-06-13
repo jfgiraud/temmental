@@ -22,6 +22,7 @@ public class TestI18n extends TestCase {
     private Template template;
     private HashMap<String, Transform> filters;
     private HashMap<String, Object> model;
+    private Locale oldLocale;
 
     @Override
     protected void setUp() throws Exception {
@@ -29,12 +30,15 @@ public class TestI18n extends TestCase {
         filters = new HashMap<String, Transform>();
         model = new HashMap<String, Object>();
         TemplateRecorder.setRecording(true);
+        oldLocale = Locale.getDefault();
+        Locale.setDefault(Locale.FRANCE);
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
         TemplateRecorder.setRecording(false);
+        Locale.setDefault(oldLocale);
     }
 
     private void assertFoundAndEquals(String expected, Locale locale, String file) throws IOException, TemplateException {
