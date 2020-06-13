@@ -1,0 +1,5 @@
+image: Ubuntu
+build_script:
+  - which java && which javac && java -version
+  - echo java home is $JAVA_HOME
+  - mvn compile test
