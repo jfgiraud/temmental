@@ -8,6 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
+
 public class ExampleTest {
 
     private Map<String, Object> transforms;
@@ -44,7 +46,7 @@ public class ExampleTest {
         transforms.put("toModel", TemplateUtils.getDeclaredMethod(ConvertToModel.class, "toModel", null));
         transforms.put("add", Transforms.ADD);
 
-        template = new Template("src/test/resources/example.tpl", transforms, propertiesPath, locale);
+        template = new Template("src/test/resources/example.tpl", transforms, createFrom(locale, propertiesPath));
     }
 
     private void setLanguage(Locale locale) {

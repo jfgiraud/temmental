@@ -1,3 +1,4 @@
+import com.github.jfgiraud.temmental.TemplateMessages;
 import org.junit.Before;
 import org.junit.Test;
 import com.github.jfgiraud.temmental.Template;
@@ -6,7 +7,6 @@ import com.github.jfgiraud.temmental.Transform;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,7 +37,7 @@ public class AccessFunctionGrantedTest {
                 return value.toUpperCase();
             }
         });
-        Template template = new Template("src/test/resources/temmental/test-function.tpl", transforms, properties, Locale.ENGLISH);
+        Template template = new Template("src/test/resources/temmental/test-function.tpl", transforms, TemplateMessages.createFrom(properties));
         model = createModel("name", "jeff");
 
         StringWriter out = new StringWriter();

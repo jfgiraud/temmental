@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -22,7 +23,7 @@ public class TemplateParseExpressionErrorsTest extends AbstractTestTemplate {
     public void setUp() throws TemplateException, IOException {
         model = new HashMap<String, Object>();
         properties = new Properties();
-        template = new Template(null, null, properties);
+        template = new Template(null, null, createFrom(properties));
     }
 
     @Test

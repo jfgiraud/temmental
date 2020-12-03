@@ -1,15 +1,14 @@
 import com.github.jfgiraud.temmental.*;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 import static org.junit.Assert.assertEquals;
 
 public class ExampleSimpleTest {
@@ -32,7 +31,7 @@ public class ExampleSimpleTest {
             }
         });
 
-        Template template = new Template("src/test/resources/example_simple.tpl", transforms, propertiesPath, locale);
+        Template template = new Template("src/test/resources/example_simple.tpl", transforms, createFrom(locale, propertiesPath));
 
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("firstname", "John");

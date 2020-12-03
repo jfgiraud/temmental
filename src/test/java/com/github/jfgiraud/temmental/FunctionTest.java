@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -266,7 +265,7 @@ public class FunctionTest extends AbstractTestElement {
                 return value.toUpperCase();
             }
         });
-        StringTemplate template = new StringTemplate("~$name:'upper~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$name:'upper~", transforms, properties);
         model = createModel("name", "jeff");
 
         assertEquals("JEFF", template.format(model));

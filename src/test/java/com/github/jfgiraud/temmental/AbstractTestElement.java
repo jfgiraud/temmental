@@ -4,9 +4,10 @@ import org.junit.Before;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 
 public abstract class AbstractTestElement extends AbstractTestTemplate {
 
@@ -20,7 +21,7 @@ public abstract class AbstractTestElement extends AbstractTestTemplate {
         model = new HashMap<String, Object>();
         transforms = new HashMap<String, Object>();
         properties = new Properties();
-        messages = new TemplateMessages(Locale.FRANCE, properties);
+        messages = createFrom(properties);
     }
 
     public void populateModel(String key, Object value) {

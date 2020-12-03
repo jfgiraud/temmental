@@ -8,15 +8,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
+
 public class StringTemplate extends Template {
 
-    public StringTemplate(String text, Map<String, ? extends Object> transforms, Properties properties, Locale locale) throws IOException, TemplateException {
-        super(null, transforms, properties, locale);
+    public StringTemplate(String text, Map<String, ? extends Object> transforms, Properties properties) throws IOException, TemplateException {
+        super(null, transforms, createFrom(properties));
         parseString(text, true);
     }
 
-    public StringTemplate(String text, HashMap<String, Transform> filters, String resourcePath, Locale locale) throws IOException {
-        super(null, filters, resourcePath, locale);
+    public StringTemplate(String text, HashMap<String, Transform> transforms, String resourcePath, Locale locale) throws IOException {
+        super(null, transforms, createFrom(locale, resourcePath));
         parseString(text, true);
     }
 

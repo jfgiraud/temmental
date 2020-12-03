@@ -4,6 +4,7 @@ package com.github.jfgiraud.temmental;
 
 import java.io.*;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,96 +20,48 @@ public class Template {
     private HashMap<String, String> sectionAliases;
 
 
+
+
     /**
      * Create a template with the given parameters.
+     * The given charset is used to read the given template file.
      *
      * @param filePath   the path to the template file to parse
+     * @param charset    the charset of the template file to parse
      * @param transforms the map of transform functions
-     * @param properties the messages
-     * @param locale     locale to use to format messages (date, numbers...)
+     * @param messages   the messages
      * @throws IOException       if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
-            throws IOException, TemplateException {
-        this(filePath, transforms, new TemplateMessages(properties, locale));
-    }
-
-
-    private Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
+    public Template(String filePath, Charset charset, Map<String, ? extends Object> transforms, TemplateMessages messages)
             throws IOException, TemplateException {
         this.transforms = transforms;
         this.messages = messages;
         this.filepath = filePath;
         if (filePath != null) {
-            readFile(filePath);
+            readFile(filePath, charset);
         }
     }
 
     /**
-     * Create a template with the given parameters. The default locale is used to retrieve localized messages and format messages (date, numbers...).
+     * Create a template with the given parameters.
+     * The given charset is used to read the given template file.
      *
      * @param filePath   the path to the template file to parse
+     * @param charset    the charset of the template file to parse
      * @param transforms the map of transform functions
-     * @param properties the messages
+     * @param messages   the messages
      * @throws IOException       if an I/O error occurs when reading the template file
      * @throws TemplateException if an other error occurs when reading the template file
      */
-    public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties)
+    public Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
             throws IOException, TemplateException {
-        this(filePath, transforms, properties, Locale.getDefault());
+        this(filePath, Charset.defaultCharset(), transforms, messages);
     }
 
-    public Template(String filePath, Map<String, ? extends Object> transforms, Locale locale, Object... resourcesContainers)
-            throws IOException, TemplateException {
-        this(filePath, transforms, new TemplateMessages(locale, resourcesContainers));
-    }
-
-    /**
-     * Create a template with the given parameters.
-     *
-     * @param filePath   the path to the template file to parse
-     * @param transforms the map of transform functions
-     * @param bundle     the messages
-     * @throws IOException       if an I/O error occurs when reading the template file
-     * @throws TemplateException if an other error occurs when reading the template file
-     */
-    public Template(String filePath, Map<String, ? extends Object> transforms, ResourceBundle bundle)
-            throws IOException, TemplateException {
-        this(filePath, transforms, new TemplateMessages(bundle));
-    }
-
-    /**
-     * Create a template with the given parameters. The default locale is used to retrieve localized messages and format messages (date, numbers...).
-     *
-     * @param filePath     the path to the template file to parse
-     * @param transforms   the map of transform functions
-     * @param resourcePath the messages (<code>classpath:path.to.my.file</code> or <code>file:/path/to/my/file.properties</code>)
-     * @throws IOException       if an I/O error occurs when reading the template file
-     * @throws TemplateException if an other error occurs when reading the template file
-     */
-    public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath)
-            throws IOException, TemplateException {
-        this(filePath, transforms, resourcePath, Locale.getDefault());
-    }
-
-    /**
-     * Create a template with the given parameters.
-     *
-     * @param filePath     the path to the template file to parse
-     * @param transforms   the map of transform functions
-     * @param resourcePath the messages (<code>classpath:path.to.my.file</code> or <code>file:/path/to/my/file.properties</code>)
-     * @param locale       locale to retrieve localized messages and format messages (date, numbers...)
-     * @throws IOException       if an I/O error occurs when reading the template file
-     * @throws TemplateException if an other error occurs when reading the template file
-     */
-    public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale)
-            throws IOException, TemplateException {
-        this(filePath, transforms, new TemplateMessages(resourcePath, locale));
-    }
-
-    private void readFile(String filePath) throws IOException, TemplateException {
-        FileReader fr = new FileReader(new File(filePath));
+    private void readFile(String filePath, Charset charset) throws IOException, TemplateException {
+//        FileReader fr = new FileReader(new File(filePath));
+        InputStreamReader fr = new InputStreamReader(new FileInputStream(filePath), charset);
         try {
             readReader(fr, 1, 0, true);
         } finally {

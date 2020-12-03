@@ -5,11 +5,9 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -27,7 +25,7 @@ public class TemplateTest extends AbstractTestTemplate {
     @Before
     public void setUp() throws FileNotFoundException, TemplateException, IOException {
         properties = new Properties();
-        template = new Template(null, null, properties);
+        template = new Template(null, null, createFrom(properties));
         model = new HashMap<String, Object>();
         stack = new Stack();
     }

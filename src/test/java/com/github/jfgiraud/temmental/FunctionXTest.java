@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 import static org.junit.Assert.*;
 
 public class FunctionXTest extends AbstractTestElement {
@@ -18,7 +19,7 @@ public class FunctionXTest extends AbstractTestElement {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        template = new Template(null, transforms, properties);
+        template = new Template(null, transforms, createFrom(properties));
     }
 
     @Test

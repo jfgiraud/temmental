@@ -1,6 +1,5 @@
 package com.github.jfgiraud.temmental;
 
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +8,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 import static com.github.jfgiraud.temmental.TemplateUtils.createList;
 import static com.github.jfgiraud.temmental.TemplateUtils.createModel;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +38,7 @@ public class TestTemplateTest {
     @Test
     public void testPrintFile() throws IOException, TemplateException {
 
-        Template template = new Template("src/test/resources/temmental/test-file.tpl", transforms, properties, Locale.ENGLISH);
+        Template template = new Template("src/test/resources/temmental/test-file.tpl", transforms, createFrom(properties));
 
         model = new HashMap<String, Object>();
         model.put("firstname", "John");
@@ -58,7 +58,7 @@ public class TestTemplateTest {
     @Test
     public void testPrintSection() throws IOException, TemplateException {
 
-        Template template = new Template("src/test/resources/temmental/test-sections.tpl", transforms, properties, Locale.ENGLISH);
+        Template template = new Template("src/test/resources/temmental/test-sections.tpl", transforms, createFrom(properties));
 
         List<Map<String, Object>> list = createList(
                 createModel("index", 0, "fruit", "orange"),
@@ -102,7 +102,7 @@ public class TestTemplateTest {
 
     @Test
     public void testBetweenSections() throws IOException, TemplateException {
-        Template template = new Template("src/test/resources/temmental/test-sections.tpl", transforms, properties, Locale.ENGLISH);
+        Template template = new Template("src/test/resources/temmental/test-sections.tpl", transforms, createFrom(properties));
         StringWriter out = new StringWriter();
         template.printSection(out, "third");
         template.printSection(out, "third");
@@ -112,7 +112,7 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandFor() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$elem~~$l#for~<~$elem~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$l#for~<~$elem~>~#for~~$elem~", transforms, properties);
         List<Map<String, Object>> elements = createList(
                 createModel("elem", 1),
                 createModel("elem", 2),
@@ -124,7 +124,7 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandEnum() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties);
         List<Map<String, Object>> elements = createList(
                 createModel("elem", 1),
                 createModel("elem", 2),
@@ -136,7 +136,7 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandEnumForQuote() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index,'elem>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$l#enum<'index,'elem>~~$index~<~$elem~>~#enum~~$elem~", transforms, properties);
         List<Integer> elements = Arrays.asList(10, 20, 30);
         model = createModel("l", elements, "elem", "before");
         assertEquals("before0<10>1<20>2<30>before", template.format(model));
@@ -144,7 +144,7 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandForQuote() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$elem~~$l#for<'elem>~<~$elem~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$l#for<'elem>~<~$elem~>~#for~~$elem~", transforms, properties);
         List<Integer> elements = Arrays.asList(1, 2, 3);
         model = createModel("l", elements, "elem", "before");
         assertEquals("before<1><2><3>before", template.format(model));
@@ -152,14 +152,14 @@ public class TestTemplateTest {
 
     @Test
     public void testBackSlashInTextContext() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("^[\\w]*$", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("^[\\w]*$", transforms, properties);
         model = createModel();
         assertEquals("^[\\w]*$", template.format(model));
     }
 
     @Test
     public void testCommandForIndirection() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$elem~~$l#for<$elem>~<~$before~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$l#for<$elem>~<~$before~>~#for~~$elem~", transforms, properties);
         List<Integer> elements = Arrays.asList(1, 2, 3);
         model = createModel("l", elements, "elem", "before");
         assertEquals("before<1><2><3>before", template.format(model));
@@ -167,7 +167,7 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandSet() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<'elem>~<~$elem~>~$l#for~<~$elem~>~#for~<~$elem~>~#set~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<'elem>~<~$elem~>~$l#for~<~$elem~>~#for~<~$elem~>~#set~~$elem~", transforms, properties);
         model = createModel("elem", "before",
                 "newvalue", "after",
                 "l", createList(
@@ -180,35 +180,35 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandSetWithIndirection() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<$elem>~<~$elem~><~$before?~>~#set~~$elem~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<$elem>~<~$elem~><~$before?~>~#set~~$elem~", transforms, properties);
         model = createModel("elem", "before", "newvalue", "after");
         assertEquals("before<before><after>before", template.format(model));
     }
 
     @Test
     public void testCommandTrueCondIsTrue() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", transforms, properties);
         model = createModel("cond", true, "name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }
 
     @Test
     public void testCommandTrueCondIsFalse() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond#true~hello ~$name~~#true~", transforms, properties);
         model = createModel("cond", false, "name", "jeff");
         assertEquals("", template.format(model));
     }
 
     @Test
     public void testCommandFalseCondIsTrue() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$cond#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond#false~hello ~$name~~#false~", transforms, properties);
         model = createModel("cond", true, "name", "jeff");
         assertEquals("", template.format(model));
     }
 
     @Test
     public void testCommandFalseCondIsFalse() throws IOException, TemplateException {
-        StringTemplate template = new StringTemplate("~$cond#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond#false~hello ~$name~~#false~", transforms, properties);
         model = createModel("cond", false, "name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }
@@ -216,7 +216,7 @@ public class TestTemplateTest {
     @Test
     public void testMessageDefault() throws IOException, TemplateException {
         properties.put("hello", "Bonjour {0}");
-        StringTemplate template = new StringTemplate("~$message[$name]!\"text\"¡~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$message[$name]!\"text\"¡~", transforms, properties);
         model = createModel("message", false, "name", "jeff");
         assertEquals("text", template.format(model));
     }
@@ -224,7 +224,7 @@ public class TestTemplateTest {
     @Test
     public void testMessageOptional() throws IOException, TemplateException {
         properties.put("hello", "Bonjour {0}");
-        StringTemplate template = new StringTemplate("~$message?[$name]~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$message?[$name]~", transforms, properties);
         model = createModel("name", "jeff");
         assertEquals("", template.format(model));
     }
@@ -237,7 +237,7 @@ public class TestTemplateTest {
                 return null;
             }
         });
-        StringTemplate template = new StringTemplate("~$message[$name]:'null!123¡~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$message[$name]:'null!123¡~", transforms, properties);
         model = createModel("message", "hello", "name", "jeff");
         assertEquals("123", template.format(model));
     }
@@ -249,7 +249,7 @@ public class TestTemplateTest {
                 return value;
             }
         });
-        StringTemplate template = new StringTemplate("~$cond!true¡#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond!true¡#false~hello ~$name~~#false~", transforms, properties);
         model = createModel("name", "jeff");
         assertEquals("", template.format(model));
     }
@@ -261,14 +261,14 @@ public class TestTemplateTest {
                 return value;
             }
         });
-        StringTemplate template = new StringTemplate("~$cond!false¡#false~hello ~$name~~#false~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$cond!false¡#false~hello ~$name~~#false~", transforms, properties);
         model = createModel("name", "jeff");
         assertEquals("hello jeff", template.format(model));
     }
 
     @Test
     public void testCharAt() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'o'>~And after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'o'>~And after", transforms, properties);
         transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
         model = createModel("data", "the key is 'open'");
         assertEquals("Some text...12And after", template.format(model));
@@ -276,7 +276,7 @@ public class TestTemplateTest {
 
     @Test
     public void testCharAtSQ() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'\\''>~And after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("Some text...~$data:'indexOf<'\\''>~And after", transforms, properties);
         transforms.put("indexOf", String.class.getDeclaredMethod("indexOf", int.class));
         model = createModel("data", "the key is 'open'");
         assertEquals("Some text...11And after", template.format(model));
@@ -298,7 +298,7 @@ public class TestTemplateTest {
  */
     @Test
     public void testOptionalWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("Some text...~$data?:'id~And after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("Some text...~$data?:'id~And after", transforms, properties);
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {
                 return value;
@@ -310,7 +310,7 @@ public class TestTemplateTest {
 
     @Test
     public void testDefaultWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
-        StringTemplate template = new StringTemplate("Some text...~$data:'id!\"xxx\"¡~And after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("Some text...~$data:'id!\"xxx\"¡~And after", transforms, properties);
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {
                 return value;
@@ -323,7 +323,7 @@ public class TestTemplateTest {
     @Test
     public void testMessage() throws IOException, TemplateException, NoSuchMethodException {
         properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
-        StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties);
         model = createModel("before", "BEFORE", "parameters", Arrays.asList("zero", "one"), "after", "AFTER");
         assertEquals("<<<0:BEFORE 1:zero 2:one 3:AFTER>>>", template.format(model));
     }
@@ -331,7 +331,7 @@ public class TestTemplateTest {
     @Test
     public void testMessageEmpty() throws IOException, TemplateException, NoSuchMethodException {
         properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
-        StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties);
         model = createModel("before", "BEFORE", "parameters", Arrays.asList(), "after", "AFTER");
         assertEquals("<<<0:BEFORE 1:AFTER 2:{2} 3:{3}>>>", template.format(model));
     }
@@ -339,7 +339,7 @@ public class TestTemplateTest {
     @Test
     public void testMessageEmpty2() throws IOException, TemplateException, NoSuchMethodException {
         properties.put("key", "0:{0} 1:{1}");
-        StringTemplate template = new StringTemplate("<<<~'key[@$parameters]~>>>", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("<<<~'key[@$parameters]~>>>", transforms, properties);
         model = createModel("parameters", Arrays.asList());
         assertEquals("<<<0:{0} 1:{1}>>>", template.format(model));
     }
@@ -347,7 +347,7 @@ public class TestTemplateTest {
     @Test
     public void testMessageWithArray() throws IOException, TemplateException, NoSuchMethodException {
         properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
-        StringTemplate template = new StringTemplate("~($a,$b)#set<'parameters>~<<<~'key[$before,@$parameters,$after]~>>>~#set~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~($a,$b)#set<'parameters>~<<<~'key[$before,@$parameters,$after]~>>>~#set~", transforms, properties);
         model = createModel("before", "BEFORE", "a", "zero", "b", "one", "after", "AFTER");
         assertEquals("<<<0:BEFORE 1:zero 2:one 3:AFTER>>>", template.format(model));
     }
@@ -355,37 +355,37 @@ public class TestTemplateTest {
     @Test
     public void testStrip() throws IOException, TemplateException, NoSuchMethodException {
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~  \n   after", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~  \n   after", transforms, properties);
             model = createModel("var", "azerty");
             assertEquals("before   \nazerty  \n   after", template.format(model));
         }
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|rt|$var?~  \n   after", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|rt|$var?~  \n   after", transforms, properties);
             model = createModel("var", "azerty");
             assertEquals("before   \n    azerty   after", template.format(model));
         }
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|t|$var?~  \n   after", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|t|$var?~  \n   after", transforms, properties);
             model = createModel("var", "azerty");
             assertEquals("before   \nazerty   after", template.format(model));
         }
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~  \n   after", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~  \n   after", transforms, properties);
             model = createModel();
             assertEquals("before   \n  \n   after", template.format(model));
         }
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|rt|$var?~  \n   after", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|rt|$var?~  \n   after", transforms, properties);
             model = createModel();
             assertEquals("before   \n       after", template.format(model));
         }
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|t|$var?~  \n   after", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|t|$var?~  \n   after", transforms, properties);
             model = createModel();
             assertEquals("before   \n   after", template.format(model));
         }
         {
-            StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~\n\nafter", transforms, properties, Locale.ENGLISH);
+            StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~\n\nafter", transforms, properties);
             model = createModel("var", "azerty");
             assertEquals("before   \nazerty\n\nafter", template.format(model));
         }

@@ -1,14 +1,12 @@
 package com.github.jfgiraud.temmental;
 
-import com.github.jfgiraud.temmental.StringTemplate;
-import com.github.jfgiraud.temmental.Template;
-import com.github.jfgiraud.temmental.TemplateException;
-import com.github.jfgiraud.temmental.TemplateRecorder;
 import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
+
+import static com.github.jfgiraud.temmental.TemplateMessages.createFrom;
 
 public class TestI18n extends TestCase {
 
@@ -50,13 +48,13 @@ public class TestI18n extends TestCase {
 
     private void assertNotFound(Locale locale, String file) throws IOException, TemplateException {
         try {
-            template = new Template("test/resources/temmental/test-file.tpl", filters, "file:src/test/resources/temmental/" + file + ".properties", locale);
+            template = new Template("test/resources/temmental/test-file.tpl", filters, createFrom(locale, "file:src/test/resources/temmental/" + file + ".properties"));
             fail("An exception must be thrown!");
         } catch (TemplateException e) {
             assertTrue(e.getMessage().startsWith("Can't find properties file"));
         }
         try {
-            template = new Template("src/test/resources/temmental/test-file.tpl", filters, "classpath:temmental." + file, locale);
+            template = new Template("src/test/resources/temmental/test-file.tpl", filters, createFrom(locale,"classpath:temmental." + file));
             fail("An exception must be thrown!");
         } catch (TemplateException e) {
             assertTrue(e.getMessage().startsWith("Can't find bundle for "));

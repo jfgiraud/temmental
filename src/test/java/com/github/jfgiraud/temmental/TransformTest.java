@@ -53,7 +53,7 @@ public class TransformTest {
 
     @Test
     public void testIfTwoArgs() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'if<\"##true-block##\",\"##false-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$bool:'if<\"##true-block##\",\"##false-block##\">:'upper~after", transforms, properties);
         model = createModel("bool", true);
         assertEquals("before##TRUE-BLOCK##after", template.format(model));
         model = createModel("bool", false);
@@ -62,7 +62,7 @@ public class TransformTest {
 
     @Test
     public void testIfOneArg() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'if<\"##true-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$bool:'if<\"##true-block##\">:'upper~after", transforms, properties);
         model = createModel("bool", true);
         assertEquals("before##TRUE-BLOCK##after", template.format(model));
         model = createModel("bool", false);
@@ -71,7 +71,7 @@ public class TransformTest {
 
     @Test
     public void testNot() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'not:'if<\"##FALSE-BLOCK##\",\"##TRUE-BLOCK##\">:'lower~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$bool:'not:'if<\"##FALSE-BLOCK##\",\"##TRUE-BLOCK##\">:'lower~after", transforms, properties);
         model = createModel("bool", true);
         assertEquals("before##true-block##after", template.format(model));
         model = createModel("bool", false);
@@ -80,7 +80,7 @@ public class TransformTest {
 
     @Test
     public void testAnd() throws IOException {
-        StringTemplate template = new StringTemplate("before~$a:'and<$b>#true~OK~#true~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$a:'and<$b>#true~OK~#true~after", transforms, properties);
         model = createModel("a", true, "b", true);
         assertEquals("beforeOKafter", template.format(model));
         model = createModel("a", true, "b", false);
@@ -89,7 +89,7 @@ public class TransformTest {
 
     @Test
     public void testOr() throws IOException {
-        StringTemplate template = new StringTemplate("before~$a:'or<$b>#true~OK~#true~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$a:'or<$b>#true~OK~#true~after", transforms, properties);
         model = createModel("a", true, "b", true);
         assertEquals("beforeOKafter", template.format(model));
         model = createModel("a", false, "b", true);
@@ -98,7 +98,7 @@ public class TransformTest {
 
     @Test
     public void testIfNotTwoArgs() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##false-block##\",\"##true-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##false-block##\",\"##true-block##\">:'upper~after", transforms, properties);
         model = createModel("bool", true);
         assertEquals("before##TRUE-BLOCK##after", template.format(model));
         model = createModel("bool", false);
@@ -107,7 +107,7 @@ public class TransformTest {
 
     @Test
     public void testIfNotOneArg() throws IOException {
-        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##false-block##\">:'upper~after", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("before~$bool:'ifn<\"##false-block##\">:'upper~after", transforms, properties);
         model = createModel("bool", true);
         assertEquals("beforeafter", template.format(model));
         model = createModel("bool", false);
@@ -116,21 +116,21 @@ public class TransformTest {
 
     @Test
     public void testEquals() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'eq<$b>#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'eq<$b>#true~OK~#true~", transforms, properties);
         model = createModel("a", true, "b", true);
         assertEquals("OK", template.format(model));
         model = createModel("a", 1, "b", "1");
         assertEquals("", template.format(model));
         model = createModel("a", "1", "b", "1");
         assertEquals("OK", template.format(model));
-        template = new StringTemplate("~$a:'eq<\"COMMANDES\">#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        template = new StringTemplate("~$a:'eq<\"COMMANDES\">#true~OK~#true~", transforms, properties);
         model = createModel("a", "COMMANDES");
         assertEquals("OK", template.format(model));
     }
 
     @Test
     public void testLessThan() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'lt<$b>#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'lt<$b>#true~OK~#true~", transforms, properties);
         model = createModel("a", 4, "b", 5);
         assertEquals("OK", template.format(model));
         model = createModel("a", 5, "b", 5);
@@ -139,7 +139,7 @@ public class TransformTest {
 
     @Test
     public void testLessEquals() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'le<$b>#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'le<$b>#true~OK~#true~", transforms, properties);
         model = createModel("a", 4, "b", 5);
         assertEquals("OK", template.format(model));
         model = createModel("a", 5, "b", 5);
@@ -148,7 +148,7 @@ public class TransformTest {
 
     @Test
     public void testGreaterThan() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'gt<$b>#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'gt<$b>#true~OK~#true~", transforms, properties);
         model = createModel("a", 5, "b", 4);
         assertEquals("OK", template.format(model));
         model = createModel("a", 5, "b", 5);
@@ -157,7 +157,7 @@ public class TransformTest {
 
     @Test
     public void testGreaterEquals() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'ge<$b>#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'ge<$b>#true~OK~#true~", transforms, properties);
         model = createModel("a", 5, "b", 4);
         assertEquals("OK", template.format(model));
         model = createModel("a", 5, "b", 5);
@@ -166,7 +166,7 @@ public class TransformTest {
 
     @Test
     public void testNotEquals() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'ne<$b>#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'ne<$b>#true~OK~#true~", transforms, properties);
         model = createModel("a", 4, "b", 5);
         assertEquals("OK", template.format(model));
         model = createModel("a", 4, "b", 4);
@@ -175,7 +175,7 @@ public class TransformTest {
 
     @Test
     public void testEmpty() throws IOException {
-        StringTemplate template = new StringTemplate("~$a:'empty#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$a:'empty#true~OK~#true~", transforms, properties);
         model = createModel("a", Arrays.asList());
         assertEquals("OK", template.format(model));
         model = createModel("a", Arrays.asList(1));
@@ -184,7 +184,7 @@ public class TransformTest {
 
     @Test
     public void testAll() throws IOException {
-        StringTemplate template = new StringTemplate("~($a,$b):'all#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~($a,$b):'all#true~OK~#true~", transforms, properties);
         model = createModel("a", true, "b", true);
         assertEquals("OK", template.format(model));
         model = createModel("a", true, "b", false);
@@ -193,7 +193,7 @@ public class TransformTest {
 
     @Test
     public void testAll2() throws IOException {
-        StringTemplate template = new StringTemplate("~$l:'all#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~$l:'all#true~OK~#true~", transforms, properties);
         model = createModel("l", Arrays.asList(true, true));
         assertEquals("OK", template.format(model));
         model = createModel("l", Arrays.asList(true, false));
@@ -202,7 +202,7 @@ public class TransformTest {
 
     @Test
     public void testAny() throws IOException {
-        StringTemplate template = new StringTemplate("~($a,$b):'any#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~($a,$b):'any#true~OK~#true~", transforms, properties);
         model = createModel("a", false, "b", true);
         assertEquals("OK", template.format(model));
         model = createModel("a", false, "b", false);
@@ -211,7 +211,7 @@ public class TransformTest {
 
     @Test
     public void testNone() throws IOException {
-        StringTemplate template = new StringTemplate("~($a,$b):'none#true~OK~#true~", transforms, properties, Locale.ENGLISH);
+        StringTemplate template = new StringTemplate("~($a,$b):'none#true~OK~#true~", transforms, properties);
         model = createModel("a", false, "b", true);
         assertEquals("", template.format(model));
         model = createModel("a", false, "b", false);

@@ -377,7 +377,7 @@ class Expression {
     public static Object evalToken(String expr, Cursor cursor, boolean allowKeyword) throws TemplateException {
         if (expr.startsWith("\"")) {
             if (!expr.endsWith("\"")) {
-                throw new TemplateException("Sentence not closed at position '%s').", cursor.getPosition());
+                throw new TemplateException("Sentence not closed at position '%s'.", cursor.getPosition());
             }
             Cursor c = cursor.clone().movel(expr, 0);
             String t = expr.substring(1); //c.move1r();
