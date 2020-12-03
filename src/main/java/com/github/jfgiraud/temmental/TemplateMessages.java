@@ -18,20 +18,32 @@ public class TemplateMessages {
         this.messagesContainers = messagesContainers;
     }
 
-    public static TemplateMessages createFrom(Properties properties) {
-        return new TemplateMessagesBuilder(Locale.getDefault()).add(properties).build();
+    public static TemplateMessages empty() {
+        return createFrom(new Properties());
     }
 
-//    public static TemplateMessages createFrom(Locale locale, Properties properties) {
-//        return new TemplateMessagesBuilder(locale).add(properties).build();
-//    }
-
-    public static TemplateMessages createFrom(String resourcePath) throws IOException {
-        return new TemplateMessagesBuilder(Locale.getDefault()).add(resourcePath).build();
+    public static TemplateMessages createFrom(Properties ... properties) {
+        return createFrom(Locale.getDefault(), properties);
     }
 
-    public static TemplateMessages createFrom(Locale locale, String resourcePath) throws IOException {
-        return new TemplateMessagesBuilder(locale).add(resourcePath).build();
+    public static TemplateMessages createFrom(Locale locale, Properties ... properties) {
+        TemplateMessagesBuilder builder = new TemplateMessagesBuilder(locale);
+        for (Properties p : properties) {
+            builder.add(p);
+        }
+        return builder.build();
+    }
+
+    public static TemplateMessages createFrom(String ... resourcePaths) throws IOException {
+        return createFrom(Locale.getDefault(), resourcePaths);
+    }
+
+    public static TemplateMessages createFrom(Locale locale, String ... resourcePaths) throws IOException {
+        TemplateMessagesBuilder builder = new TemplateMessagesBuilder(locale);
+        for (String p : resourcePaths) {
+            builder.add(p);
+        }
+        return builder.build();
     }
 
     /**

@@ -33,20 +33,18 @@ After that, you call print-methods with models to write on the expected output.
 ## constructors
   
 ```java
-public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
-public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties)
-public Template(String filePath, Map<String, ? extends Object> transforms, Locale locale, Object... resourcesContainers)
-public Template(String filePath, Map<String, ? extends Object> transforms, ResourceBundle bundle)
-public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath)
-public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale)
-    
-// all constructors throw IOException or TemplateException
+public Template(String filePath, Charset charset, Map<String, ? extends Object> transforms, TemplateMessages messages)
+public Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)    
 ```
 
 ## instantiation example
 
 ```java
-template = new Template("src/test/resources/example.tpl", transforms, "file:src/test/resources/example.properties", locale);
+template = new Template("src/test/resources/example.tpl", transforms, TemplateMessages.createFrom(Locale.FRENCH, "file:src/test/resources/example.properties"));
+
+/* or */
+
+template = new Template("src/test/resources/example.tpl", transforms, new TemplateMessagesBuilder(Locale.FRENCH).add("file:src/test/resources/example.properties").build());
 ```
 
 In this example, the template object is created with:

@@ -48,7 +48,6 @@ public class Template {
      * The given charset is used to read the given template file.
      *
      * @param filePath   the path to the template file to parse
-     * @param charset    the charset of the template file to parse
      * @param transforms the map of transform functions
      * @param messages   the messages
      * @throws IOException       if an I/O error occurs when reading the template file
