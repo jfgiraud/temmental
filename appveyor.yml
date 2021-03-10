@@ -4,7 +4,9 @@ build_script:
   - which java && which javac && java -version
   - echo java home is $JAVA_HOME
   - pwd
-  - mvn compile test
+  - mvn compile
+test_script:
+  - mvn test
 only_commits:
   files:
     - ./**/*.java
