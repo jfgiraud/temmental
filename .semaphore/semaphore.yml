@@ -1,0 +1,37 @@
+version: v1.0
+name: Initial Pipeline
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Build
+    task:
+      env_vars:
+        - name: MAVEN_OPTS
+          value: '-Dmaven.repo.local=.m2'
+      jobs:
+        - name: Build
+          commands:
+            - checkout
+            - cache restore
+            - mvn -q package -Dmaven.test.skip=true
+            - which make
+            - cache store
+  - name: Test
+    task:
+      env_vars:
+        - name: MAVEN_OPTS
+          value: '-Dmaven.repo.local=.m2'
+      prologue:
+        commands:
+          - checkout
+          - cache restore
+          - mvn -q test-compile -Dmaven.test.skip=true
+      jobs:
+        - name: Unit tests
+          commands:
+            - mvn test
+        - name: Integration tests
+          commands:
+            - echo noop
