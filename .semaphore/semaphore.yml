@@ -16,4 +16,6 @@ blocks:
       jobs:
         - name: 'Job #1'
           commands:
+            - pwd
+            - ls
             - mvn test
