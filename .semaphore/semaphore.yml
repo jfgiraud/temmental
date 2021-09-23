@@ -16,6 +16,7 @@ blocks:
             - checkout
             - cache restore
             - mvn -q package -Dmaven.test.skip=true
+            - which make
             - cache store
   - name: Test
     task:
