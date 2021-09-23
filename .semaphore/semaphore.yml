@@ -5,17 +5,32 @@ agent:
     type: e1-standard-2
     os_image: ubuntu1804
 blocks:
-  - name: Checkout
+  - name: Build
     task:
+      env_vars:
+        - name: MAVEN_OPTS
+          value: '-Dmaven.repo.local=.m2'
       jobs:
-        - name: 'Job #1'
+        - name: Build
           commands:
             - checkout
-  - name: Compile & Test
+            - cache restore
+            - mvn -q package -Dmaven.test.skip=true
+            - cache store
+  - name: Test
     task:
+      env_vars:
+        - name: MAVEN_OPTS
+          value: '-Dmaven.repo.local=.m2'
+      prologue:
+        commands:
+          - checkout
+          - cache restore
+          - mvn -q test-compile -Dmaven.test.skip=true
       jobs:
-        - name: 'Job #1'
+        - name: Unit tests
           commands:
-            - pwd
-            - ls
             - mvn test
+        - name: Integration tests
+          commands:
+            - echo noop
