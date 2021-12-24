@@ -1,4 +1,6 @@
-## description
+# temmental
+
+# description
 
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
 
@@ -6,7 +8,7 @@ The template syntax does not depend of manipulated documents. You can use this t
 
 The template engine is made to raise exceptions as soon as possible when something wrong is detected.
 
-## explore
+# explore
 
 You can explore the unit tests of the project, but a complex example is available: 
 
@@ -15,31 +17,36 @@ You can explore the unit tests of the project, but a complex example is availabl
 - [example_en.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_en.properties)
 - [example_fr.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_fr.properties)
 
-## principles
+# principles
 
 To use the template engine, you need to create a template object. 
 
-After that, you call print-methods with models to write on the expected output.
+This object is created with :
+- *a template file*
+- *a message properties*
+- *a transform map*
+
+After that, you call print-methods with *model* to write on the expected output.
 
 # Template class
 
 ## constructors
   
 ```java
-public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties, Locale locale)
-public Template(String filePath, Map<String, ? extends Object> transforms, Properties properties)
-public Template(String filePath, Map<String, ? extends Object> transforms, Locale locale, Object... resourcesContainers)
-public Template(String filePath, Map<String, ? extends Object> transforms, ResourceBundle bundle)
-public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath)
-public Template(String filePath, Map<String, ? extends Object> transforms, String resourcePath, Locale locale)
-    
+public Template(String filePath, Charset charset, Map<String, ? extends Object> transforms, TemplateMessages messages)
+public Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
+
 // all constructors throw IOException or TemplateException
 ```
 
 ## instantiation example
 
 ```java
-template = new Template("src/test/resources/example.tpl", transforms, "file:src/test/resources/example.properties", locale);
+template = new Template("src/test/resources/example.tpl", transforms, TemplateMessages.createFrom(Locale.FRENCH, "file:src/test/resources/example.properties"));
+
+/* or */
+
+template = new Template("src/test/resources/example.tpl", transforms, new TemplateMessagesBuilder(Locale.FRENCH).add("file:src/test/resources/example.properties").build());
 ```
 
 In this example, the template object is created with:
