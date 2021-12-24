@@ -1,11 +1,3 @@
-![Logo](/assets/img/temmental.jpg)
-
-[![Build Status](https://jfgiraud.semaphoreci.com/badges/temmental/branches/master.svg)](https://jfgiraud.semaphoreci.com/projects/temmental)
-[![Build status](https://ci.appveyor.com/api/projects/status/lnub4vglis74x8is/branch/master?svg=true)](https://ci.appveyor.com/project/jfgiraud/temmental/branch/master) 
-[![License](https://img.shields.io/badge/license-GPL-brightgreen)](./LICENSE.txt)
-![java](https://img.shields.io/badge/java-%3E%3D5-informational)
-![Dependencies](https://img.shields.io/badge/dependencies-no-informational)
-
 ## description
 
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
@@ -18,10 +10,10 @@ The template engine is made to raise exceptions as soon as possible when somethi
 
 You can explore the unit tests of the project, but a complex example is available: 
 
-- [ExampleTest.java](./src/test/java/ExampleTest.java)
-- [example.tpl](./src/test/resources/example.tpl)
-- [example_en.properties](./src/test/resources/example_en.properties)
-- [example_fr.properties](./src/test/resources/example_fr.properties)
+- [ExampleTest.java](https://github.com/jfgiraud/temmental/blob/master/src/test/java/ExampleTest.java)
+- [example.tpl](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example.tpl)
+- [example_en.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_en.properties)
+- [example_fr.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_fr.properties)
 
 ## principles
 
@@ -228,7 +220,7 @@ These key/value pairs will be used to compute the code between tildes (variables
 
 The result of the computing is used to render your data in the template.
 
-The best way to understand the code of a template is to read the given example: [example.tpl](./src/test/resources/example.tpl) 
+The best way to understand the code of a template is to read the given example: [example.tpl](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example.tpl) 
 
 ```text
 <!-- #section header || other -->
