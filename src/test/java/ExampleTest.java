@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -46,7 +47,7 @@ public class ExampleTest {
         transforms.put("toModel", TemplateUtils.getDeclaredMethod(ConvertToModel.class, "toModel", null));
         transforms.put("add", Transforms.ADD);
 
-        template = new Template("src/test/resources/example.tpl", transforms, createFrom(locale, propertiesPath));
+        template = new Template("src/test/resources/example.tpl", Charset.defaultCharset(), transforms, createFrom(locale, propertiesPath));
     }
 
     private void setLanguage(Locale locale) {

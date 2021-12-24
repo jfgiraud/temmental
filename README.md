@@ -40,18 +40,18 @@ public Template(String filePath, Map<String, ? extends Object> transforms, Templ
 ## instantiation example
 
 ```java
-template = new Template("src/test/resources/example.tpl", transforms, TemplateMessages.createFrom(Locale.FRENCH, "file:src/test/resources/example.properties"));
+template = new Template("src/test/resources/example.tpl", Charset.defaultCharset(), transforms, TemplateMessages.createFrom(Locale.FRENCH, "file:src/test/resources/example.properties"));
 
 /* or */
 
-template = new Template("src/test/resources/example.tpl", transforms, new TemplateMessagesBuilder(Locale.FRENCH).add("file:src/test/resources/example.properties").build());
+template = new Template("src/test/resources/example.tpl", Charset.defaultCharset(), transforms, new TemplateMessagesBuilder(Locale.FRENCH).add("file:src/test/resources/example.properties").build());
 ```
 
 In this example, the template object is created with:
 - the path of the template file `"src/test/resources/example.tpl"`
+- the charset to use to read the template file  
 - a map of named transform functions `transforms` 
-- a locale `Locale.FRENCH` 
-- a resourcePath `"file:src/test/resources/example.properties"` 
+- a `templateMessages` object (created from a given locale `Locale.FRENCH` and a resourcePath `"file:src/test/resources/example.properties"`) 
 
 1. As you can see, the specified resource path doesn't exist. Only the localized resource pathes exist.
  The given locale will be used to compute the best resource file to use. 
