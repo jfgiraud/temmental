@@ -1,23 +1,12 @@
 # temmental
 
-# description
-
 Temmental is a **_small_** template engine **_without dependency_** written in **_java_**.
 
 The template syntax does not depend of manipulated documents. You can use this template engine to generate _text_, _html_, _xml_... documents.
 
+## principles
+
 The template engine is made to raise exceptions as soon as possible when something wrong is detected.
-
-# explore
-
-You can explore the unit tests of the project, but a complex example is available: 
-
-- [ExampleTest.java](https://github.com/jfgiraud/temmental/blob/master/src/test/java/ExampleTest.java)
-- [example.tpl](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example.tpl)
-- [example_en.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_en.properties)
-- [example_fr.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_fr.properties)
-
-# principles
 
 To use the template engine, you need to create a template object. 
 
@@ -27,6 +16,15 @@ This object is created with :
 - *a transform map*
 
 After that, you call print-methods with *model* to write on the expected output.
+
+## explore
+
+You can explore the unit tests of the project, but a complex example is available:
+
+- [ExampleTest.java](https://github.com/jfgiraud/temmental/blob/master/src/test/java/ExampleTest.java)
+- [example.tpl](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example.tpl)
+- [example_en.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_en.properties)
+- [example_fr.properties](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example_fr.properties)
 
 # Template class
 
