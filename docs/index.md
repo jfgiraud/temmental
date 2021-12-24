@@ -6,20 +6,22 @@ The template syntax does not depend of manipulated documents. You can use this t
 
 ## principles
 
-The template engine is made to raise exceptions as soon as possible when something wrong is detected.
+The template engine is made to raise exceptions as soon as possible when something wrong is detected. 
+
+You get an explicit message to understand the problem. 
 
 To use the template engine, you need to create a template object. 
 
 This object is created with :
-- *a template file*
-- *a message properties*
-- *a transform map*
+- *a template file* 
+- *messages*  
+- *a transform map* 
 
 After that, you call print-methods with *model* to write on the expected output.
 
 ## explore
 
-You can explore the unit tests of the project, but a complex example is available:
+You can explore the unit tests of the project, but an example is available :
 
 - [ExampleTest.java](https://github.com/jfgiraud/temmental/blob/master/src/test/java/ExampleTest.java)
 - [example.tpl](https://github.com/jfgiraud/temmental/blob/master/src/test/resources/example.tpl)
@@ -30,12 +32,16 @@ You can explore the unit tests of the project, but a complex example is availabl
 
 ## constructors
   
+There are two constructors :
+
 ```java
 public Template(String filePath, Charset charset, Map<String, ? extends Object> transforms, TemplateMessages messages)
 public Template(String filePath, Map<String, ? extends Object> transforms, TemplateMessages messages)
-
-// all constructors throw IOException or TemplateException
 ```
+
+All constructors throw IOException or TemplateException if, by example, the template file can not be read or parsed. 
+
+A constructor can take the charset as parameter if needed.
 
 ## instantiation example
 
@@ -50,11 +56,9 @@ template = new Template("src/test/resources/example.tpl", transforms, new Templa
 In this example, the template object is created with:
 - the path of the template file `"src/test/resources/example.tpl"`
 - a map of named transform functions `transforms` 
-- a locale `Locale.FRENCH` 
-- a resourcePath `"file:src/test/resources/example.properties"` 
+- a TemplateMessages (created from a locale `Locale.FRENCH` and a resourcePath `"file:src/test/resources/example.properties"`) 
 
-1. As you can see, the specified resource path doesn't exist. Only the localized resource pathes exist.
- The given locale will be used to compute the best resource file to use. 
+1. As you can see, the specified resource path doesn't exist. Only the localized resource pathes exist. The given locale will be used to compute the best resource file to use. 
 2. If a transform function is used in the template file but not declared in the transforms map, an exception will be thrown.
 3. If a property key is used in the template file but not declared in the properties, an exception will be thrown.
 
@@ -74,8 +78,7 @@ You call print-methods with or without models (map of key/value) to write data o
     public void printSection(Writer out, String sectionName) throws TemplateException, java.io.IOException {
 ```
 
-1. If the model doesn't declare a variable used in the template or if the model has null value for that variable, an 
-exception will be thrown.
+1. If the model doesn't declare a variable used in the template or if the model has null value for that variable, an exception will be thrown.
 2. Variables can also be used in the template for "property messages" or "transform functions" (indirection).
 
 # The template file `.tpl`
