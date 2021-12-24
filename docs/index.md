@@ -1,4 +1,4 @@
-![Logo](/docs/assets/img/temmental.jpg?raw=true)
+![Logo](/assets/img/temmental.jpg)
 
 [![Build Status](https://jfgiraud.semaphoreci.com/badges/temmental/branches/master.svg)](https://jfgiraud.semaphoreci.com/projects/temmental)
 [![Build status](https://ci.appveyor.com/api/projects/status/lnub4vglis74x8is/branch/master?svg=true)](https://ci.appveyor.com/project/jfgiraud/temmental/branch/master) 
