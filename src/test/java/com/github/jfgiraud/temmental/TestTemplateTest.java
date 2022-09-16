@@ -24,6 +24,7 @@ public class TestTemplateTest {
     @Before
     public void setUp() throws Exception {
         transforms = new HashMap<String, Object>();
+        transforms.put("concat", String.class.getDeclaredMethod("concat", String.class));
         properties = new Properties();
         properties.put("hello", "Bonjour");
         TemplateRecorder.setRecording(true);
@@ -159,6 +160,13 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandForIndirection() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("~$it#for<'branch>~#~$branch~#~\"elem_\":'concat<$branch>#set<'l>~~$l~#~$$l~~#set~\n~#for~", transforms, properties, Locale.ENGLISH);
+        model = createModel("it", Arrays.asList("b", "b1", "b2"), "elem_b", "VALUE_B", "elem_b1", "VALUE_B1", "elem_b2", "VALUE_B2");
+        assertEquals("#b#elem_b#VALUE_B\n#b1#elem_b1#VALUE_B1\n#b2#elem_b2#VALUE_B2\n", template.format(model));
+    }
+
+    @Test
+    public void testCommandForVariable() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$l#for<$elem>~<~$before~>~#for~~$elem~", transforms, properties, Locale.ENGLISH);
         List<Integer> elements = Arrays.asList(1, 2, 3);
         model = createModel("l", elements, "elem", "before");

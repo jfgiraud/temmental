@@ -46,7 +46,7 @@ abstract class Element {
                 varName = varName.substring(0, varName.length() - 1);
             }
             if (map.containsKey(varName) && map.get(varName) != null) {
-                return map.get(varName);
+                return isIndirection(prefix) ? getIndirectionValue(map, map.get(varName), varName, true) : map.get(varName);
             } else {
                 throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", varName, cursor.getPosition());
             }
@@ -54,9 +54,27 @@ abstract class Element {
             if (!map.containsKey(varName) || map.get(varName) == null) {
                 throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", varName, cursor.getPosition());
             } else {
-                return map.get(varName);
+                return isIndirection(prefix) ? getIndirectionValue(map, map.get(varName), varName, false) : map.get(varName);
             }
         }
+    }
+
+    private Object getIndirectionValue(Map<String, Object> map, Object o, String varName, boolean optional) {
+        if (! (o instanceof String)) {
+            throw new TemplateException("Value for '$%s' is not a String", varName, cursor);
+        }
+        if (!map.containsKey(o) || map.get(o) == null) {
+            if (!optional) {
+                throw new TemplateException("Key '%s' is not present or has null value in the model map at position '%s'.", o, cursor.getPosition());
+            } else {
+                throw new TemplateIgnoreRenderingException("Ignore rendering because key '%s' is not present or has null value in the model map at position '%s'.", o, cursor.getPosition());
+            }
+        }
+        return map.get(o);
+    }
+
+    private boolean isIndirection(String prefix) {
+        return "$$".equals(prefix);
     }
 
     boolean isRequired() {
