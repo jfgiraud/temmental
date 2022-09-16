@@ -20,7 +20,8 @@ public class ExampleTest {
 
     @Before
     public void setUp() throws NoSuchMethodException, IOException {
-        setLanguage(Locale.FRENCH);
+        locale = Locale.FRENCH;
+        propertiesPath = "file:src/test/resources/example.properties";
         transforms = new HashMap<String, Object>();
         transforms.put("upper", String.class.getDeclaredMethod("toUpperCase"));
         transforms.put("size", Transforms.SIZE);
@@ -50,15 +51,10 @@ public class ExampleTest {
         template = new Template("src/test/resources/example.tpl", Charset.defaultCharset(), transforms, createFrom(locale, propertiesPath));
     }
 
-    private void setLanguage(Locale locale) {
-        this.locale = locale;
-        propertiesPath = "file:src/test/resources/example.properties";
-    }
-
     class Option implements ConvertToModel {
 
         private final String type;
-        private String label;
+        private final String label;
         public int number;
         public double price;
 
@@ -106,7 +102,7 @@ public class ExampleTest {
         }
         model.put("totaux", new Option("Totaux", totaux));
         template.printSection(out, "body", model);
-        System.out.println(out.toString());
+        System.out.println(out);
 
     }
 

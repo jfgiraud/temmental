@@ -33,19 +33,19 @@ public class Command extends Element {
 
     @Override
     public String repr(int d, boolean displayPosition) {
-        String buffer = "@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n";
-        buffer += "   " + ((element instanceof Element) ? ((Element) element).repr(d + 1, true) : element);
-        buffer += "\n";
+        StringBuilder buffer = new StringBuilder("@" + keyword.getCursor().getPosition() + pref(d) + "Command(" + keyword.getKeyword() + ")\n");
+        buffer.append("   ").append((element instanceof Element) ? ((Element) element).repr(d + 1, true) : element);
+        buffer.append("\n");
         for (int i = 0; i < betweenTags.size(); i++) {
             Object obj = betweenTags.get(i);
             if (obj instanceof Element) {
-                buffer += "   " + ((Element) obj).repr(d + 2, true);
+                buffer.append("   ").append(((Element) obj).repr(d + 2, true));
             } else {
-                buffer += "   " + StringUtils.viewWhiteSpaces(String.valueOf(obj));
+                buffer.append("   ").append(StringUtils.viewWhiteSpaces(String.valueOf(obj)));
             }
-            buffer += ((i < betweenTags.size() - 1) ? "\n" : "");
+            buffer.append((i < betweenTags.size() - 1) ? "\n" : "");
         }
-        return buffer;
+        return buffer.toString();
     }
 
 
@@ -204,9 +204,6 @@ public class Command extends Element {
 
     @Override
     Object writeObject(Map<String, Object> functions, Map<String, Object> model, TemplateMessages messages) throws TemplateException {
-        /*StringWriter sw = new StringWriter();
-        writeObject(sw, functions, model, messages);
-        return sw.toString();*/
         throw new TemplateException("writeObject without out parameter should not be called for Command");
     }
 
@@ -254,14 +251,9 @@ public class Command extends Element {
     }
 
     public boolean allowParameters(int number) {
-        if ("for".equals(keyword.getKeyword()) && (number == 0 || number == 1)) {
-            return true;
-        } else if ("enum".equals(keyword.getKeyword()) && (number == 1 || number == 2 || number == 3)) {
-            return true;
-        } else if ("set".equals(keyword.getKeyword()) && number == 1) {
-            return true;
-        }
-        return false;
+        return ("for".equals(keyword.getKeyword()) && (number == 0 || number == 1))
+            || ("enum".equals(keyword.getKeyword()) && (number == 1 || number == 2 || number == 3))
+            || ("set".equals(keyword.getKeyword()) && number == 1);
     }
 
     public Keyword getKeyword() {

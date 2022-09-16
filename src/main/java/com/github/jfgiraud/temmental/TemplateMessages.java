@@ -66,11 +66,11 @@ public class TemplateMessages {
 
     private boolean containsKey(ResourceBundle messageContainer, String key) {
         try {
-            if (messageContainer.getString(key) != null)
-                return true;
+            messageContainer.getString(key);
+            return true;
         } catch (MissingResourceException e) {
+            return false;
         }
-        return false;
     }
 
     /**

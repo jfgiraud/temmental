@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class ExampleSimpleTest {
 
     @Test
-    public void testTemplate() throws IOException, ParseException, NoSuchMethodException {
+    public void testTemplate() throws IOException, NoSuchMethodException {
         String propertiesPath = "file:src/test/resources/example_simple.properties";
         Locale locale = Locale.FRENCH;
 

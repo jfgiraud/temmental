@@ -21,18 +21,13 @@ public class BadCharsetTest {
 
     @Before
     public void setUp() throws IOException {
-        setLanguage(Locale.FRENCH);
-        transforms = new HashMap<String, Object>();
-
-    }
-
-    private void setLanguage(Locale locale) {
-        this.locale = locale;
+        locale = Locale.FRENCH;
         propertiesPath = "file:src/test/resources/example.properties";
+        transforms = new HashMap<String, Object>();
     }
 
     @Test
-    public void testTemplateBadCharset() throws IOException, ParseException {
+    public void testTemplateBadCharset() throws IOException {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("country", "France");
 
@@ -47,7 +42,7 @@ public class BadCharsetTest {
     }
 
     @Test
-    public void testTemplateGoodCharset() throws IOException, ParseException {
+    public void testTemplateGoodCharset() throws IOException {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("country", "France");
 

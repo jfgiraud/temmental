@@ -24,6 +24,7 @@ public class TestTemplateTest {
     @Before
     public void setUp() throws Exception {
         transforms = new HashMap<String, Object>();
+        transforms.put("concat", String.class.getDeclaredMethod("concat", String.class));
         properties = new Properties();
         properties.put("hello", "Bonjour");
         TemplateRecorder.setRecording(true);
@@ -159,6 +160,13 @@ public class TestTemplateTest {
 
     @Test
     public void testCommandForIndirection() throws IOException, TemplateException {
+        StringTemplate template = new StringTemplate("~$it#for<'branch>~#~$branch~#~\"elem_\":'concat<$branch>#set<'l>~~$l~#~$$l~~#set~\n~#for~", transforms, properties);
+        model = createModel("it", Arrays.asList("b", "b1", "b2"), "elem_b", "VALUE_B", "elem_b1", "VALUE_B1", "elem_b2", "VALUE_B2");
+        assertEquals("#b#elem_b#VALUE_B\n#b1#elem_b1#VALUE_B1\n#b2#elem_b2#VALUE_B2\n", template.format(model));
+    }
+
+    @Test
+    public void testCommandForVariable() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$l#for<$elem>~<~$before~>~#for~~$elem~", transforms, properties);
         List<Integer> elements = Arrays.asList(1, 2, 3);
         model = createModel("l", elements, "elem", "before");
@@ -166,7 +174,7 @@ public class TestTemplateTest {
     }
 
     @Test
-    public void testCommandSet() throws IOException, TemplateException, NoSuchMethodException {
+    public void testCommandSet() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<'elem>~<~$elem~>~$l#for~<~$elem~>~#for~<~$elem~>~#set~~$elem~", transforms, properties);
         model = createModel("elem", "before",
                 "newvalue", "after",
@@ -179,7 +187,7 @@ public class TestTemplateTest {
     }
 
     @Test
-    public void testCommandSetWithIndirection() throws IOException, TemplateException, NoSuchMethodException {
+    public void testCommandSetWithIndirection() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("~$elem~~$newvalue#set<$elem>~<~$elem~><~$before?~>~#set~~$elem~", transforms, properties);
         model = createModel("elem", "before", "newvalue", "after");
         assertEquals("before<before><after>before", template.format(model));
@@ -282,22 +290,8 @@ public class TestTemplateTest {
         assertEquals("Some text...11And after", template.format(model));
     }
 
-    /* @Test
-     public void testGet() throws IOException, TemplateException, NoSuchMethodException {
-         transforms.put("upper", String.class.getDeclaredMethod("toUpperCase"));
-         transforms.put("inc", new Transform<Integer,Integer>() {
-             public Integer apply(Integer price) {
-                 return price+1;
-             }
-         });
-
-         StringTemplate template = new StringTemplate("~$data{$i}~", transforms, properties, Locale.ENGLISH);
-         model = createModel("data", Arrays.asList("a", "b", "c", "d", "e", "f", "g"), "i", 5);
-         assertEquals("f", template.format(model));
-     }
- */
     @Test
-    public void testOptionalWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
+    public void testOptionalWithSettedAndNull() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("Some text...~$data?:'id~And after", transforms, properties);
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {
@@ -309,7 +303,7 @@ public class TestTemplateTest {
     }
 
     @Test
-    public void testDefaultWithSettedAndNull() throws IOException, TemplateException, NoSuchMethodException {
+    public void testDefaultWithSettedAndNull() throws IOException, TemplateException {
         StringTemplate template = new StringTemplate("Some text...~$data:'id!\"xxx\"¡~And after", transforms, properties);
         transforms.put("id", new Transform<Object, Object>() {
             public Object apply(Object value) {
@@ -321,7 +315,7 @@ public class TestTemplateTest {
     }
 
     @Test
-    public void testMessage() throws IOException, TemplateException, NoSuchMethodException {
+    public void testMessage() throws IOException, TemplateException {
         properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
         StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties);
         model = createModel("before", "BEFORE", "parameters", Arrays.asList("zero", "one"), "after", "AFTER");
@@ -329,23 +323,23 @@ public class TestTemplateTest {
     }
 
     @Test
-    public void testMessageEmpty() throws IOException, TemplateException, NoSuchMethodException {
+    public void testMessageEmpty() throws IOException, TemplateException {
         properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
         StringTemplate template = new StringTemplate("<<<~'key[$before,@$parameters,$after]~>>>", transforms, properties);
-        model = createModel("before", "BEFORE", "parameters", Arrays.asList(), "after", "AFTER");
+        model = createModel("before", "BEFORE", "parameters", Collections.emptyList(), "after", "AFTER");
         assertEquals("<<<0:BEFORE 1:AFTER 2:{2} 3:{3}>>>", template.format(model));
     }
 
     @Test
-    public void testMessageEmpty2() throws IOException, TemplateException, NoSuchMethodException {
+    public void testMessageEmpty2() throws IOException, TemplateException {
         properties.put("key", "0:{0} 1:{1}");
         StringTemplate template = new StringTemplate("<<<~'key[@$parameters]~>>>", transforms, properties);
-        model = createModel("parameters", Arrays.asList());
+        model = createModel("parameters", Collections.emptyList());
         assertEquals("<<<0:{0} 1:{1}>>>", template.format(model));
     }
 
     @Test
-    public void testMessageWithArray() throws IOException, TemplateException, NoSuchMethodException {
+    public void testMessageWithArray() throws IOException, TemplateException {
         properties.put("key", "0:{0} 1:{1} 2:{2} 3:{3}");
         StringTemplate template = new StringTemplate("~($a,$b)#set<'parameters>~<<<~'key[$before,@$parameters,$after]~>>>~#set~", transforms, properties);
         model = createModel("before", "BEFORE", "a", "zero", "b", "one", "after", "AFTER");
@@ -353,7 +347,7 @@ public class TestTemplateTest {
     }
 
     @Test
-    public void testStrip() throws IOException, TemplateException, NoSuchMethodException {
+    public void testStrip() throws IOException, TemplateException {
         {
             StringTemplate template = new StringTemplate("before   \n    ~|lt|$var?~  \n   after", transforms, properties);
             model = createModel("var", "azerty");
